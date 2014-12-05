@@ -1,0 +1,595 @@
+4:38
+
+/*
+applications that we want are the following:
+1) apache-p, apache-t
+2) mysql
+3) ssh-s
+4) ssh-c
+5) kernel make (not scribe)
+6) untar (verbose)
+7) urandom (can you also do something with the data ? )
+8) editor
+9) firefox (ibench ? or your benchmark)
+10) acrobat reader (I got a script to run benchmark)
+12) vncserver + mplayer ( can do ?)
+13) open office
+
+0) total time of benchmark
+1) overhead (performance)
+2) storage (total, compressed, non-det data, memory events)
+3) total number of tasks, and of processes (avg, max)
+
+(don't know how we can benchmark the last two)
+*/
+
+
+when applicable:
+	server database, log directory are mounted on a tmpfs
+	benchmarking application is runned on the same machine (can it hurts perf ?).
+	when benchmarking performance the scribe log file is /dev/null
+	log file compression (c) is performed with lzma (default options)
+	the name service cache daemon is not running
+	all the tested apps replay
+
+stats:
+	they are measured from start to end (not only the period where requests
+	happen).
+	they are measured with RDTSC.
+
+	this snippe tof code:
+		start_perf(XX);
+		/* nothing */
+		end_perf(XX);
+	yield a timing of ~0.0400us.
+
+	stats format: num_of_event (min/avg/max) or (min/avg/p99/max)
+
+	instant signal:       signal sent in a syscall
+	deferred signal:      signal which was supposed to be sent in userspace, but
+                              deferred until the next syscall.
+	mem blocking region:  the zone between two sync points where ownership
+                              cannot be taken. measuring the time spent in such
+                              regions.
+	mem wait for sharing: time spent waiting for a page to be shared.
+	mem steal ownership:  number of page that got stolen
+
+
+apache 2.0.54 mpm=prefork (multiproc)
+	same remarks as before
+
+	rate native:	1061 req/s
+	rate scribed:	1054 req/s
+	overhead:	0.7%
+
+	native:
+		N/A
+	logging:			(+scribe)
+		cpu     user 4.9% sys 11.3% idle 83.8%
+		real    196.777s	real    3m17.081s
+		user    0.008s		user    0m0.010s
+		sys     0.003s		sys     0m3.299s
+	replay:				(+scribe)
+		cpu     user 12.2% sys 35.0% idle 52.8%
+		real    32.997s		real    0m33.000s
+		user    0.007s		user    0m0.008s
+		sys     0.003s		sys     0m3.381s
+	speedup: 5.76
+
+	native time:	189s
+	scribed time:	190s
+	log size:	109Mb
+	log (c) size:	4.8Mb
+	log rate:	587Kb/s
+	log (c) rate:	26Kb/s
+
+	signal_instant:   10
+	signal:           2        (185us  212us  239us  239us)
+	sync_point:       3951674  (0us    12us   501us  4621us)
+	page_fault:       329892   (0us    16us   501us  3464us)
+	sharing_total:	  327052
+	sharing_instant:  271586
+	sharing_wait:     55466    (0us    31us   567us  3304us)
+	process:          9        8.12
+	thread:           9        8.12
+	ratio_mem:        6.50%
+	ratio_data:       39.81%
+
+apache 2.0.54 mpm=worker (threaded)
+	200000 requests on a 100Kb file sent with httperf-0.8 with two clients.
+	server log directory is on a tmpfs
+	replay works with 1000 requests
+	time is reported by httperf
+
+	rate scribed:	1069 req/s
+	rate scribed:	1060 req/s
+	overhead:	0.8%
+
+	native:
+		N/A
+	logging:			(+scribe)
+		cpu     user 4.7% sys 10.9% idle 84.4%
+		real    209.155s	real    3m29.159s
+		user    0.006s		user    0m0.008s
+		sys     0.005s		sys     0m3.818s
+	replay:				(+scribe)
+		cpu     user 14.2% sys 38.7% idle 47.2%
+		real    26.775s		real    0m26.778s
+		user    0.007s		user    0m0.009s
+		sys     0.004s		sys     0m1.950s
+	speedup: 7.08
+
+	native time:	187s
+	scribed time:	189s
+
+	log size:	149Mb
+	log (c) size:	11Mb
+	log rate:	807Kb/s
+	log (c) rate:	59Kb/s
+
+	signal_instant:   7
+	signal:           3        (92us  241us  355us  355us)
+	sync_point:       7937640  (0us   7us    502us  17948us)
+	page_fault:       2331166  (0us   11us   500us  1768us)
+	sharing_total:    2298495
+	sharing_instant:  1759925
+	sharing_wait:     538570   (0us   11us   502us  1757us)
+	process:          4        3.99
+	thread:           58       55.66
+	ratio_mem:        33.60%
+	ratio_data:       28.17%
+
+mysql 5.0.60
+	benchmarked with sql-test which is shipped with mysql
+	(run-all-tests without test-connect and test-insert).
+	client runs on the same host as the server.
+	log file/rate does not take in account launching/exiting the server
+	257029 tests are performed.
+
+	native time:		184s
+	scribed time:	188s
+	overhead:	2.2%
+
+	native:				(+scribe)
+		cpu     user 8.4% sys 2.0% idle 89.5%
+		real    217.363s	real    3m37.365s
+		user    72.314s		user    1m12.314s
+		sys     19.233s		sys     0m19.234s
+	logging:			(+scribe)
+		cpu     user 10.1% sys 10.2% idle 79.7%
+		real    211.392s	real    3m32.131s
+		user    79.075s		user    1m19.082s
+		sys     75.079s		sys     1m25.986s
+	replay:				(+scribe)
+		N/A
+	speedup: 1.25 (not calculated with the present data)
+
+	log size:	337Mb
+	log (c) size:	13Mb
+	log rate:	1840Kb/s
+	log (c) rate:	71Kb/s
+
+	signal_instant:   277100
+	signal:           6         (28us  221us  1091us)
+	sync_point:       19995846  (0us   5us   500us  88273us)
+	page_fault:       5200658   (0us   4us   501us  85252us)
+	sharing_total:	  5160952
+	sharing_instant:  4925186
+	sharing_wait:     235766    (0us   13us  539us  85239us)
+	process:          1         1.00
+	thread:           11        9.95
+	ratio_mem:        31.52%
+	ratio_data:       20.18%
+
+
+OpenSSH_5.1p1 - server
+	10 connections are performed parallel with pussh.
+	Each connection runs 'cat vi.input | human_typing | ssh -t -t target vi /tmp/\\\$'.
+	human_typing caps the rate at 100chars/s
+	vi.input contains:
+		i
+		5K text
+		:wq
+
+	native time:	52.95s
+	scribed time:	52.95s
+	overhead:	0.0%
+
+	native:
+		N/A
+	logging:			(+scribe)
+		cpu     user 1.9% sys 1.4% idle 96.7%
+		real    57.932s		real    0m57.935s
+		user    0.003s		user    0m0.004s
+		sys     0.004s		sys     0m0.429s
+	replay:				(+scribe)
+		cpu     user 50.2% sys 32.2% idle 17.6%
+		real    2.830s		real    0m2.833s
+		user    0.005s		user    0m0.006s
+		sys     0.004s		sys     0m0.403s
+	speedup: 18.7
+
+	log size:	15Mb
+	log (c) size:	680Kb
+	log rate:	290Kb/s
+	log (c) rate:	13Kb/s
+
+	signal_instant:   55
+	signal:           5       (2us   294us  1464us  1464us)
+	sync_point:       423460  (0us   14us   787us   145417us)
+	page_fault:       64544   (0us   0us    43us    43us)
+	sharing_total:	  0
+	sharing_instant:  0
+	sharing_wait:     0
+	process:          37      19.70
+	thread:           37      19.70
+	ratio_mem:        0.00%
+	ratio_data:       61.61%
+
+OpenSSH_5.1p1 - client
+	pussh is logged this time.
+	10 connections are performed parallel with pussh.
+	Each connection runs 'cat vi.input | human_typing | ssh -t -t target vi /tmp/\\\$'.
+	human_typing caps the rate at 100chars/s
+	vi.input contains:
+		i
+		5K text
+		:wq
+
+	native time:	52.97s
+	scribed time:	53.08s
+	overhead:	0.2%
+
+	native:				(+scribe)
+		cpu     user 0.3% sys 0.2% idle 99.5%
+		real    52.996s		real    0m52.998s
+		user    0.638s		user    0m0.639s
+		sys     0.361s		sys     0m0.363s
+	logging:			(+scribe)
+		cpu     user 0.3% sys 0.5% idle 99.2%
+		real    53.605s		real    0m53.615s
+		user    0.645s		user    0m0.646s
+		sys     0.845s		sys     0m0.982s
+	replay:				(+scribe)
+		cpu     user 32.2% sys 57.2% idle 10.5%
+		real    0.759s		real    0m0.761s
+		user    0.974s		user    0m0.975s
+		sys     1.595s		sys     0m1.742s
+		speedup: 69.9
+
+
+	log size:	5.2Mb
+	log (c) size:	737Kb
+	log rate:	100Kb/s
+	log (c) rate:	14Kb/s
+
+	signal_instant:   27
+	signal:           14      (24us  647us  1147us  5683us)
+	sync_point:       149604  (0us   23us   2538us  54171us)
+	page_fault:       55374   (0us   0us    595us   915us)
+	sharing_total:	  954
+	sharing_instant:  896
+	sharing_wait:     58      (6us   48us   581us   906us)
+	process:          55      51.13
+	thread:           65      60.95
+	ratio_mem:        0.81%
+	ratio_data:       52.33%
+
+kernel make -j10
+	native time:	101s
+	scribed time:	107s
+
+	native:				(+scribe)
+		cpu     user 87.7% sys 8.2% idle 4.1%
+		real    100.350s	real    1m40.352s
+		user    351.907s	user    5m51.908s
+		sys     32.666s		sys     0m32.668s
+	logging: (1024)				(+scribe)
+		cpu     user 82.5% sys 12.1% idle 5.3%
+		real    107.200s		real    1m47.570s
+		user    353.356s		user    5m53.356s
+		sys     50.006s			sys     0m51.888s
+	replay: (1024)				(+scribe)
+		cpu     user 77.4% sys 11.9% idle 10.7%
+		real    108.230s		real    1m50.553s
+		user    335.022s		user    5m35.022s
+		sys     50.896s			sys     0m53.238s
+	speedup: 0.99
+
+	overhead:	6.8%
+	log size:	62Mb
+	log (c) size:	3.2Mb
+	log rate:	588Kb/s
+	log (c) rate:	29Kb/s
+
+	signal_instant:   3679
+	signal:           135      (3us   563us  1449us       55473us)
+	sync_point:       1624871  (0us   594us  (99%)5338us  1362062us)
+	page_fault:       4203194  (0us   0us    104us        104us)
+	sharing_total:	  0
+	sharing_instant:  0
+	sharing_wait:     0
+	process:          62       43.76
+	thread:           62       43.76
+	ratio_mem:        0.30% <-- this is due to vfork
+	ratio_data:       43.00%
+
+tar xf linux-2.6.11.12.tar.gz <-- verbose doesnt improve perf
+	native time:	2.8s
+	scribed time:	2.9s
+	overhead:	3.6%
+	log size:	3069Kb
+	log (c) size:	225Kb
+	log rate:	1058Kb/s
+	log (c) rate:	78Kb/s
+
+	native:				(+scribe)
+		cpu     user 24.4% sys 9.0% idle 66.5%
+		real    2.828s		real    0m2.830s
+		user    2.765s		user    0m2.766s
+		sys     1.025s		sys     0m1.028s
+	logging:			(+scribe)
+		cpu     user 20.0% sys 16.9% idle 63.1%
+		real    3.493s		real    0m3.498s
+		user    2.778s		user    0m2.779s
+		sys     2.165s		sys     0m2.340s
+	replay:				(+scribe)
+		cpu     user 20.8% sys 16.3% idle 62.8%
+		real    3.413s		real    0m3.416s
+		user    2.833s		user    0m2.835s
+		sys     2.023s		sys     0m2.214s
+	speedup: 1.02
+
+	signal_instant:   1
+	signal:           0
+	sync_point:       158433  (0us  19us  562us  1446us)
+	page_fault:       1279    (0us  0us   7us)
+	sharing_total:	  0
+	sharing_instant:  0
+	sharing_wait:     0
+	process:          3       2.98
+	thread:           3       2.98
+	ratio_mem:        0.00%
+	ratio_data:       0.15%
+
+bash -c "dd if=/dev/urandom bs=1K count=10000 | lzma > /dev/null"
+	native time:	8.9s
+	scribed time:	9.0s
+	overhead:	1.1%
+
+	native:				(+scribe)
+		cpu     user 24.5% sys 9.0% idle 66.6%
+		real    8.934s		real    0m8.936s
+		user    8.741s		user    0m8.742s
+		sys     3.192s		sys     0m3.195s
+	logging:			(+scribe)
+		cpu     user 24.2% sys 9.2% idle 66.6%
+		real    9.002s		0m9.074s
+		user    8.636s		0m8.694s
+		sys     3.203s		0m3.270s
+	replay:				(+scribe)
+		cpu     user 23.9% sys 1.6% idle 74.5%
+		real    8.917s		real    0m8.919s
+		user    8.522s		user    0m8.523s
+		sys     0.497s		sys     0m0.551s
+	speedup: 1.01
+
+	log size:	10484Kb
+	log (c) size:	10171Kb
+	log rate:	1164Kb/s
+	log (c) rate:	1130Kb/s
+
+	signal_instant:   1
+	signal:           0
+	sync_point:       20493   (0us  442us  65099us  73520us)
+	page_fault:       24617   (0us  0us    16us     16us)
+	sharing_total:	  0
+	sharing_instant:  0
+	sharing_wait:     0
+	process:          3       2.99
+	thread:           3       2.99
+	ratio_mem:        0.00%
+	ratio_data:       94.76%
+
+vim 7.1
+	script:
+		:for i in range(1, 1000000)
+		:let dummy = append(0, "hello world")
+		:endfor
+		:w! /dev/null
+		:q
+
+	native time:	12.4s
+	scribed time:	12.4s
+
+	native:				(+scribe)
+		cpu     user 24.3% sys 0.3% idle 75.5%
+		real    13.384s		real    0m13.387s
+		user    12.901s		user    0m12.901s
+		sys     0.150s		sys     0m0.152s
+	logging:			(+scribe)
+		cpu     user 24.4% sys 0.7% idle 74.9%
+		real    13.123s		real    0m13.166s
+		user    12.779s		user    0m12.779s
+		sys     0.336s		sys     0m0.380s
+	replay (std dev is high)	(+scribe)
+		cpu     user 24.6% sys 0.7% idle 74.8%
+		real    13.029s		real    0m13.031s
+		user    12.712s		user    0m12.712s
+		sys     0.275s		sys     0m0.324s
+
+	speedup: average 1.01
+
+	overhead:	0%
+	log size:	1.7Mb
+	log (c) size:	7.6Kb
+	log rate:	140Kb/s
+	log (c) rate:	0.61Kb/s
+
+	signal_instant:   2
+	signal:           0
+	sync_point:       34838   (0us  352us  700us  60503us)
+	page_fault:       19562   (0us  0us    11us   11us)
+	sharing_total:	  0
+	sharing_instant:  0
+	sharing_wait:     0
+	process:          4       2.00
+	thread:           4       2.00
+	ratio_mem:        0.00%
+	ratio_data:       74.07% <--- many select() calls
+
+
+firefox http://www2.webkit.org/perf/sunspider-0.9/sunspider-driver.html
+	bench native:	5665ms
+	bench scribed:	5855ms
+	overhead:	3.4%
+	scribed time:	120s
+	log size:	44332Kb
+	log (c) size:	3874Kb
+	log rate:	369Kb/s
+	log (c) rate:	32.3Kb/s
+	log:
+		bookmark 0 at 26.285s (when clicking on the start link)
+		bookmark 1 at 146.320s (when the benchmark ends)
+		bookmark delta: 120s
+	replay:
+		bookmark 0 at 4.769s
+		bookmark 1 at 96.184s
+		bookmark delta: 91.4s
+
+		bookmark speedup: 32%
+		slight better speedup when considering app timing on the whole
+		execution, (and removing 30s for the logging time, which is very
+		generous).
+
+
+
+	signal_instant:   9
+	signal:           1        (198us  198us  198us)
+	signal:           1        (182us  182us  182us   182us)
+	sync_point:       2318492  (0us    30us   3287us  441934us)
+	page_fault:       1268295  (0us    21us   2330us  428317us)
+	sharing_total:	  709922
+	sharing_instant:  397534
+	sharing_wait:     312388   (0us    59us   9183us  428309us)
+	process:          7        4.98
+	thread:           13       11.66
+	ratio_mem:        43.47%
+	ratio_data:       24.75%
+
+acrobat:
+	native time:	2.78s
+	scribed time:	2.95s
+	overhead:	6.1%
+	log size:	1751Kb
+	log (c) size:	96Kb
+	log rate:	594Kb/s
+	log (c) rate:	32.5Kb/s
+
+	native:			(+scribe)
+		cpu     user 5.6% sys 2.1% idle 92.4%
+		real    3.860s		real    0m3.863s
+		user    0.139s		user    0m0.141s
+		sys     0.068s		sys     0m0.071s
+	logging:			(+scribe)
+		cpu     user 5.5% sys 3.7% idle 90.8%
+		real    4.081s		real    0m4.119s
+		user    0.153s		user    0m0.156s
+		sys     0.117s		sys     0m0.167s
+	replay:				(+scribe)
+		cpu     user 21.3% sys 13.2% idle 65.5%
+		real    1.040s		real    0m1.043s
+		user    0.160s		user    0m0.161s
+		sys     0.110s		sys     0m0.150s
+	speedup: 3.92
+
+	signal_instant:   50
+	signal:           2       (90us  384us  678us   678us)
+	sync_point:       57852   (0us   21us   2563us  11220us)
+	page_fault:       48699   (0us   0us    27us    27us)
+	sharing_total:	  212
+	sharing_instant:  201
+	sharing_wait:     11      (3us   11us   17us)
+	process:          10      5.20
+	thread:           10      5.20
+	ratio_mem:        0.27%
+	ratio_data:       45.75%
+
+
+mplayer -vo x11 -ao null -endpos 30 "24.S07E10.720p.HDTV.X264-DIMENSION.mkv"
+	native time:	30.8s
+	scribed time:	30.8s
+	overhead:	0%
+	log size:	26229Kb
+	log (c) size:	393Kb
+	log rate	852Kb/s
+	log (c) rate:	12.8Kb
+
+	native:				(+scribe)
+		cpu     user 13.9% sys 0.1% idle 86.0%
+		real    31.866s		real    0m31.869s
+		user    14.728s		user    0m14.731s
+		sys     0.144s		sys     0m0.146s
+	logging:			(+scribe)
+		cpu     user 14.1% sys 7.2% idle 78.7%
+		real    32.103s		real    0m32.513s
+		user    15.065s		user    0m15.068s
+		sys     4.388s		sys     0m5.635s
+	replay:				(+scribe)
+		cpu     user 18.6% sys 10.7% idle 70.7%
+		real    24.761s		real    0m24.764s
+		user    15.183s		user    0m15.184s
+		sys     5.117s		sys     0m6.631s
+	speedup: 1.30
+
+	signal_instant:   5
+	signal:           0
+	sync_point:       2623237  (0us  8us  501us  29231us)
+	page_fault:       1316505  (0us  2us  70us   70us)
+	sharing_total:	  1293300
+	sharing_instant:  1293300
+	sharing_wait:     0
+	process:          5        3.97
+	thread:           5        3.97
+	ratio_mem:        96.61%
+	ratio_data:       1.41%
+
+
+openoffice 3.0.1:
+	jungletest, skipping scrolling.
+	*** the benchmark suite is also scribed ***
+
+	native score:	4.8s
+	scribed score:	5.5s
+	overhead:	14.6%
+	time scribed:	11s
+	log size:	5481Kb
+	log (c) size:	427Kb
+	log rate:	498Kb/s
+	log (c) rate:	39Kb/s
+
+	native:				(+scribe)
+		cpu     user 10.8% sys 1.0% idle 88.2%
+		real    11.042s		real    0m11.045s
+		user    0.278s		user    0m0.280s
+		sys     0.089s		sys     0m0.091s
+	logging:			(+scribe)
+		cpu     user 10.2% sys 3.3% idle 86.5%
+		real    11.887s		real    0m11.932s
+		user    0.293s		user    0m0.294s
+		sys     0.357s		sys     0m0.490s
+	replay:
+		N/A
+	speedup: 1.72 (not calculated with the present data)
+
+	signal_instant:   17
+	signal:           2       (87us  1166us  2245us)
+	sync_point:       343039  (0us   41us  6478us   296047us)
+	page_fault:       204770  (0us   14us  479us    171963us)
+	sharing_total:	  123529
+	sharing_instant:  95080
+	sharing_wait:     28449   (0us   68us  17411us  171950us)
+	process:          8       4.90
+	thread:           19      9.47
+	ratio_mem:        43.35%
+	ratio_data:       34.59%

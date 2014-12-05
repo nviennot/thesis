@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"  standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="1000" height="550" viewBox="0 0 1000 550"
+ xmlns="http://www.w3.org/2000/svg"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+>
+
+<desc>Produced by GNUPLOT 4.4 patchlevel 0 (Gentoo revision r0) </desc>
+
+<defs>
+
+	<circle id='gpDot' r='0.5' stroke-width='0.5'/>
+	<path id='gpPt0' stroke-width='0.148' stroke='currentColor' d='M-1,0 h2 M0,-1 v2'/>
+	<path id='gpPt1' stroke-width='0.148' stroke='currentColor' d='M-1,-1 L1,1 M1,-1 L-1,1'/>
+	<path id='gpPt2' stroke-width='0.148' stroke='currentColor' d='M-1,0 L1,0 M0,-1 L0,1 M-1,-1 L1,1 M-1,1 L1,-1'/>
+	<rect id='gpPt3' stroke-width='0.148' stroke='currentColor' x='-1' y='-1' width='2' height='2'/>
+	<rect id='gpPt4' stroke-width='0.148' stroke='currentColor' fill='currentColor' x='-1' y='-1' width='2' height='2'/>
+	<circle id='gpPt5' stroke-width='0.148' stroke='currentColor' cx='0' cy='0' r='1'/>
+	<use xlink:href='#gpPt5' id='gpPt6' fill='currentColor' stroke='none'/>
+	<path id='gpPt7' stroke-width='0.148' stroke='currentColor' d='M0,-1.33 L-1.33,0.67 L1.33,0.67 z'/>
+	<use xlink:href='#gpPt7' id='gpPt8' fill='currentColor' stroke='none'/>
+	<use xlink:href='#gpPt7' id='gpPt9' stroke='currentColor' transform='rotate(180)'/>
+	<use xlink:href='#gpPt9' id='gpPt10' fill='currentColor' stroke='none'/>
+	<use xlink:href='#gpPt3' id='gpPt11' stroke='currentColor' transform='rotate(45)'/>
+	<use xlink:href='#gpPt11' id='gpPt12' fill='currentColor' stroke='none'/>
+</defs>
+<g style="fill:none; color:white; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+</g>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+</g>
+<g style="fill:none; color:gray; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,482.5 L968.4,482.5 '></path>
+</g>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,482.5 L122.4,482.5 M968.4,482.5 L954.9,482.5 '></path>
+	<g transform="translate(96.3,489.2)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:end">
+		<text><tspan>0.0</tspan>
+		</text>
+	</g>
+</g>
+<g style="fill:none; color:gray; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,412.2 L968.4,412.2 '></path>
+</g>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,412.2 L122.4,412.2 M968.4,412.2 L954.9,412.2 '></path>
+	<g transform="translate(96.3,418.9)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:end">
+		<text><tspan>0.2</tspan>
+		</text>
+	</g>
+</g>
+<g style="fill:none; color:gray; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,341.8 L968.4,341.8 '></path>
+</g>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,341.8 L122.4,341.8 M968.4,341.8 L954.9,341.8 '></path>
+	<g transform="translate(96.3,348.5)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:end">
+		<text><tspan>0.4</tspan>
+		</text>
+	</g>
+</g>
+<g style="fill:none; color:gray; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,271.5 L968.4,271.5 '></path>
+</g>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,271.5 L122.4,271.5 M968.4,271.5 L954.9,271.5 '></path>
+	<g transform="translate(96.3,278.2)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:end">
+		<text><tspan>0.6</tspan>
+		</text>
+	</g>
+</g>
+<g style="fill:none; color:gray; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,201.1 L968.4,201.1 '></path>
+</g>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,201.1 L122.4,201.1 M968.4,201.1 L954.9,201.1 '></path>
+	<g transform="translate(96.3,207.8)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:end">
+		<text><tspan>0.8</tspan>
+		</text>
+	</g>
+</g>
+<g style="fill:none; color:gray; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,130.8 L968.4,130.8 '></path>
+</g>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,130.8 L122.4,130.8 M968.4,130.8 L954.9,130.8 '></path>
+	<g transform="translate(96.3,137.5)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:end">
+		<text><tspan>1.0</tspan>
+		</text>
+	</g>
+</g>
+<g style="fill:none; color:gray; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,60.5 L968.4,60.5 '></path>
+</g>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,60.5 L122.4,60.5 M968.4,60.5 L954.9,60.5 '></path>
+	<g transform="translate(96.3,67.2)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:end">
+		<text><tspan>1.2</tspan>
+		</text>
+	</g>
+	<path  d='M231.7,482.5 L231.7,496.0 '></path>
+	<g transform="translate(231.7,529.7)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>Apache</tspan>
+		</text>
+	</g>
+	<path  d='M354.5,482.5 L354.5,496.0 '></path>
+	<g transform="translate(354.5,529.7)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>Mysql</tspan>
+		</text>
+	</g>
+	<path  d='M477.3,482.5 L477.3,496.0 '></path>
+	<g transform="translate(477.3,529.7)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>Make</tspan>
+		</text>
+	</g>
+	<path  d='M600.0,482.5 L600.0,496.0 '></path>
+	<g transform="translate(600.0,529.7)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>Firefox</tspan>
+		</text>
+	</g>
+	<path  d='M722.8,482.5 L722.8,496.0 '></path>
+	<g transform="translate(722.8,529.7)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>Acrobat</tspan>
+		</text>
+	</g>
+	<path  d='M845.6,482.5 L845.6,496.0 '></path>
+	<g transform="translate(845.6,529.7)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>OpenOffice</tspan>
+		</text>
+	</g>
+	<path  d='M108.9,25.3 L108.9,482.5 L968.4,482.5 L968.4,25.3 L108.9,25.3 Z '></path>
+	<g transform="translate(39.1,253.9) rotate(270)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>Normalized Performance</tspan>
+		</text>
+	</g>
+	<g transform="translate(235.4,119.9)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>0.8%</tspan>
+		</text>
+	</g>
+	<g transform="translate(358.2,112.9)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>2.2%</tspan>
+		</text>
+	</g>
+	<g transform="translate(480.9,98.8)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>6.8%</tspan>
+		</text>
+	</g>
+	<g transform="translate(603.7,109.4)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>3.4%</tspan>
+		</text>
+	</g>
+	<g transform="translate(726.5,98.8)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>6.1%</tspan>
+		</text>
+	</g>
+	<g transform="translate(849.3,70.7)" style="stroke:none; fill:black; font-family:droid sans; font-size:18.00pt; text-anchor:middle">
+		<text><tspan>14.6%</tspan>
+		</text>
+	</g>
+</g>
+	<a xlink:title="Plot #1">
+<g style="fill:none; color:red; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<g style = 'stroke:none; shape-rendering:crispEdges'>
+		<polygon fill = 'currentColor' fill-opacity = '0.500000' points = '194.9,482.5 268.6,482.5 268.6,127.9 194.9,127.9 '/>
+	</g>
+	<path  d='M194.9,482.5 L194.9,128.0 L268.5,128.0 L268.5,482.5 L194.9,482.5 Z '></path>
+	<g style = 'stroke:none; shape-rendering:crispEdges'>
+		<polygon fill = 'currentColor' fill-opacity = '0.500000' points = '317.6,482.5 391.4,482.5 391.4,123.0 317.6,123.0 '/>
+	</g>
+	<path  d='M317.6,482.5 L317.6,123.1 L391.3,123.1 L391.3,482.5 L317.6,482.5 Z '></path>
+	<g style = 'stroke:none; shape-rendering:crispEdges'>
+		<polygon fill = 'currentColor' fill-opacity = '0.500000' points = '440.4,482.5 514.2,482.5 514.2,106.8 440.4,106.8 '/>
+	</g>
+	<path  d='M440.4,482.5 L440.4,106.9 L514.1,106.9 L514.1,482.5 L440.4,482.5 Z '></path>
+	<g style = 'stroke:none; shape-rendering:crispEdges'>
+		<polygon fill = 'currentColor' fill-opacity = '0.500000' points = '563.2,482.5 637.0,482.5 637.0,118.8 563.2,118.8 '/>
+	</g>
+	<path  d='M563.2,482.5 L563.2,118.9 L636.9,118.9 L636.9,482.5 L563.2,482.5 Z '></path>
+	<g style = 'stroke:none; shape-rendering:crispEdges'>
+		<polygon fill = 'currentColor' fill-opacity = '0.500000' points = '686.0,482.5 759.8,482.5 759.8,109.3 686.0,109.3 '/>
+	</g>
+	<path  d='M686.0,482.5 L686.0,109.4 L759.7,109.4 L759.7,482.5 L686.0,482.5 Z '></path>
+	<g style = 'stroke:none; shape-rendering:crispEdges'>
+		<polygon fill = 'currentColor' fill-opacity = '0.500000' points = '808.8,482.5 882.6,482.5 882.6,79.4 808.8,79.4 '/>
+	</g>
+	<path  d='M808.8,482.5 L808.8,79.5 L882.5,79.5 L882.5,482.5 L808.8,482.5 Z '></path>
+</g>
+	</a>
+<g style="fill:none; color:black; stroke:currentColor; stroke-width:1.00; stroke-linecap:butt; stroke-linejoin:miter">
+	<path  d='M108.9,25.3 L108.9,482.5 L968.4,482.5 L968.4,25.3 L108.9,25.3 Z '></path>
+</g>
+</svg>
+

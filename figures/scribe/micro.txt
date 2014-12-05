@@ -1,0 +1,89 @@
+[2009-Mar-04] microbenchmark
+* running on blade13, smp, scribe-perf
+* (getsid() not fixed yet)
+* iterations (-i): 1000
+
+=> without scribe
+syscall       |  average  |  variance |  minimum  |  maximum
+----------------------------------------------------------------------
+fork()        |   239.651 |    10.031 |   210.943 |   274.496
+clone()       |   250.033 |     2.974 |   240.157 |   260.940
+execve()      |   699.418 |     2.869 |   665.570 |   716.985
+getpid()      |     0.155 |     4.984 |     0.142 |     0.165
+getppid()     |     0.165 |     3.956 |     0.155 |     0.179
+getpgid(self) |     0.252 |     3.327 |     0.239 |     0.281
+getpgid(0)    |     0.150 |     2.290 |     0.144 |     0.162
+getsid()      |     0.148 |     3.550 |     0.139 |     0.166
+msgget/ctl()  |     0.971 |     3.492 |     0.921 |     1.076
+msgsnd/rcv()  |     2.239 |     5.538 |     2.047 |     2.417
+shmget/ctl()  |     2.833 |     1.370 |     2.779 |     2.932
+shmat/ctl()   |    52.291 |     0.599 |    51.931 |    53.770
+
+=> with scribe
+syscall       |  average  |  variance |  minimum  |  maximum
+----------------------------------------------------------------------
+fork()        |   437.887 |     3.238 |   425.732 |   502.780
+clone()       |  1345.145 |     0.637 |  1332.741 |  1363.765
+execve()      |  1117.384 |     0.538 |  1110.120 |  1126.370
+getpid()      |     0.590 |     2.763 |     0.575 |     0.618
+getppid()     |     0.591 |     0.555 |     0.586 |     0.641
+getpgid(self) |     0.680 |     0.542 |     0.676 |     0.711
+getpgid(0)    |     0.575 |     0.256 |     0.573 |     0.612
+getsid()      | 32656.295 |     0.002 | 32655.451 | 32657.225
+msgget/ctl()  |     2.066 |     2.215 |     2.008 |     2.149
+msgsnd/rcv()  |     4.671 |     0.706 |     4.625 |     4.752
+shmget/ctl()  |     3.844 |     0.540 |     3.822 |     3.990
+shmat/ctl()   |   134.042 |     0.390 |   133.582 |   135.376
+
+=> comparison
+syscall	      slowdown	  addition	  base	  
+----------------------------------------------------------------------
+fork()        x 1.8	  + 198 usec	  239 usec
+clone()       x 5.3	  + 1095 usec	  250 usec
+execve()      x 1.6	  + 418 usec	  699 usec
+getpid()      x 3.8	  + 0.435 usec	  0.155 usec
+getppid()     x 3.6	  + 0.426 usec	  0.165 usec
+msgget/ctl()  x 2.1	  + 1.095 usec	  0.971 usec	(two syscalls)
+msgsnd/rcv()  x 2.1	  + 2.432 usec	  2.239 usec	(four syscalls)
+shmget/ctl()  x 1.4	  + 1.011 usec	  2.833 usec	(two syscalls)
+shmat/ctl()   x 2.6	  + 82 usec	  52.29 usec
+
+
+* running on blade13, smp, scribe-perf
+* (getsid() not fixed yet)
+* iterations (-i): 5000
+
+=> without scribe
+syscall       |  average  |  variance |  minimum  |  maximum
+----------------------------------------------------------------------
+fork()        |   172.966 |     3.372 |   163.144 |   195.256
+clone()       |   122.083 |     0.713 |   120.951 |   126.413
+execve()      |   619.481 |     0.581 |   614.698 |   628.108
+getpid()      |     0.145 |     1.739 |     0.141 |     0.148
+getppid()     |     0.157 |     0.602 |     0.156 |     0.163
+getpgid(self) |     0.240 |     0.502 |     0.238 |     0.242
+getpgid(0)    |     0.142 |     0.382 |     0.142 |     0.144
+getsid()      |     0.142 |     0.977 |     0.141 |     0.145
+msgget/ctl()  |     0.871 |     1.663 |     0.853 |     0.888
+msgsnd/rcv()  |     2.064 |     1.121 |     2.039 |     2.122
+shmget/ctl()  |     2.669 |     0.803 |     2.634 |     2.704
+shmat/ctl()   |    51.006 |     0.239 |    50.877 |    51.166
+
+=> without scribe
+syscall       |  average  |  variance |  minimum  |  maximum
+----------------------------------------------------------------------
+fork()        |   388.549 |     2.527 |   373.553 |   401.195
+clone()       |  1244.418 |     1.271 |  1229.701 |  1291.540
+execve()      |  1079.819 |     0.953 |  1064.152 |  1102.879
+getpid()      |     0.580 |     0.521 |     0.575 |     0.583
+getppid()     |     0.584 |     0.058 |     0.583 |     0.594
+getpgid(self) |     0.680 |     0.304 |     0.677 |     0.692
+getpgid(0)    |     0.578 |     0.374 |     0.576 |     0.583
+getsid()      |     0.582 |     0.656 |     0.576 |     0.589
+msgget/ctl()  |     1.884 |     0.888 |     1.855 |     1.920
+msgsnd/rcv()  |     4.598 |     0.255 |     4.588 |     4.669
+shmget/ctl()  |     3.764 |     0.535 |     3.733 |     3.866
+shmat/ctl()   |   134.164 |     0.327 |   133.737 |   141.297
+
+
+results are similar to before, probably a bit better.

@@ -1,0 +1,24 @@
+# performance data for SCRIBE (sosp 2009)
+#
+# TOTALS (statistics):  [no. of sync points, signals, memfaults]
+# actually what we want here is:
+#  1) no. of threads and processes (left scale)
+#  2) rate of shared memory faults (right scale)
+
+# (total = including threads)
+# index		#total	#procs	
+#		avg	avg	
+# ---------------------------------------------------------------
+  01 	 	9	9	apache-m
+  02  		55	4	apache-t
+  03	  	10	1	mysql
+  04	   	20	20	ssh-s
+  05    	61	51	ssh-c
+  06	   	44	44 	make
+  07	  	3	3	untar
+  08	   	3	3	urandom
+  09	 	2	2	editor
+  10	 	12	5	firefox
+  11	 	6	10	acrobat
+  12	 	4	4	mplayer
+  13	 	10	5	openoffice

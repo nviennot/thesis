@@ -1,0 +1,69 @@
+\documentclass[12pt]{article}
+
+\usepackage{graphics}
+\usepackage{epsfig}
+\usepackage{times}
+\usepackage{amsmath}
+
+\input{macros}
+
+% <http://psl.cs.columbia.edu/phdczar/proposal.html>:
+%
+% The standard departmental thesis proposal format is the following:
+%        30 pages
+%        12 point type
+%        1 inch margins all around = 6.5   inch column
+%        (Total:  30 * 6.5   = 195 page-inches)
+%
+% For letter-size paper: 8.5 in x 11 in
+% Latex Origin is 1''/1'', so measurements are relative to this.
+
+\topmargin      0.0in
+\headheight     0.0in
+\headsep        0.0in
+\oddsidemargin  0.0in
+\evensidemargin 0.0in
+\textheight     9.0in
+\textwidth      6.5in
+
+\title{{\bf Record-Replay Mechanism Applied to Operating Systems and Distributed Systems} \\
+\it Thesis proposal}
+\author{ {\bf Nicolas Viennot}  \\
+Department of Computer Science \\
+Columbia University\\
+{\small nviennot@cs.columbia.edu}
+}
+\date{\today}
+
+\begin{document}
+\pagestyle{plain}
+\pagenumbering{roman}
+\maketitle
+
+\pagebreak
+\input{00-abstract}
+
+\pagebreak
+\tableofcontents
+\pagebreak
+
+\cleardoublepage
+\pagenumbering{arabic}
+
+\input{01-intro}
+\input{02-scribe}
+\input{03-racepro}
+\input{04-dora}
+\input{05-synapse}
+\input{06-plan}
+
+\pagebreak
+
+\begin{footnotesize}
+\bibliographystyle{plain}
+\bibliography{proposal,refs}
+\end{footnotesize}
+
+\end{document}
+
+

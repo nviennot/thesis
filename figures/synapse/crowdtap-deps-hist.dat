@@ -1,0 +1,8 @@
+dependencies w_readonly_wo_tracked w_readonly_w_tracked wo_readonly_wo_tracked wo_readonly_w_tracked
+0-10 67193 71292 85597 90068
+10-50 17783 17442 3561 28
+50-100 2294 633 485 14
+100-500 2251 731 339 
+500-1000 407 9 102 
+1000-5000 179 3 26 
+5000-10000 3   

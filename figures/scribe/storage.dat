@@ -1,0 +1,37 @@
+# performance data for SCRIBE (sosp 2009)
+#
+# STORAGE GROWTH (and breakdown)  KB/sec
+
+# index		normal	gzip	data	mem	scenario
+# --------------------------------------------------------
+# 01 02		587	26	234	40	apachce-m
+# 04 05		807	59	225	266	apache-t		
+# 07 08		1840	71	368	570	mysql
+# 10 11		290	13	176	0	ssh-s
+# 13 14		100	14	52	0	ssh-c
+# 16 17		588	29	252	2	make
+# 19 20		1248	89	137	0	untar
+# 22 23		1200	1200	1140	0	urandom
+# 25 26		140	1	103	0	editor
+# 28 29		369	32	92	158	firefox
+# 31 32		594	32	267	2	acrobat
+# 34 35		852	13	17	817	mplayer
+# 37 38		498	39	174	214	openoffice
+#
+# this version has the storage numbers aggregated... (data, mem)
+#
+# index		normal	gzip	data	mem	scenario
+# --------------------------------------------------------
+  01 02		587	26	234	274	apachce-m
+  04 05		807	59	225	491	apache-t
+  07 08		1840	71	368	938	mysql
+  10 11		290	13	176	176	ssh-s
+  13 14		100	14	52	52	ssh-c
+  16 17		588	29	252	254	make
+  19 20		1058	78	2	2	untar
+  22 23		1200	1138	1140	1140	urandom
+  25 26		140	1	103	103	editor
+  28 29		369	32	92	270	firefox
+  31 32		594	32	267	269	acrobat
+  34 35		852	13	17	834	mplayer
+  37 38		498	39	174	388	openoffice

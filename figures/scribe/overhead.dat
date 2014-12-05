@@ -1,0 +1,21 @@
+# performance data for SCRIBE (sosp 2009)
+#
+# NORMALIZED PERFORMANCE
+
+# index		normalized	replay 		scenario
+# 		performance 	overhead	name
+#		(logging)
+# --------------------------------------------------------
+  01 02		1.007		0.141243 	apache-p
+  04 05		1.008		0.173611 	apache-t
+  07 08		1.022		0.8      	mysql
+  10 11		1.000		0.0534759	ssh-s
+  13 14		1.002		0.0143062	ssh-c
+  16 17		1.068		1.0096082 	make
+  19 20		1.036		0.980392 	untar
+  22 23		1.011		0.990099 	urandom
+  25 26		1.000		1        	editor
+  28 29		1.034		0.757576 	firefox
+  31 32		1.061		0.255102 	acrobat
+  34 35		1.000		0.769231 	mplayer
+  37 38		1.146		0.581395 	openoffice

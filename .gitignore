@@ -1,0 +1,14 @@
+*.aux
+*.bbl
+*.blg
+*.log
+.silly_file_to_force_rebuild
+.buildopts
+paper.out
+paper.synctex.gz
+paper.pdf
+paper.log.errors
+.DS_Store
+*.tex~
+proposal.pdf
+proposal.toc

@@ -1,0 +1,74 @@
+\usepackage{xspace}
+\usepackage{multirow}
+
+\newcommand{\scribe}{{\scshape Scribe}}
+\newcommand{\racepro}{\textsc{Racepro}\xspace}
+\newcommand{\dora}{{\scshape Dora}}
+\newcommand{\synapse}{Synapse\xspace}
+\newcommand{\crowdtap}{Crowdtap\xspace}
+
+\newcommand{\comment}[1]{}
+\newcommand{\code}[1]{\texttt{#1}}
+% \newcommand{\code}[1]{\small \tt{#1}}
+\newcommand{\smallcaption}[1]{\caption[#1]{{\protect\small \protect\bf #1}}}
+
+% units for results
+\newcommand{\us}{\,$\mu$s}
+\newcommand{\ms}{\,ms}
+\newcommand{\secs}{\,s}
+\newcommand{\KB}{\,KB}
+\newcommand{\MB}{\,MB}
+\newcommand{\GB}{\,GB}
+
+\newcommand{\eg}{{\it e.g.}}
+\newcommand{\ie}{{\it i.e.}}
+\newcommand{\para}[1]{\vspace{.01in}\noindent{\bf #1}\hspace{.04in}}
+\newcommand{\npage}[0]{540\xspace}
+\newcommand{\nbug}[0]{150\xspace}
+\newcommand{\npraceunconfirmed}[0]{58\xspace}
+\newcommand{\nprace}[0]{109\xspace}
+\newcommand{\nmrace}[0]{41\xspace}
+\newcommand{\ntoctou}[0]{25\xspace}
+\newcommand{\nnottoctou}[0]{84\xspace}
+\newcommand{\norder}[0]{79\xspace}
+\newcommand{\natomic}[0]{30\xspace}
+\newcommand{\nracepro}[0]{10\xspace}
+\newcommand{\nraceproold}[0]{6\xspace}
+\newcommand{\nracepronew}[0]{4\xspace}
+\newcommand{\toctou}[0]{\textsc{toctou}\xspace}
+
+
+\usepackage{subfigure}
+\usepackage{pifont}
+\usepackage{wrapfig}
+\usepackage[hyphens]{url}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{grey}{rgb}{0.5,0.5,0.5}
+\newcommand{\specialKeyword}[1]{\underline{{#1}}}
+\lstset{
+  frame=single,
+  columns=fullflexible,
+  basewidth={0.7em, 0.7em},
+  basicstyle=\scriptsize,
+  keywordstyle=\bf\color{black},
+  commentstyle=\color{grey},
+  frameround=tttt,
+  escapeinside=\`\`,
+  framesep=0pt, %leave this in so that the code listings aren't way in the margins. the box still goes a little bit out but i forget how to fix that. but it should def be fixed prior to submission!
+  language=ruby,
+  morekeywords={ *, include, field, after\_create, before\_create, before\_save,
+                 after\_update, before\_filter, has\_many, has\_one, belongs\_to,
+                 each, emebds\_many, embedded\_in, has\_and\_belongs\_to\_many,
+                 after\_destroy}
+}
+
+\newcommand{\headingg}[1]{\noindent{\bf{#1}}} % at beginning of section -- no extra space
+\newcommand{\heading}[1]{{\vspace{2pt}\noindent\bf{#1}}} % inside section
+\newcommand{\headingi}[1]{{\vspace{0pt}\em{#1}}} % inside section
+\newcommand{\headinggi}[1]{{\em{#1}}} % at beginning of section -- no extra space
+
+\def\F{Fig.}

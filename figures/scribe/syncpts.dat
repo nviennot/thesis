@@ -1,0 +1,29 @@
+# performance data for SCRIBE (sosp 2009)
+#
+# SYNC POINTS:
+#
+#  (a) distance between points (min, avg, max)
+#  measured from end of a sync point to the start of next one)
+#
+#  (b) duration (avg) within a sync point
+#  calculated as:  (time * #thread / #syncpts) - interval
+#  where 'interval' is distance between sync points (time outside)
+#
+# units: millisec
+#
+# index	sync  	sync	sync	scenario    total	total	 threads
+# 	min 	avg	max		    sync	time [s]
+# ----------------------------------------------------------------------
+  01	0	0.012	4.621	apache-p    3951674	190	8
+  02	0	0.007	3.005	apache-t    7937640	189	56
+  03	0	0.005	88.273	mysql	    19995846	188	10
+  04	0	0.015	83.143	ssh-s	    423460	53	20
+  05	0	0.019	43.226	ssh-c	    149604	53	61
+  06	0	0.588	1362.06	make	    1624871	107	44
+  07	0	0.019	1.121	untar	    158433	2.9	3
+  08	0	0.442	67.033	urandom	    20493	9	3
+  09	0	0.354	60.012	editor	    34838	12.4	2
+  10	0	0.027	392.42	firefox	    2318492	120	11.5
+  11	0	0.020	11.22	acroread    57852	3	5.2
+  12	0	0.008	29.231	mplayer	    2623237	30.8	4
+  13	0	0.019	288.716	openoffice  343039	11	9.5
