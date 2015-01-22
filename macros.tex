@@ -1,10 +1,15 @@
+\usepackage{graphics}
+\usepackage{epsfig}
+\usepackage{times}
+\usepackage{amsmath}
+
 \usepackage{xspace}
 \usepackage{multirow}
 
-\newcommand{\scribe}{{\scshape Scribe}}
-\newcommand{\racepro}{\textsc{Racepro}\xspace}
-\newcommand{\dora}{{\scshape Dora}}
-\newcommand{\synapse}{Synapse\xspace}
+\newcommand{\scribe}{{\scshape Scribe}\xspace}
+\newcommand{\racepro}{{\scshape Racepro}\xspace}
+\newcommand{\dora}{{\scshape Dora}\xspace}
+\newcommand{\synapse}{{\scshape Synapse}\xspace}
 \newcommand{\crowdtap}{Crowdtap\xspace}
 
 \newcommand{\comment}[1]{}
@@ -50,13 +55,13 @@
 \definecolor{grey}{rgb}{0.5,0.5,0.5}
 \newcommand{\specialKeyword}[1]{\underline{{#1}}}
 \lstset{
-  frame=single,
+  % frame=single,
   columns=fullflexible,
   basewidth={0.7em, 0.7em},
   basicstyle=\scriptsize,
   keywordstyle=\bf\color{black},
   commentstyle=\color{grey},
-  frameround=tttt,
+  % frameround=tttt,
   escapeinside=\`\`,
   framesep=0pt, %leave this in so that the code listings aren't way in the margins. the box still goes a little bit out but i forget how to fix that. but it should def be fixed prior to submission!
   language=ruby,

@@ -1,15 +1,15 @@
-PAPER = proposal
+PAPER = thesis
 TEX = $(wildcard *.tex)
 FIGS = $(wildcard figures/*/*)
-BIB = proposal.bib
+BIB = main.bib
 
 .PHONY: clean
 
 $(PAPER).pdf: $(TEX) $(BIB) $(FIGS) Makefile
-	pdflatex $(PAPER)
-	bibtex $(PAPER)
-	pdflatex $(PAPER)
-	pdflatex $(PAPER)
+	echo | pdflatex $(PAPER)
+	echo | bibtex $(PAPER)
+	echo | pdflatex $(PAPER)
+	echo | pdflatex $(PAPER)
 
 clean:
-	rm -f *.toc *.aux *.bbl *.blg *.log *.out $(PAPER).pdf $(PAPER).dvi
+	rm -f *.lof *.lot *.toc *.aux *.bbl *.blg *.log *.out $(PAPER).pdf $(PAPER).dvi

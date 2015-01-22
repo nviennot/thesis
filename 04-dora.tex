@@ -410,7 +410,7 @@ into kernel space, where it will detect the pending signal.
 Replaying this behavior can be challenging because it requires
 interrupting the target process at the exact same instruction as
 during its original execution.  Previous
-approaches~\cite{bressoud-tft, bressoud, revirt, smp-revirt:vee08}
+approaches~\cite{bressoud-tft,bressoud,revirt,smp-revirt:vee08}
 have relied on hardware providing a cycle accurate instruction
 counter~\cite{replica-nondet:ftcs96}, but this does not work for CPUs
 without such counters and does not work for mutable replay.
@@ -467,7 +467,7 @@ protocol on memory pages with some optimizations~\cite{scribe:sigmetrics10}.
 
 To ensure that ownership transitions occur at precisely the same
 location in the execution during both record and replay, previous
-approaches~\cite{bressoud-tft, bressoud, revirt, smp-revirt:vee08}
+approaches~\cite{bressoud-tft,bressoud,revirt,smp-revirt:vee08}
 have relied on cycle-accurate hardware instruction counters.  An ordering
 this precise is not resilient to application changes, so it does not work for
 mutable replay. To address this problem, {\dora} defers ownership

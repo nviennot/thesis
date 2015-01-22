@@ -154,8 +154,8 @@ permit.
 \synapse is the first heterogeneous DB replication system that we are
 aware of to satisfy these three goals.  For instance, most traditional
 data-warehousing systems are not suitable for real-time integration
-\cite{Chan:1999:DSM:319757.319787,10.1109/TKDE.2005.16,
-Yang:1997:AMV:645923.673657}.   Change capture systems often rely on specific
+\cite{Chan:1999:DSM:319757.319787,10.1109/TKDE.2005.16,Yang:1997:AMV:645923.673657}.
+Change capture systems often rely on specific
 features provided by SQL DBs (e.g., triggers, transaction logs) that can
 limit their applicability to today's broad range of DBs~\cite{databus}.
 
@@ -847,7 +847,7 @@ message to the subscribers. All writes within a single transaction are combined
 into a single message.
 
 The message broker reliably disseminates the write message across subscribers.
-Of the many existing message brokers~\cite{jms, kafka, pubsubhubbub, rabbitmq},
+Of the many existing message brokers~\cite{jms,kafka,pubsubhubbub,rabbitmq},
 we use RabbitMQ~\cite{rabbitmq} in our implementation, using it to provide a
 dedicated queue for each subscriber app. Messages in the queue are processed in
 parallel by multiple subscriber workers per application, which can be threads,
@@ -915,9 +915,8 @@ Causal ordering identifies, for each write $W$, the prior writes that must
 be applied before $W$ to avoid negative effects, such as sending a notification
 for a new post to an out-of-date friends set.
 \synapse implements causality in a manner very similar to other
-causal systems~\cite{ahamad1995causal, Birman:1991:LCA:128738.128742,
-eiger, bolton} and its dependency tracking mechanism is
-described in \S\ref{sec:arch:deps}.
+causal systems~\cite{ahamad1995causal,Birman:1991:LCA:128738.128742,eiger,bolton}
+and its dependency tracking mechanism is described in \S\ref{sec:arch:deps}.
 When a publisher writes in its DB, \synapse updates causal dependency versions in its
 version store and then sends the new write to the subscribers, which buffer it.
 Each subscriber applies this buffered write to its DB once it has applied all
@@ -937,8 +936,9 @@ Since \synapse transmits all published attributes (as opposed to deltas), the su
 
 To enforce causal ordering, \synapse tracks dependencies between updates.  To
 first order, \synapse takes an explicit approach to identifying
-dependencies, an approach that was adopted by other prior systems~\cite{bolton,
-cops, Bailis:2012:PDC:2391229.2391251}.  Specifically, using two constructs in
+dependencies, an approach that was adopted by other prior
+systems~\cite{bolton,cops,Bailis:2012:PDC:2391229.2391251}.
+Specifically, using two constructs in
 our API, {\code with\_write\_dep} and {\code with\_read\_dep}, a developer
 can specify write and read dependencies, respectively.  Each call takes as a
 parameter a URI describing the dependency target. E.g.,
@@ -1818,9 +1818,8 @@ ORM -- keeping it largely independent of the DB.
 
 \heading{Data Warehousing and Change Capture Systems.}
 Data warehousing is a traditional approach for replicating data across
-heterogeneous DBs~\cite{books/daglib/0029346, Chaudhuri:1997:ODW:248603.248616}.
-While many warehousing techniques~\cite{Chan:1999:DSM:319757.319787,
-10.1109/TKDE.2005.16, Yang:1997:AMV:645923.673657,dynamo-es-river,mongo-es-river,mosql} are not suitable for
+heterogeneous DBs~\cite{books/daglib/0029346,Chaudhuri:1997:ODW:248603.248616}.
+While many warehousing techniques~\cite{Chan:1999:DSM:319757.319787,10.1109/TKDE.2005.16,Yang:1997:AMV:645923.673657,dynamo-es-river,mongo-es-river,mosql} are not suitable for
 real-time integration, change-data capture systems, one class of data
 warehousing systems, are focused on real-time transfer of data updates
 between different DB engines. 
@@ -1866,10 +1865,10 @@ In contrast, \synapse encourages developers to use different ORMs for different 
 
 \heading{Publish/Subscribe Systems.}
 \synapse's API is inspired by publish/subscribe systems, a long-time active
-area of research~\cite{siena, scribe, thialfi, gryphon, pubsubhubbub, hermes}.
+area of research~\cite{siena,scribe,thialfi,gryphon,pubsubhubbub,hermes}.
 \synapse also incorporates a reliable messaging system,
 RabbitMQ~\cite{rabbitmq}, but could use other systems that ensure eventual and
-scalable dissemination of messages to subscribers~\cite{kafka, scribe}.
+scalable dissemination of messages to subscribers~\cite{kafka,scribe}.
 All of these systems require programmers to both specify which messages should
 be included in which unit of order, while \synapse contexts {\em
 transparently} intercepts data updates, compiles their dependencies
@@ -1882,13 +1881,10 @@ reads) versus its availability and scale~\cite{brewer-conj}.
 Among these consistency models, causal
 consistency~\cite{Lamport:1978:TCO:359545.359563}
 has been demonstrated to provide a good balance between semantics and
-scalability~\cite{cops, eiger} and is the strongest model achievable with high
+scalability~\cite{cops,eiger} and is the strongest model achievable with high
 availability under network partitions~\cite{mahajan11cacTR}.  Many
 implementations of causal consistency exist in the context of
-{\em same-DB replication}~\cite{eiger,cops,bolton,Du:2013:OSC:2523616.2523628,
-Belaramani:2006:PR:1267680.1267685, Ladin:1992:PHA:138873.138877, bayou,
-zawirski13swiftcloud, Wang:2013:RSS:2482626.2482661,
-Birman:1991:LCA:128738.128742}.  \synapse applies these approaches to provide
+{\em same-DB replication}~\cite{eiger,cops,bolton,Du:2013:OSC:2523616.2523628,Belaramani:2006:PR:1267680.1267685,Ladin:1992:PHA:138873.138877,bayou,zawirski13swiftcloud,Wang:2013:RSS:2482626.2482661,Birman:1991:LCA:128738.128742}.  \synapse applies these approaches to provide
 causal order of update delivery between {\em distinct DBs}.
 
 \subsection{Conclusion} \label{sec:conclusion}
