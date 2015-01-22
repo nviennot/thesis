@@ -1,16 +1,86 @@
 \chapter{Introduction}
 \label{ch:intro}
 
-Deterministic application record and replay is the ability to record
-application execution and deterministically replay it at a later time.
-Record-replay has many potential uses, including diagnosing
-and debugging applications by capturing and reproducing hard to find
-bugs, dynamic application analysis by performing costly
-instrumentation on replicas that replay application behavior recorded
-on production systems, intrusion analysis by capturing intrusions involving
-non-deterministic effects, and fault-tolerance by providing
-replicas that replay execution and at the occurrence of a fault, go
-live in place of the previously running application instance.
+Deterministic application record and replay is the ability to record application
+execution and deterministically replay it at a later time.  Record-replay has
+many potential uses, including diagnosing and debugging applications by
+capturing and reproducing hard to find bugs, dynamic application analysis by
+performing costly instrumentation on replicas that replay application behavior
+recorded on production systems, intrusion analysis by capturing intrusions
+involving non-deterministic effects, and fault-tolerance by providing replicas
+that replay execution and at the occurrence of a fault, go live in place of the
+previously running application instance.
 
+Many approaches have tried to provide transparent (i.e., which does not require
+application changes) record-replay functionality, but have suffered from
+fundamental limitations that make them unusable in many cases.  First, most
+approaches only support replaying the recorded application execution, and do not
+allow the replayed instance to go live and continue normal execution.  This only
+works for simple debugging uses.  It does not work for most scenarios, including
+any form of debugging that requires the replayed instance to go live, such as
+debugging past the end of a recorded execution, fault-tolerance which requires
+the replayed instance to be able to go live when the primary fails, or
+time-travel execution in which an application can go back in time and go live
+from any point in its recorded execution.
 
-A bit of related work?
+Transparent application execution record-replay mechanisms can be implemented at different levels:
+hardware, VM, kernel, and userspace. Previous approaches that require
+specialized hardware are not suitable for any deployments on the cloud.
+Mechanisms implemented at the VM level suffer from performance issues
+due to unnecessary kernel recording overhead.  Userspace record-replay systems
+are not suitable for generic multi-processor support as they lack the ability to
+instrument memory accesses efficiently. The only viable level for
+a multi-processor, hardware agnostic, transparent, record-replay system is the
+kernel level. However, implementing a record-replay system at the kernel level
+is challenging. Delivering asynchronous events, for example signals or
+scheduling decisions, can be very difficult to perform with perfect precision.
+We later introduce two new lightweight OS mechanisms to solve this problem.
+
+Application state record-replay mechanisms, a subset of application execution
+record-replay mechanisms, are useful as well.  In distributed
+databases, data replication provide fault tolerance and load balancing
+features. Data replication often hide record-replay mechanisms.
+Today, most large scale web applications rely on many different databases as
+each database provides a specific feature-set. Unfortunately, the data replication
+engines of these databases are not compatible with each other, and offer very
+different consistency semantics. Because the same data often need to be
+replicated across all these database, it is desirable to provide a generic
+record-replay system compatible with such databases.
+
+First, we present \scribe (\S\ref{ch:scribe}), an OS-level record-replay
+mechanism.  Scribe introduces new lightweight OS mechanisms, rendezvous and sync
+points, to efficiently record nondeterministic interactions such as related
+system calls, signals, and shared memory accesses. Rendezvous points make a
+partial ordering of execution based on system call dependencies sufficient for
+replay, avoiding the recording overhead of maintaining an exact execution
+ordering.  Sync points convert asynchronous interactions that can occur at
+arbitrary times into synchronous events that are much easier to record and
+replay.
+
+Second, we present \racepro (\S\ref{ch:racepro}), a process race detection
+system to improve software correctness. Process races occur when multiple
+processes access shared operating system resources, such as files, without
+proper synchronization.  Racepro leverages a low overhead record-replay
+mechanism to detect harmful races as it deployed systems as opposed to synthetic
+environments.
+
+Third, we present \dora (\S\ref{ch:dora}), a mutable record-replay system which
+allows a recorded execution of an application to be replayed with a modified
+version of the application. This feature, not available in previous
+record-replay systems, enables powerful new functionality. In particular, Dora
+can help reproduce, diagnose, and fix software bugs by replaying a version of a
+recorded application that is recompiled with debugging information, reconfigured
+to produce verbose log output, modified to include additional print statements,
+or patched to fix a bug.
+
+Lastly, we present \synapse (\S\ref{ch:synapse}), an heterogeneous database
+replication system specifically designed for web applications. These web
+applications behave very differently compared to traditional single-host
+applications as they are distributed and have their state contained in
+databases.  Synapse lets independent services cleanly share data with each other
+in an isolated and scalable way. The services run on top of their own databases,
+whose layouts, and engines can be completely different, and incorporate
+read-only views of each others' shared data.  Synapse synchronizes these views
+in real-time using a new scalable, consistent replication mechanism that
+leverages the high-level data models in popular MVC-based Web applications to
+replicate data across heterogeneous databases.

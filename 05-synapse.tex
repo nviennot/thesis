@@ -815,9 +815,54 @@ this task, creating the {\code \footnotesize Interest} model and a virtual
 attribute  ({\code \footnotesize interests\_virt}) to insert the new interests
 received into the separate table.
 
-   comment
 
-   comment
+\subsection{Application State Record-Replay}
+\label{synapse:s:record-replay}
+
+\synapse is an application state record-replay system and share many
+similarities with application execution record-replay systems.
+Under \synapse architecture (\F~\ref{synapse:fig:architecture}(a)), the
+publisher application {\em records} operations that
+change its state, which is entirely contained in its DB.  At a later
+point in time, the subscriber {\em replays} these recorded operations mutating
+its state. Considering a publisher app that publishes all of its models, and a
+subscriber app running the same code as the publisher app that subscribes to all
+models, the subscriber is a perfect replica of the publisher. This replica
+can be used for fault-tolerance purposes, a typical use case of record-replay systems.
+
+\synapse shares many similarities with the execution record-replay system \scribe.
+Due to its go live feature, \scribe must maintain a consistent and valid OS
+kernel state at any point in time during replay because the application
+execution may continue uncontrolled at any point in time.
+From this perspective, \scribe (resp. \synapse) records and replays the state of
+the OS (resp. DB).
+Table~\ref{synapse:tab:similarities} summarizes the similarities between the
+two record-replay systems. The important takeaway is that both systems use a
+causal engine to execute state mutation operations.
+
+\begin{table}[t]
+ \centering {\footnotesize
+  \begin{tabular}{l l l}\toprule
+                                     & {\bf \scribe}       & {\bf \synapse}                  \\ \midrule
+Replicated state                     & OS state            & DB state                        \\
+Actors                               & Userspace processes & Web app processes (distributed) \\
+State mutation API                   & System calls        & DB operations                   \\
+State mutation library               & libc                & DB driver                       \\
+Parallelism                          & Multi-Core          & Distributed                     \\
+Synchronization engine               & Causal              & Causal                          \\
+Synchronization protocol             & CREW                & CREW                            \\
+Synchronization primitives           & Rendezvous points   & Dependency tracking             \\
+Recorded events                      & API calls           & DB data                         \\
+Log format                           & Binary              & JSON                            \\
+  \bottomrule
+  \end{tabular}
+ }
+ \caption{{\small {\bf Similarities between \scribe and \synapse }}
+ Each row depicts the equivalent entity with \scribe and \synapse.}
+ \label{synapse:tab:similarities}
+\end{table}
+
+
 \section{\synapse Architecture}
 \label{synapse:sec:arch}
 
@@ -929,8 +974,6 @@ To maintain availability despite message loss, we provide a weak
 ordering mode that never blocks and offers this guarantee: as writes and
 updates arrive for a document, they are always increasing.
 Since \synapse transmits all published attributes (as opposed to deltas), the subscriber can always fast forward to the latest received version.
-
-   comment
 
 \subsection{Tracking Causal Dependencies} \label{synapse:sec:arch:deps}
 
@@ -1533,9 +1576,31 @@ this task, creating the {\code \footnotesize Interest} model and a virtual
 attribute  ({\code \footnotesize interests\_virt}) to insert the new interests
 received into the separate table.
 
-   comment
+\subsection{Splitting a monolithic app into services with \synapse}
+\label{synapse:sec:apps:gitlab}
 
-   comment
+We used \synapse to split an open source monolithic application, GitLab, into a
+service oriented architecture application. GitLab is a source revision system
+frontend similar to GitHub.  GitLab is built on Ruby-on-Rails and used by more
+than 100,000 companies.  With \synapse, we were able to extract all email
+functionality into a separate service, independent of the core application,
+running on its own database.
+
+We extracted 276 lines from GitLab core application into the mailer.  10 models
+had to be published out of a total of 22.  To increase our confidence that the
+extraction was successful, we leveraged \synapse testing framework. We were able
+to migrate 124 tests cases (700 lines of code) related to the mailer from the
+GitLab core application to the extracted mailer service.  We did not have to
+rewrite or modify any of these test cases.  \synapse transparently reuse the
+data factories to mock \synapse messages as if they were received from the main
+application, exactly like it would happen in a deployed system. These passing
+test cases demonstrate the correctness of the feature extraction into its own
+service.
+
+However, the mailer sometimes needs to render the output of a {\tt git diff} on
+a specific repository. Because git repositories are not replicated, the mailer
+must communicate with the main application through a synchronous API to
+retrieve computation on git repositories.
 
 \section{Evaluation}
 \label{synapse:sec:evaluation}

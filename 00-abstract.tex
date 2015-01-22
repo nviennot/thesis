@@ -1,53 +1,25 @@
 \begin{abstract}
 
-As applications running on traditional operating systems
-grow in complexity, software bugs have become increasingly
-common and more difficult to reproduce, diagnose, and fix.  Aggressive release
-schedules exacerbate the problem, resulting in frail software that requires
-patches to fix problems that occur in the field. Resolving a bug typically
-starts with reproducing it in a controlled environment. Because the common
-approach of conveying a bug report is often inadequate for tricky,
-nondeterministic bugs, record-replay has been developed to capture application
-bugs as they occur and deterministically replay the bug at a later time,
-removing the burden of repeated testing to reproduce the bug.
+Deterministic application record and replay is the ability to record
+application execution and deterministically replay it at a later time.
+Record-replay has many potential uses, including diagnosing
+and debugging applications by capturing and reproducing hard to find
+bugs.
 
-First, we present Scribe, an OS-level record-replay mechanism.
-Scribe introduces new lightweight OS mechanisms, rendezvous and sync points, to
+First, we present \scribe, an OS-level deterministic record-replay mechanism.
+\scribe introduces new lightweight OS mechanisms, rendezvous and sync points, to
 efficiently record nondeterministic interactions such as related system calls,
-signals, and shared memory accesses. Rendezvous points make a partial ordering
-of execution based on system call dependencies sufficient for replay, avoiding
-the recording overhead of maintaining an exact execution ordering.  Sync points
-convert asynchronous interactions that can occur at arbitrary times into
-synchronous events that are much easier to record and replay.
-
-Second, we present Racepro, a process race detection system to improve
+signals, and shared memory accesses.
+Second, we present \racepro, a process race detection system to improve
 software correctness. Process races occur when multiple processes access shared
 operating system resources, such as files, without proper synchronization.
-Racepro leverages a low overhead record-replay mechanism to detect harmful races
-as it deployed systems as opposed to synthetic environments.
-
-Third, we present Dora, a mutable record-replay system which allows a recorded
+Third, we present \dora, a mutable record-replay system which allows a recorded
 execution of an application to be replayed with a modified version of the
-application. This feature, not available in previous record-replay systems,
-enables powerful new functionality. In particular, Dora can help reproduce,
-diagnose, and fix software bugs by replaying a version of a recorded application
-that is recompiled with debugging information, reconfigured to produce verbose
-log output, modified to include additional print statements, or patched to fix a
-bug.
+application.
+Lastly, we present \synapse, an heterogeneous database replication system
+specifically designed for web applications.
 
-Lastly, we present Synapse, an heterogeneous database record-replay system
-specifically designed for web applications. These web applications behave very
-differently compared to traditional single-host applications as they are
-distributed and have their state contained in databases.
-Synapse lets independent services cleanly share data with each other in an
-isolated and scalable way. The services run on top of their own databases,
-whose layouts, and engines can be completely different, and incorporate
-read-only views of each others' shared data.  Synapse synchronizes these views
-in real-time using a new scalable, consistent replication mechanism that
-leverages the high-level data models in popular MVC-based Web applications to
-replicate data across heterogeneous databases.
-
-These four record-replay systems share many similarities and have many useful
-applications, including auditing, debugging, testing, and bug detection.
+These four systems share many similarities as they are built on top of
+record-replay systems. This thesis proposal describes these four systems.
 
 \end{abstract}
