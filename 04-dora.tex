@@ -1,7 +1,7 @@
-\section{Transparent Mutable Replay for Multicore Debugging and Patch Validation}
+\chapter{Transparent Mutable Replay for Multicore Debugging and Patch Validation}
 \label{dora:ch:proposal}
 
-\subsection{Abstract}
+\section{Abstract}
 
 We present {\dora}, a mutable record-replay system which allows a
 recorded execution of an application to be replayed with a modified
@@ -40,7 +40,7 @@ applications to validate patches with realistic workloads, and (4)
 maintains low recording overhead on commodity multicore hardware,
 making it suitable for production systems.
 
-\subsection{Introduction}
+\section{Introduction}
 
 As applications grow in complexity, software bugs have become
 increasingly common and more difficult to reproduce, diagnose, and fix.
@@ -199,7 +199,7 @@ of code.
 	Section~\ref{dora:sec:related} discusses related work.
 	Finally, we present some concluding remarks and directions for future work.
 
-\subsection{Mutable Replay Concept}
+\section{Mutable Replay Concept}
 \label{dora:sec:definition}
 
 Since mutable replay is a previously undefined concept, we begin by
@@ -304,7 +304,7 @@ execution of the original program.
 We will show that {\dora} does this, producing a $d$-optimal replay
 with the cost function described in Section~\ref{dora:sec:explorer}. 
 
-\subsection{Recorder}
+\section{Recorder}
 \label{dora:sec:recorder}
 
 {\dora}'s recorder builds upon our Scribe work on lightweight OS-level
@@ -361,7 +361,7 @@ several system calls and information about their arguments.
 \label{dora:fig:example-orig-log}
 \end{figure}
 
-\subsubsection{Nondeterministic Interactions}
+\subsection{Nondeterministic Interactions}
 To replay an execution deterministically, the timing and ordering of
 nondeterministic interactions between tasks must be recorded.  To
 enable mutable replay, {\dora} must also be resilient to changes in
@@ -495,12 +495,12 @@ exhibit an enormous number of ownership transitions.  Nevertheless,
 {\dora} performs well for a wide range of 
 real-world applications as shown in Section~\ref{dora:sec:results}.
 
-\subsubsection{Additional Information for Mutable Replay}
+\subsection{Additional Information for Mutable Replay}
 
 In traditional replay, all deterministic information need not be
 recorded because it will be regenerated during replay, but in mutable
 replay, the modified application may behave differently even in
-deterministic subsections of code.  {\dora}'s recorder stores
+deterministic sections of code.  {\dora}'s recorder stores
 additional deterministic information in the log to help the replayer
 detect differences between the original and replayed
 executions as early as possible.  Since {\dora} provides deterministic replay for
@@ -545,7 +545,7 @@ the environment in which the program was recorded.
 For example, the recorder stores
 host information in case the modified application requests it with a new
 \code{uname()} or \code{gethostname()} call.
-\subsection{Replayer}
+\section{Replayer}
 \label{dora:sec:replayer}
 
 {\dora}'s replayer replays the originally
@@ -593,7 +593,7 @@ later events will match events in the log.  For simplicity, {\dora}
 treats a divergence as one of two possible types of \emph{mutations},
 an \emph{addition} or a \emph{deletion}.  
 
-\subsubsection{Additions}
+\subsection{Additions}
 An addition is an event added to the program.  For example, a program
 could be modified by adding code that includes a new system call.  A
 new event is most often a system call, but it can also be a new signal
@@ -687,7 +687,7 @@ original serial numbers are reordered as necessary to ensure that
 subsequent replays based on this log deterministically perform the
 memory access in the same way.
 
-\subsubsection{Deletions}
+\subsection{Deletions}
 A deletion corresponds to the removal of events from the original log
 file and implies that the unexpected event matches a later event in the
 log. The replayer deletes the intermediate events.  There can be
@@ -754,7 +754,7 @@ with the original recorded execution. Asynchronous events associated with a
 deleted shared memory event are relocated to other sync points in the same
 manner as they are for system calls.
 
-\subsubsection{Going Live}
+\subsection{Going Live}
 In rare cases, the entire log file is
 consumed before the modified application terminates. This can occur when the
 original application crashes, but the patched application avoids crashing. The
@@ -765,7 +765,7 @@ Since {\dora} faithfully replays kernel actions, the system is always in a state
 it to transition to live execution. Linux namespaces~\cite{namespaces:linux06}
 create a consistent environment for processes before and after they go live.
 Examples of this are demonstrated in Section~\ref{dora:sec:results}.
-\subsection{Explorer}
+\section{Explorer}
 \label{dora:sec:explorer}
 
 The explorer uses the replayer to search for a $d$-optimal replay. When the
@@ -953,7 +953,7 @@ with the kernel API.  The {\tt fopen()} library call internally calls {\tt
 malloc()}, resulting in two new invocations to {\tt brk()}. Thus, even minor
 changes to high-level source code can result in relatively large changes to the
 low-level executable code.
-\subsection{Properties}
+\section{Properties}
 \label{dora:sec:properties}
 
 We can make several useful guarantees about the behavior of {\dora}
@@ -1021,7 +1021,7 @@ for certain classes of application changes.
 	deterministically replay the original execution of the explorer using the
 	modified program. This enables exact reproduction of a previously found
 	replay, allowing {\dora} to be used iteratively.
-\subsection{Limitations}
+\section{Limitations}
 \label{dora:sec:limitations}
 
 {\dora} has several limitations as it has no knowledge of application
@@ -1065,7 +1065,7 @@ and Squid, 83\% resulted in only minor changes to the application behavior.
 Analysis of various security patches showed that over 75\% only
 changed applications in minor ways ~\cite{mreplay-feas}. This makes sense, as
 patches often attempt to fix an edge case in an application.
-\subsection{Evaluation}
+\section{Evaluation}
 \label{dora:sec:results}
 
 \begin{table*}[t]
@@ -1188,7 +1188,7 @@ overhead for the production workloads.
 \label{dora:tab:upgrades}
 \end{table}
 
-\subsubsection{Debugging and Diagnosis Techniques}
+\subsection{Debugging and Diagnosis Techniques}
 \label{dora:sec:debugging}
 
 We used a wide range of debugging and diagnosis techniques with the
@@ -1320,7 +1320,7 @@ will have no information about which commands
 were executed. Using {\dora}, the developer can modify the program
 to log executed commands, then replay the exploit
 using the modified program. This process can be repeated, allowing
-the developer to iteratively add print statements to different subsections of the
+the developer to iteratively add print statements to different sections of the
 code and pinpoint the bug. To demonstrate this, we added enough print statements
 to identify the bug. {\dora} found the $d$-optimal replay, which had
 mutations of fourteen added system calls and a shared memory event.
@@ -1364,7 +1364,7 @@ modify the program to log each request to a file with the complete
 header information of the request, then replay a recording of the exploit with
 the modified program. This allows the developer to see that the
 requests which crash the server have empty header parameters and
-narrow down the bug to a very specific subsection of code.
+narrow down the bug to a very specific section of code.
 At least 12 system calls were added per request. The exact number varied
 depending on the type of request.
 
@@ -1387,7 +1387,7 @@ the translation use case is novel and has interesting
 applications. The replay involved replacing 43 system calls and deleting 5
 system calls.
 
-\subsubsection{Patch Validation}
+\subsection{Patch Validation}
 \label{dora:sec:validation}
 
 \begin{table*}[t]
@@ -1482,7 +1482,7 @@ scenario, {\dora} did not go live because the
 proftpd master forks a new worker per connection and is resilient to worker
 crashes, allowing subsequent requests to be replayed without going live.
 
-\subsubsection{Release Upgrades}
+\subsection{Release Upgrades}
 \label{dora:sec:upgrades}
 
 To demonstrate another use case of {\dora}, we took two server applications
@@ -1519,7 +1519,7 @@ application changes. They required add and delete mutations of
 read()}, {\tt write()}, {\tt mmap()}, {\tt munmap()} and {\tt time()}
 system calls.
 
-\subsubsection{Performance}
+\subsection{Performance}
 \label{dora:sec:performance}
 
 To quantify the performance costs of using {\dora}, we measured the
@@ -1612,7 +1612,7 @@ disk. The storage growth rates ranged from 10 KB/s to 130 KB/s. These
 storage requirements are modest considering our workloads. {\dora}
 would take almost three months to fill a 1 TB drive at the worst
 of these rates, which makes it an affordable and practical solution.
-\subsection{Related Work}
+\section{Related Work}
 \label{dora:sec:related}
 
 Many record-replay approaches have been proposed to improve bug 
@@ -1711,7 +1711,7 @@ sequences being used for matching are known in advance. In contrast,
 mutable replay must match a known execution log with an
 execution sequence that is not known in advance, so these algorithms cannot be
 directly applied.
-\subsection{Conclusions and Future Work}
+\section{Conclusions and Future Work}
 \label{dora:sec:conclude}
 
 {\dora} introduces the concept of mutable record-replay and is the

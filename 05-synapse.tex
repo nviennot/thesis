@@ -1,7 +1,7 @@
-\section{New Data Integration Abstractions for Agile Web Application Development}
+\chapter{New Data Integration Abstractions for Agile Web Application Development}
 \label{synapse:ch:synapse}
 
-\subsection{Abstract}
+\section{Abstract}
 
 The growing demand for data-driven features in today's Web applications -- such
 as targeting, recommendations, or predictions -- has transformed those
@@ -22,7 +22,7 @@ Neo4j, and Elasticsearch. We and others have built over a dozen applications
 using \synapse with great ease, some of which are running in production with
 over 450,000 users.
 
-\subsection{Introduction}
+\section{Introduction}
 \label{synapse:sec:intro}
 
 We live in a data-driven world. Web applications today -- from
@@ -162,7 +162,7 @@ limit their applicability to today's broad range of DBs~\cite{databus}.
 We release our system open source at \url{https://github.com/promiscuous-io/promiscuous}.
 (The system's name was initially Promiscuous, but we have decided to change that
 to Synapse. The change is still pending in the repo.)
-\subsection{Background}
+\section{Background}
 \label{synapse:s:motivation}
 
 MVC is widely-used and supported by many Web
@@ -237,7 +237,7 @@ selecting delivery \\
 \end{table}
 
 \setlength{\tabcolsep}{4pt}
-\subsection{\synapse API}
+\section{\synapse API}
 \label{synapse:sec:programming-model}
 
 \synapse extends the MVC programming pattern to create an
@@ -272,7 +272,7 @@ cases as shown in \S\ref{synapse:sec:apps}.
 We discuss the \synapse API using Ruby-on-Rails, but similar APIs can be
 built for other frameworks.
 
-\subsubsection{\synapse Abstractions}
+\subsection{\synapse Abstractions}
 \label{synapse:sec:api}
 
 \begingroup
@@ -459,7 +459,7 @@ as shown in \S\ref{synapse:sec:examples}.
 
 \endgroup
 
-\subsubsection{\synapse Delivery Semantics}
+\subsection{\synapse Delivery Semantics}
 \label{synapse:sec:semantics}
 Update delivery semantics are an
 important part of \synapse's programming model. Different applications
@@ -535,7 +535,7 @@ histories and out-of-order deliveries).  We signal such periods
 clearly to programmers in our API using the {\code bootstrap?}
 predicate.  \S\ref{synapse:sec:arch:bootstrapping} describes this situation and
 explains how subscribers demanding higher semantics can deal with it. 
-\subsubsection{\synapse Programming by Example}
+\subsection{\synapse Programming by Example}
 \label{synapse:sec:examples}
 
 \synapse addresses many of the challenges of heterogeneous-DB applications automatically through its use of ORMs, often being entirely plug-and-play.
@@ -818,7 +818,7 @@ received into the separate table.
    comment
 
    comment
-\subsection{\synapse Architecture}
+\section{\synapse Architecture}
 \label{synapse:sec:arch}
 
 \F~\ref{synapse:fig:architecture}(a) shows the \synapse architecture applied to an
@@ -860,7 +860,7 @@ The worker then persists the update to the underlying DB. When writing to
 models, prescribed callbacks are invoked by the ORM. When transactions are
 supported, the message is processed within a transaction.
 
-\subsubsection{Model-Driven Replication}
+\subsection{Model-Driven Replication}
 \label{synapse:sec:arch:cross-db-propagation}
 
 To synchronize distinct DBs, \synapse needs to (1) identify the objects being
@@ -901,7 +901,7 @@ Different ORMs may have different names for these methods (e.g. {\tt find} vs
 {\tt find\_by}) but their translation is trivial. Any callbacks specified by the
 programmer are automatically called by the ORM.
 
-\subsubsection{Enforcing Delivery Semantics} \label{synapse:sec:arch:cross-db-causality}
+\subsection{Enforcing Delivery Semantics} \label{synapse:sec:arch:cross-db-causality}
 
 \synapse enforces update-message ordering with three different
 delivery modes: global, causal, and weak. The performance of each delivery mode
@@ -932,7 +932,7 @@ Since \synapse transmits all published attributes (as opposed to deltas), the su
 
    comment
 
-\subsubsection{Tracking Causal Dependencies} \label{synapse:sec:arch:deps}
+\subsection{Tracking Causal Dependencies} \label{synapse:sec:arch:deps}
 
 To enforce causal ordering, \synapse tracks dependencies between updates.  To
 first order, \synapse takes an explicit approach to identifying
@@ -972,7 +972,7 @@ by \synapse automatically.  In contrast, prior work relying on explicit
 dependencies requires their use with {\em all writes}, which would believe is
 onerous for developers and error-prone.
 
-\subsubsection{Bootstrapping and Reliability} \label{synapse:sec:arch:bootstrapping}
+\subsection{Bootstrapping and Reliability} \label{synapse:sec:arch:bootstrapping}
 
 When a new subscriber comes online, it must synchronize with the publisher in a
 three-step bootstrapping process. First, all current publisher versions are sent
@@ -1000,7 +1000,7 @@ and publishing resumes. Messages embed this generation number as shown on
 processed. This generation change incurs a global synchronization barrier and
 temporarily slows subscribers.
 
-\subsubsection{Testing Framework}
+\subsection{Testing Framework}
 \label{synapse:sec:testing}
 
 \synapse provides a solid testing framework to help with development and
@@ -1053,7 +1053,7 @@ is well tested before deploying into the production environment.
 \end{table}
 \setlength{\tabcolsep}{5pt}
 
-\subsubsection{Supporting New DBs and ORMs}
+\subsection{Supporting New DBs and ORMs}
 Adding subscriber support for a new ORM is trivial: a developer need only map the CRUD operations (create/read/update/delete) into \synapse's engine.
 To add publisher support for a new ORM, a developer needs to first plug into the ORM's interfaces to intercept queries on their way to the DB (all queries for causality and writes for replication).
 Then, the developer needs to add two phase commit hooks to the DB driver for transactional DBs (as discussed in \S\ref{synapse:sec:arch:bootstrapping}).
@@ -1063,7 +1063,7 @@ Our first supported DB was PostgreSQL, taking a single developer approximately o
 After building support for this DB, supporting other SQL DBs, such as MySQL and Oracle, was trivial: about 50 lines of DB-specific, implemented in about a couple of hours for each.
 Supporting subsequent DBs (e.g., MongoDB, TokuMX, and Cassandra) was equally simple and took just a few days and 200-300 lines of code per ORM.
 Thus, in our experience, supporting various DBs is a very reasonable task for an experienced programmer.
-\subsection{Applications}
+\section{Applications}
 \label{synapse:sec:apps}
 
 We and others have built or modified 14 web applications to share data with
@@ -1075,7 +1075,7 @@ Overall, our development and deployment experience has been positive: we made
 average a single line of configuration per attribute of each model published.
 At the same time, we achieved great benefits from using \synapse.  
 
-\subsubsection{\synapse at \crowdtap}
+\subsection{\synapse at \crowdtap}
 \label{synapse:sec:apps:crowdtap}
 
 \crowdtap is an online marketing-services company contracted by major brands such as Verizon, AT\&T, Sony and MasterCard.
@@ -1216,7 +1216,7 @@ returns products related to interests.
      \vspace{-0.5cm}
 \end{figure*}
 
-\subsubsection{\synapse in Open-Source Apps}
+\subsection{\synapse in Open-Source Apps}
 \label{synapse:sec:apps:social}
 \begingroup
 \setlength{\columnsep}{6pt}
@@ -1537,7 +1537,7 @@ received into the separate table.
 
    comment
 
-\subsection{Evaluation}
+\section{Evaluation}
 \label{synapse:sec:evaluation}
 
 We leverage both our deployment and the applications we built to answer three
@@ -1553,7 +1553,7 @@ otherwise noted, our evaluation focuses on the causal delivery mode, which is
 the default setting in our prototype.  After providing some sample executions,
 we next discuss each evaluation question in turn.
 
-\subsubsection{Sample Executions}
+\subsection{Sample Executions}
 \label{synapse:sec:evaluation:sample-runs}
 
 To build intuition into how \synapse behaves and the kinds of overheads it
@@ -1575,7 +1575,7 @@ enforcing causality.
 
 \setlength{\tabcolsep}{4pt}
 
-\subsubsection{Application Overheads (Q1)}
+\subsection{Application Overheads (Q1)}
 \label{synapse:sec:evaluation:overhead}
 
 We next evaluate \synapse's publishing overheads in the context of real
@@ -1684,7 +1684,7 @@ These results show that \synapse overheads with real applications are low and
 likely unnoticeable to users. However, the results are insufficient to assess
 performance under stress, a topic that we discuss next.
 
-\subsubsection{Scalability (Q2)}
+\subsection{Scalability (Q2)}
 \label{synapse:sec:evaluation:scalability}
 
 To evaluate \synapse throughput and latency under high load, we developed a
@@ -1727,7 +1727,7 @@ figure marks with a * the DB that bottlenecks in each combination. For
 instance, PostgreSQL bottlenecks at 12,000 writes/s, and Elasticsearch at
 20,000 writes/s.
 
-\subsubsection{Delivery Semantic Comparison (Q3)}
+\subsection{Delivery Semantic Comparison (Q3)}
 \label{synapse:sec:evaluation:delivery}
 
 \synapse supports three delivery modes -- global, causal, and weak -- which
@@ -1743,7 +1743,7 @@ the inherent parallelism of the workload.  Finally, the weak delivery mode
 scales perfectly, never reaching its peak up to 400 subscriber workers.
 In practice, we recommend choosing either the causal or weak mode.
 
-\subsubsection{Production Notes (Q4)}
+\subsection{Production Notes (Q4)}
 \label{synapse:sec:eval:ease-of-use}
 
 As stated before, \crowdtap has given us very positive feedback on \synapse's
@@ -1783,7 +1783,7 @@ modes for each of its subscribers, taking into account its availability/consiste
 needs.  It is not an easy choice, but according to them, it {\em can} and {\em must}
 be done in a production environment where even reliable components can fail.
 
-\subsubsection{Summary}
+\subsection{Summary}
 
 We have shown that \synapse is easy to integrate with applications,
 and can support multiple, different DBs with reasonable effort. \synapse adds
@@ -1791,7 +1791,7 @@ reasonable overhead on real applications, and is not a bottleneck for
 scalability.  Moreover, although still a research prototype, it has been shown
 to be valuable beyond its initial promise in production.
 
-\subsection{Related Work}
+\section{Related Work}
 \label{synapse:sec:related}
 
 \synapse builds upon an immense body of work spanning multiple fields,
@@ -1887,7 +1887,7 @@ implementations of causal consistency exist in the context of
 {\em same-DB replication}~\cite{eiger,cops,bolton,Du:2013:OSC:2523616.2523628,Belaramani:2006:PR:1267680.1267685,Ladin:1992:PHA:138873.138877,bayou,zawirski13swiftcloud,Wang:2013:RSS:2482626.2482661,Birman:1991:LCA:128738.128742}.  \synapse applies these approaches to provide
 causal order of update delivery between {\em distinct DBs}.
 
-\subsection{Conclusion} \label{synapse:sec:conclusion}
+\section{Conclusion} \label{synapse:sec:conclusion}
 
 \synapse is an easy-to-use, strong-semantics cross-DB system for
 large-scale, data-driven web service integration. It leverages high-level

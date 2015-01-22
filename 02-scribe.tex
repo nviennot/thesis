@@ -1,8 +1,8 @@
-\section{Transparent, Lightweight Application Execution Replay \\
+\chapter{Transparent, Lightweight Application Execution Replay \\
 on Commodity Multiprocessor Operating Systems}
 \label{scribe:ch:scribe}
 
-\subsection{Abstract}
+\section{Abstract}
 
 We present \scribe{}, the first system to provide transparent,
 low-overhead application record-replay and the ability to go live from
@@ -30,7 +30,7 @@ is less than 2.5\% for server applications including Apache and MySQL,
 and less than 15\% for desktop applications including Firefox,
 Acrobat, OpenOffice, parallel kernel compilation, and movie playback.
 
-\subsection{Introduction}
+\section{Introduction}
 
 Deterministic application record and replay is the ability to record
 application execution and deterministically replay it at a later time.
@@ -178,7 +178,7 @@ results show for the first time a new level of transparent record and
 replay performance on commodity multiprocessor systems that was not
 previously possible. 
 
-\subsection{Architecture Overview}
+\section{Architecture Overview}
 \label{scribe:sec:arch}
 
 \scribe{} can record and replay the execution of a group of processes
@@ -373,7 +373,7 @@ delivery and for recording of asynchronous events, respectively.
  	
   
 
-\subsection{System Calls}
+\section{System Calls}
 \label{scribe:sec:syscalls}
 
 System calls are the predominant form for processes to interact with
@@ -392,7 +392,7 @@ resources.
 
   
 
-\subsubsection{Record}
+\subsection{Record}
 
 During recording, \scribe{} always allows each system call to execute
 and records its return value using the {\em syscall\_ret} event so
@@ -427,7 +427,7 @@ by the replay and therefore deterministic.  In contrast, approaches
 that use system call simulation must explicitly log such data,
 significantly inflating the resulting log size. 
 
-\subsubsection{Replay}
+\subsection{Replay}
 
 During replay, \scribe{} replays the system calls of each process
 independently, unless system calls access shared resources as discussed
@@ -549,7 +549,7 @@ that outcome for the wildstar argument.
 
     
 
-\subsubsection{Go Live}
+\subsection{Go Live}
 \label{scribe:sec:golive}
 
 In most cases, executing recorded system calls during replay is
@@ -622,7 +622,7 @@ because it will be deterministically reproduced by replaying the
 application.
 
   
-\subsection{Shared Memory}
+\section{Shared Memory}
 \label{scribe:sec:memory}
 
 Replaying shared memory interleaving is critical for deterministic
@@ -832,7 +832,7 @@ page table.
  
 
   
-\subsection{Rendezvous Points}
+\section{Rendezvous Points}
 \label{scribe:sec:rendezvous}
 
 System calls that access shared resources may cause nondeterminism
@@ -1041,7 +1041,7 @@ running \code{open} on a file already opened by another process, will
 result in a rendezvous event for the global resource, for the process
 descriptor, and for the inode resource.  
 
-\subsection{Sync Points}
+\section{Sync Points}
 \label{scribe:sec:sync}
 
 \begin{figure*}[t]
@@ -1201,7 +1201,7 @@ or due to memory sharing also qualify.
 However, page faults due to copy-on-write or memory paging do not
 satisfy the second requirement.
 
-\subsubsection{Signal Delivery}
+\subsection{Signal Delivery}
 
 During recording, \scribe{} defers the delivery of an asynchronous
 signal until the target process is at a sync point.  This allows
@@ -1262,7 +1262,7 @@ proper kernel state.
 
   
 
-\subsubsection{Page Ownership Transfer}
+\subsection{Page Ownership Transfer}
 
 Page state transitions are allowed to only take place when \scribe{}
 can conveniently track, and later replay them. We draw the following
@@ -1318,7 +1318,7 @@ other processes may promptly revoke ownership of any pages that it
 holds.  PTEs of the requesting processes and the owner are updated
 promptly to reflect these actions.
 
-\subsubsection{Signature Record and Replay}
+\subsection{Signature Record and Replay}
 
 Deferring signals and page ownership transfers may incur a performance
 penalty by increasing the latency of signal delivery and page faults
@@ -1465,7 +1465,7 @@ point is rarely needed in practice for handling asynchronous events.
 
 \vspace{-1mm}
 
-\subsection{Performance Evaluation}
+\section{Performance Evaluation}
 \label{scribe:sec:results}
 
 We have implemented a \scribe{} prototype as a Linux kernel module and
@@ -1742,7 +1742,7 @@ not witness a need for this functionality in practice.
 Our experiences and results demonstrate that sync points occur
 frequently and are useful for enabling deterministic replay.
 
-\subsection{Related Work}
+\section{Related Work}
 \label{scribe:sec:related}
 
 Replaying program execution has been of interest for over 40
@@ -1862,7 +1862,7 @@ activities that result in kernel-level sharing.  While SMP-ReVirt can
 provide whole system replay, \scribe{} can provide much more efficient
 application replay.   
 
-\subsection{Conclusions and Future Work}
+\section{Conclusions and Future Work}
 \label{scribe:sec:conclude}
 
 \scribe{} is the first operating system mechanism to provide transparent,
