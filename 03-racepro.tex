@@ -1,5 +1,5 @@
 \section{Pervasive Detection of Process Races in Deployed Systems}
-\label{ch:racepro}
+\label{racepro:ch:racepro}
 
 \subsection{Abstract}
 
@@ -26,7 +26,7 @@ from benign ones.  We have implemented \racepro in Linux, shown that it
 imposes only modest recording overhead, and used it to detect a number
 of previously unknown bugs in real applications caused by process races.
 
-\subsection{Introduction} \label{sec:intro}
+\subsection{Introduction} \label{racepro:sec:intro}
 
 While thread races have drawn much attention from the research
 community~\cite{cui:tern:osdi10,racerx:sosp03,racefuzzer:pldi08,wu:loom:osdi10,yu:racetrack:sosp},
@@ -83,7 +83,7 @@ different from those used in shared memory. For instance, what shared objects
 does \code{execve} access?  In addition to reading the inode of the
 executed binary, an obvious yet incomplete answer, \code{execve} also
 conceptually writes to \code{/proc}, which is the root cause of the
-\code{ps | grep X} race (\S\ref{sec:detect}).  Similarly, a
+\code{ps | grep X} race (\S\ref{racepro:sec:detect}).  Similarly, a
 thread-join returns only when the thread being waited for exits, but
 \code{wait} may return when any child process exits or any signal arrives.
 Besides fork-wait, processes can also synchronize using
@@ -158,19 +158,19 @@ desktop applications.  Furthermore, we show that \racepro can detect
 \nracepro real bugs due to process races in widespread Linux
 distributions. 
 
-This paper is organized as follows.  \S\ref{sec:study} presents a
+This paper is organized as follows.  \S\ref{racepro:sec:study} presents a
 study of process races and several process race examples.
-\S\ref{sec:overview} presents an overview of the \racepro architecture.
-\S\ref{sec:record} describes the execution recording mechanism.
-\S\ref{sec:detect} describes  the system call modeling using
+\S\ref{racepro:sec:overview} presents an overview of the \racepro architecture.
+\S\ref{racepro:sec:record} describes the execution recording mechanism.
+\S\ref{racepro:sec:detect} describes  the system call modeling using
 micro-operations and the race detection algorithm.
-\S\ref{sec:validate} describes how replay and go-live are used to
-determine harmful races.  \S\ref{sec:eval} presents experimental
-results.  \S\ref{sec:related} discusses related work.  Finally, 
-\S\ref{sec:conclusion} presents some concluding remarks and directions
+\S\ref{racepro:sec:validate} describes how replay and go-live are used to
+determine harmful races.  \S\ref{racepro:sec:eval} presents experimental
+results.  \S\ref{racepro:sec:related} discusses related work.  Finally, 
+\S\ref{racepro:sec:conclusion} presents some concluding remarks and directions
 for future work.
 
-\subsection{Process Race Study} \label{sec:study}
+\subsection{Process Race Study} \label{racepro:sec:study}
 
 We conducted a study of real process races with two key questions in
 mind.  First, are process races a real problem?  Second, what are their
@@ -183,13 +183,13 @@ the returned pages, identified all unique bugs in the sampled pages,
 and classified these bugs based on whether they resulted in process
 or thread races.  Raw data of the studied bugs is 
 available~\cite{all-resource-races}.
-\S\ref{sec:findings} presents our findings. \S\ref{sec:example}
+\S\ref{racepro:sec:findings} presents our findings. \S\ref{racepro:sec:example}
 describes four process race examples from the most serious to the
 least. 
 
-\subsubsection{Findings} \label{sec:findings}
+\subsubsection{Findings} \label{racepro:sec:findings}
 
-Table~\ref{tab:data} summarizes the collected pages and bugs;
+Table~\ref{racepro:tab:data} summarizes the collected pages and bugs;
 Fedora and Redhat results are combined as they share the same
 management website.   For each distribution, we show the number of
 pages returned for our query (Returned), the number of pages sampled
@@ -217,7 +217,7 @@ which were \toctou races, the number of thread races
   \hline                           
   Total               & 9028 & 540  & 150 & 109 (25) & 41  \\
 \end{tabular}
-\caption{{\em Summary of collected pages and bugs.}} \label{tab:data}
+\caption{{\em Summary of collected pages and bugs.}} \label{racepro:tab:data}
 \end{table}
 
 \para{Process races are numerous.}  Of the \nbug sampled bugs, \nprace
@@ -233,13 +233,13 @@ may extrapolate to over 1,500 process races.  Note that our
 counting is very conservative: the sampled pages contain an additional
 \npraceunconfirmed likely process races, but the pages did
 not contain enough information for us to understand the cause, so we
-did not include them in Table~\ref{tab:data}.
+did not include them in Table~\ref{racepro:tab:data}.
 
 \begin{figure}[t]
   \hskip 5mm
   \includegraphics[width=0.45\linewidth,angle=270]{figures/racepro/race-effects}
   \vskip -5mm
-  \caption{\em Process races breakdown by effects.} \label{fig:effects}
+  \caption{\em Process races breakdown by effects.} \label{racepro:fig:effects}
   \vskip -2mm
 \end{figure}
 
@@ -255,7 +255,7 @@ did not include them in Table~\ref{tab:data}.
   the percentage of process races that involve the specific number of
   packages, processes, or languages.  To avoid inflating the number of
   processes, we count a run of a shell script as one process.  (Each external
-  command in a script causes a \code{fork}.)} \label{fig:breakdown}
+  command in a script causes a \code{fork}.)} \label{racepro:fig:breakdown}
 \end{figure*}
 
 \para{Process races are dangerous.}  Compared to thread races that
@@ -263,17 +263,17 @@ typically corrupt volatile application memory, process races
 are arguably more dangerous because they often corrupt persistent and system resources.
 Indeed, the sampled process races caused security breaches, files and databases to
 become corrupted, programs to read garbage, and processes to get stuck
-in infinite loops. Figure~\ref{fig:effects} summarizes the effects of
-all process races from Table~\ref{tab:data}.
+in infinite loops. Figure~\ref{racepro:fig:effects} summarizes the effects of
+all process races from Table~\ref{racepro:tab:data}.
 
 \para{Process races are heterogeneous.}  The sampled process races
 spread across over 200 programs, ranging from server
 applications such as MySQL, to desktop applications such as OpenOffice,
 to shell scripts in Upstart~\cite{upstart}, an event-driven
-replacement of System V \code{init} scripts.  Figure~\ref{fig:breakdown}
+replacement of System V \code{init} scripts.  Figure~\ref{racepro:fig:breakdown}
 breaks down the process races by packages, processes, and
 programming languages involved.  Over half of the \nprace process races,
-including all examples described in \S\ref{sec:example}, require 
+including all examples described in \S\ref{racepro:sec:example}, require 
 interactions of at least two programs.  These programs are written in
 different programming languages such as C, Java, PHP, and shell scripts,
 run in multiple processes, synchronize via \code{fork} and \code{wait},
@@ -290,10 +290,10 @@ system-wide.
 
 \para{Process races are highly elusive.} Many of the process races,
 including Bug 1 and 3 described in
-\S\ref{sec:example}, occur only due to site-specific software,
+\S\ref{racepro:sec:example}, occur only due to site-specific software,
 hardware, and user configurations.  Moreover, many of the sampled
 process races, including all of those described in
-\S\ref{sec:example}, occur only due to rare runtime factors. For
+\S\ref{racepro:sec:example}, occur only due to rare runtime factors. For
 example, Bug 1 only occurs when a database shutdown takes longer 
 than usual, and Bug 2 only occurs when a signal is delivered right 
 after a child process exited.
@@ -305,20 +305,20 @@ executions to check.
 \nprace process races fall into two categories.  Over two
 thirds (\norder) are execution order
 violations~\cite{lu:concurrency-bugs}, 
-such as Bug 1, 3, and 4 in \S\ref{sec:example},
+such as Bug 1, 3, and 4 in \S\ref{racepro:sec:example},
 where a set of events are
 supposed to occur in a fixed order, but no synchronization operations
 enforce the order.
 Less than one third (\natomic) are atomicity violations, including all
 \toctou bugs; most of them are the simplest load-store
-races, such as Bug 2 in \S\ref{sec:example}. 
+races, such as Bug 2 in \S\ref{racepro:sec:example}. 
 Few programs we studied use standard locks (\eg, \code{flock}) to
 synchronize file system accesses among processes.
 These patterns suggest that a lockset-based race detection algorithm is
 unlikely to work well for detecting process races.  Moreover, it is crucial
 to use an algorithm that can detect order violations.
 
-\subsubsection{Process Race Examples} \label{sec:example}
+\subsubsection{Process Race Examples} \label{racepro:sec:example}
 
 \begin{figure*}[t]
 \begin{minipage}{0.49\linewidth}
@@ -337,7 +337,7 @@ p = wait(...) // error (no child)
 \end{verbatim}
 \end{footnotesize}
     \vskip -2mm
-    \caption{{\em dash-MySQL race.}} \label{fig:dash-mysql}
+    \caption{{\em dash-MySQL race.}} \label{racepro:fig:dash-mysql}
   \end{minipage}
 \end{minipage}
 \begin{minipage}{0.49\linewidth}
@@ -356,7 +356,7 @@ close(fd);
 \end{verbatim}
 \end{footnotesize}
       \vskip -2mm
-      \caption{{\em bash race.}} \label{fig:bash}
+      \caption{{\em bash race.}} \label{racepro:fig:bash}
     \end{minipage}
 \end{minipage}
 \vskip -2mm
@@ -385,7 +385,7 @@ file, and a large MySQL database that takes a long time to shut down.
     executions; thick solid lines represent replayed executions.  Dashed
     arrows represent potentially buggy execution branches. The dotted
     thick arrow represents the branch \racepro selects to
-    explore.} \label{fig:flow}
+    explore.} \label{racepro:fig:flow}
 \end{minipage}
 \hfill
 \begin{minipage}{0.47\linewidth}
@@ -395,7 +395,7 @@ file, and a large MySQL database that takes a long time to shut down.
   \caption{{\em \racepro Architecture.} Components are shaded. The recorder
     and the replayer run in kernel-space, and the explorer and the
     checkers run in user-space.  Recorded executions and modified
-    executions are stored in files.} \label{fig:arch}
+    executions are stored in files.} \label{racepro:fig:arch}
 \end{minipage}
 \end{figure*}
 
@@ -405,7 +405,7 @@ infinite loop with 100\% CPU usage after a MySQL update.
 This failure is due to an atomicity violation in \code{dash},
 a small shell Debian uses to run daemons~\cite{dash}.  It occurs
 when \code{dash} is interrupted by a signal unexpectedly.
-Figure~\ref{fig:dash-mysql} shows the event sequence causing this race.
+Figure~\ref{racepro:fig:dash-mysql} shows the event sequence causing this race.
 To run a new background job, \code{dash} forks a child process and
 adds it to the job list of \code{dash}.  It then calls \code{setjmp} to save an execution
 context and waits for the child to exit.  After the child exits,
@@ -443,15 +443,15 @@ to \code{.bash\_history} without synchronization.
 When \code{bash} appends to the history file, it correctly uses
 \code{O\_APPEND}.  However, it also occasionally reads back the history
 file and overwrites it, presumably to keep the history file under a
-user-specified size.  Figure~\ref{fig:bash} shows this problematic
+user-specified size.  Figure~\ref{racepro:fig:bash} shows this problematic
 sequence of system calls.  \code{bash} also runs this sequence when it
 exits.  When multiple \code{bash} processes exit at the same time, the
 history file may be corrupted. 
 
-\subsection{Architecture Overview} \label{sec:overview}
+\subsection{Architecture Overview} \label{racepro:sec:overview}
 
 \racepro is designed to automatically detect process races using the
-workflow shown in Figure~\ref{fig:flow}.  
+workflow shown in Figure~\ref{racepro:fig:flow}.  
 It consists of three steps,
 the first of which runs on the deployed system, while the latter two can run
 elsewhere on a separate replay system to avoid any performance
@@ -476,14 +476,14 @@ positives~\cite{pinsel:pldi07,racefuzzer:pldi08}. The live part
 of the re-execution is also recorded, so that users can
 deterministically replay detected bugs for debugging.
 
-Figure~\ref{fig:arch} shows the \racepro architecture used to support its
+Figure~\ref{racepro:fig:arch} shows the \racepro architecture used to support its
 workflow.  Of the four main architectural components, the recorder
 and the replayer run in kernel-space, and the explorer and checkers
 run in user-space.  We will describe how \racepro records executions
-(\S\ref{sec:record}) and detects (\S\ref{sec:detect}) and validates
-(\S\ref{sec:validate}) races using these components.  
+(\S\ref{racepro:sec:record}) and detects (\S\ref{racepro:sec:detect}) and validates
+(\S\ref{racepro:sec:validate}) races using these components.  
 
-\subsection{Recording Executions} \label{sec:record}
+\subsection{Recording Executions} \label{racepro:sec:record}
 
 \racepro's record-replay functionality builds on our previous work on
 lightweight OS-level deterministic replay on
@@ -500,12 +500,12 @@ extremely heterogeneous involving many different programs written in
 different program languages.  Third, \racepro's recorder operates at the
 OS level to log sufficiently fine-grained accesses to shared kernel
 objects so that \racepro's explorer can detect races regardless of
-high-level program semantics~(\S\ref{sec:detect}).  Finally, \racepro's
+high-level program semantics~(\S\ref{racepro:sec:detect}).  Finally, \racepro's
 record-replay records executions such that it can later transition 
 from controlled replay of the recording to live execution at any
 point.  This enables \racepro to distinguish harmful races from benign
 ones by allowing checkers to monitor an application for
-failures~(\S\ref{sec:reexec}). 
+failures~(\S\ref{racepro:sec:reexec}). 
 
 To record the execution of multiprocess and multithreaded
 applications, \racepro records all nondeterministic interactions between
@@ -525,9 +525,9 @@ later replays the exact same order of accesses.  This is done by
 piggybacking on the synchronization code that the kernel already has
 for serializing accesses to shared objects.  These tracked accesses
 also help detect process races in a recorded execution
-(\S\ref{sec:detect}). 
+(\S\ref{racepro:sec:detect}). 
 
-Table~\ref{tab:resources} lists the kernel objects tracked by \racepro.
+Table~\ref{racepro:tab:resources} lists the kernel objects tracked by \racepro.
 Most of the entries correspond one-to-one to specific low-level kernel
 resources, including inodes, files, file-tables, memory maps, and
 process credentials. The global entry corresponds to system-wide
@@ -559,7 +559,7 @@ global      & system-wide properties (\eg, hostname, mounts) \\
 pid         & process ID (access to process and \code{/proc}) \\
 ppid        & parent process ID (synchronize \code{exit/getppid}) \\
 \end{tabular}
-\caption{{\em Shared kernel objects tracked.}} \label{tab:resources}
+\caption{{\em Shared kernel objects tracked.}} \label{racepro:tab:resources}
 \end{table}
 
 The recorder only tracks kernel objects whose state is visible
@@ -577,7 +577,7 @@ only matters that the lifespan of processes is observed correctly,
 which is already tracked and enforced via the pid resource.  If \racepro
 tracked accesses to the kernel process table, it would mistakenly
 conclude that every two \code{fork} system calls are ``racy'' because they
-all modify a common resource~(\S\ref{sec:detect}).  One complication 
+all modify a common resource~(\S\ref{racepro:sec:detect}).  One complication 
 with this approach is that if the kernel object in question controls
 assignment of identifiers (\eg, process ID in the \code{fork} example),
 it may assign different identifiers during replay because the original
@@ -621,7 +621,7 @@ the CREW protocol are synchronous kernel entries that
 deterministically occur on replay and hence are also used as sync 
 points. 
 
-\subsection{Detecting Process Races} \label{sec:detect}
+\subsection{Detecting Process Races} \label{racepro:sec:detect}
 
 \racepro flags a set of system calls as a race if (1)~they are
 \emph{concurrent} and therefore could have executed in a different
@@ -629,15 +629,15 @@ order than the order recorded, (2)~they access a common resource
 such that reordering the accesses may change the outcome of the
 execution.  To determine whether a set of system calls are concurrent, 
 \racepro constructs a happens-before~\cite{lamportclock} graph for the
-recorded execution (\S\ref{sec:graph}).  To determine whether a set of
+recorded execution (\S\ref{racepro:sec:graph}).  To determine whether a set of
 system calls access common resources, \racepro obtains the shared kernel
 resources accessed by system calls from the log file and models the
 system calls as \emph{load} and \emph{store} micro-operations
-(\S\ref{sec:model}) on those resources.  \racepro then runs a set of
+(\S\ref{racepro:sec:model}) on those resources.  \racepro then runs a set of
 happens-before based race detection algorithms to detect load-store
-and wait-wakeup races (\S\ref{sec:potential}).
+and wait-wakeup races (\S\ref{racepro:sec:potential}).
 
-\subsubsection{The Happens-Before Graph} \label{sec:graph}
+\subsubsection{The Happens-Before Graph} \label{racepro:sec:graph}
 
 We define a partial ordering on the execution of system calls called
 \emph{inherent} happens-before relations.  We say that system call
@@ -699,7 +699,7 @@ can implement a fork-join primitive using read and write operations on
 a file.  In some cases, such inaccuracies may make \racepro more
 conservative in flagging racy system calls and thereby identify
 impossible races.  However, such cases will be filtered later by
-\racepro's validation step (\S\ref{sec:validate}) and will not be reported.
+\racepro's validation step (\S\ref{racepro:sec:validate}) and will not be reported.
 
 \begin{figure}[t]
 \centering
@@ -708,15 +708,15 @@ impossible races.  However, such cases will be filtered later by
 \caption{{\em The Happens-before graph and respective vector-clocks
   (in brackets) for ps\,|\,grep\,X.} $P_{i=1,2,3}$ represent the processes
   involved. The \code{read} of process $P_2$ and the \code{execve} of
-  $P_3$ form a load-store race~(\S\ref{sec:load-store}), and so do the
+  $P_3$ form a load-store race~(\S\ref{racepro:sec:load-store}), and so do the
   second \code{fork} of $P_1$ and the \code{getdents} (read directory entries) of $P_2$. The first
   \code{wait} of $P_1$ and the \code{exit}s of $P_2$ and $P_3$ form a
-  wait-wakeups race~(\S\ref{sec:wait-wakeup}). For clarity, not all
-  system calls are shown.} \label{fig:psgrep}
+  wait-wakeups race~(\S\ref{racepro:sec:wait-wakeup}). For clarity, not all
+  system calls are shown.} \label{racepro:fig:psgrep}
 \vspace{-0mm}
 \end{figure}
 
-Figure~\ref{fig:psgrep} shows the happens-before graph for the example
+Figure~\ref{racepro:fig:psgrep} shows the happens-before graph for the example
 command \code{ps | grep X}.  This command creates two child processes
 that access \code{grep}'s entry in the \code{/proc} directory: the process
 that runs \code{grep} modifies its command-line data when executed, and
@@ -743,7 +743,7 @@ they are not concurrent.  There exists a happens-before edge in the
 graph because a read from the pipe will block until data is available
 after a write to it.
 
-\subsubsection{Modeling Effects of System Calls} \label{sec:model}
+\subsubsection{Modeling Effects of System Calls} \label{racepro:sec:model}
 
 Existing algorithms for detecting memory races among threads rely on
 identifying concurrent load and store instructions to shared memory.
@@ -849,10 +849,10 @@ call does a \emph{load} from the same location.
 \end{tabular}
 \caption{{\em Micro-operations of common system calls.}}
 \vskip -3mm
-\label{tab:syscall-effects}.
+\label{racepro:tab:syscall-effects}.
 \end{table}
 
-Table~\ref{tab:syscall-effects} shows the template of micro-operations
+Table~\ref{racepro:tab:syscall-effects} shows the template of micro-operations
 that \racepro uses to model nine common system calls: \code{open}, \code{write},
 \code{read}, \code{getdents}, \code{execve}, \code{clone}
 (fork a process), \code{exit}, \code{wait}, and \code{getppid}. The \code{open} system
@@ -919,16 +919,16 @@ therefore modeled as a \emph{load} from all the signals. This method
 ensures that any system call that may be affected by a signal would
 access the shared object that represents that signal.
 
-\subsubsection{Race Detection Algorithms} \label{sec:potential}
+\subsubsection{Race Detection Algorithms} \label{racepro:sec:potential}
 
 Building on the happens-before graph and the modeling of system calls
 as micro-operations, \racepro detects three types of process races:
-load-store races (\S\ref{sec:load-store}), wait-wakeups races
-(\S\ref{sec:wait-wakeup}), and wakeup-waits races
-(\S\ref{sec:wakeup-wait}).  \racepro may also be extended to detect
-other types of races (\S\ref{sec:multilevel}).
+load-store races (\S\ref{racepro:sec:load-store}), wait-wakeups races
+(\S\ref{racepro:sec:wait-wakeup}), and wakeup-waits races
+(\S\ref{racepro:sec:wakeup-wait}).  \racepro may also be extended to detect
+other types of races (\S\ref{racepro:sec:multilevel}).
 
-\paragraph{Load-Store Races} \label{sec:load-store}
+\paragraph{Load-Store Races} \label{racepro:sec:load-store}
 
 A load-store race occurs when two system calls concurrently access the
 same shared object and at least one is a \emph{store} operation. In this
@@ -936,7 +936,7 @@ case, the two system calls could have executed in the reverse order.
 \racepro flags two system calls as a load-store race if (1)~they are
 concurrent; (2)~they access the same shared kernel object, and (3)~at
 least one access is a \emph{store}. In the \code{ps | grep X}
-example shown in Figure~\ref{fig:psgrep}, the system calls
+example shown in Figure~\ref{racepro:fig:psgrep}, the system calls
 \code{read} and \code{execve} are flagged as a race because they are
 concurrent, they access the same resource, and at least one,
 \code{execve}, does a \emph{store}. In contrast, the system call 
@@ -947,7 +947,7 @@ flagged as a race because it is not concurrent with any of them as
 
 \racepro detects load-store races using a straightforward happens-before-based
 race detection algorithm. We chose a happens-before over
-lockset because processes rarely use standard locks (\S\ref{sec:study}). 
+lockset because processes rarely use standard locks (\S\ref{racepro:sec:study}). 
 \racepro iterates through all the shared kernel objects in the
 recording.  For each shared object, it considers the set of all
 accesses to that object by all system calls, and divides this set into
@@ -970,7 +970,7 @@ calls will be marked more than once. For example, two \code{write} system
 calls from different processes to the same location in the same file
 will be marked twice, once when the meta-data of the inode is
 considered, and once when the data of the file is considered. Because
-\racepro detects and later validates (\S\ref{sec:validate}) races at the
+\racepro detects and later validates (\S\ref{racepro:sec:validate}) races at the
 granularity of system calls, it only reports the respective pair of
 system calls once.
 
@@ -986,7 +986,7 @@ ranks pairs of system calls according to their distance from each
 other in the happens-before graph, and examines nearer system calls
 first. 
 
-\paragraph{Wait-Wakeups Races} \label{sec:wait-wakeup}
+\paragraph{Wait-Wakeups Races} \label{racepro:sec:wait-wakeup}
 
 A wait-wakeups race occurs when a wait system call may be woken up
 by more than a single matching wakeup system call. 
@@ -1013,7 +1013,7 @@ two system calls must always occur in that order.
 wait system call, (2)~the other two are wakeup system calls that match
 the wait condition, and (3)~the wait system call did not happen-before
 any of the wakeup system calls.
-In the \code{ps | grep X} example shown in Figure~\ref{fig:psgrep},
+In the \code{ps | grep X} example shown in Figure~\ref{racepro:fig:psgrep},
 the two \code{exit} system calls of $P_2$ and $P_3$ and the first
 \code{wait} system call of $P_1$ are flagged as a wait-wakeups race since
 both \code{exit} calls are concurrent and can match the \code{wait}.  In
@@ -1066,29 +1066,29 @@ S3: write(P,10);   ...
 \center{\scriptsize \bf (b)}
 \end{minipage}
 \vspace{-1mm}
-\caption{{\em Wait-wakeups races in streams.}} \label{fig:streams}
+\caption{{\em Wait-wakeups races in streams.}} \label{racepro:fig:streams}
 \vspace{-1mm}
 \end{figure}
 
 The relative order of the wakeup system calls may matter if their
 effect on the resource is cumulative. For instance,
-Figure~\ref{fig:streams} depicts a cumulative wait-wakeups scenario
+Figure~\ref{racepro:fig:streams} depicts a cumulative wait-wakeups scenario
 in which the order of two \code{write} system calls to the same stream
 determines what a matching \code{read} would observe.  
 A \code{read} from a stream may return less data than requested if the
 data in the buffer is insufficient. 
-In Figure~\ref{fig:streams}a, a blocking \code{read} occurs after two 
+In Figure~\ref{racepro:fig:streams}a, a blocking \code{read} occurs after two 
 \code{write}s and consumes their cumulative data.  However, in
-Figure~\ref{fig:streams}b, the \code{read} occurs before the second
+Figure~\ref{racepro:fig:streams}b, the \code{read} occurs before the second
 \code{write} and returns the data only from the first \code{write}. 
-Note that $S_2$ and $S_3$ in Figure~\ref{fig:streams}a do not form a
+Note that $S_2$ and $S_3$ in Figure~\ref{racepro:fig:streams}a do not form a
 load-store race as $S_2$ inherently happens-before $S_3$.
 Thus, \racepro flags either case as a wait-wakeups race.
 The relative order of the wakeup system calls does not matter if their
 effect on the resource is not cumulative, such as with \code{wait} and
 \code{exit} system calls.
 
-\paragraph{Wakeup-Waits Races} \label{sec:wakeup-wait}
+\paragraph{Wakeup-Waits Races} \label{racepro:sec:wakeup-wait}
 
 A wakeup-waits race occurs when a wakeup system call may wake up
 more than a single matching wait system call.
@@ -1123,7 +1123,7 @@ load from the same abstract memory location.  For each matching wait
 system call $S_3$, \racepro checks whether it would form a wakeup-waits
 race together with $S_1$ and $S_2$.
 
-\paragraph{Many-System-Calls Races} \label{sec:multilevel}
+\paragraph{Many-System-Calls Races} \label{racepro:sec:multilevel}
 
 \racepro's algorithms handle races that involve two system calls for
 load-store races, and three system calls for both wait-wakeups and
@@ -1136,8 +1136,8 @@ considers one pair of system calls at a time.  To detect such races,
 the algorithms can be extended to consider more system calls at a time
 and more complex patterns of races.  An alternative approach is to apply
 \racepro's analysis recursively on modified executions
-(\S\ref{sec:reexec}). 
-\subsection{Validating Races}  \label{sec:validate}
+(\S\ref{racepro:sec:reexec}). 
+\subsection{Validating Races}  \label{racepro:sec:validate}
 
 A detected process race may be either benign or harmful, depending on
 whether it leads to a failure.  For instance, consider the
@@ -1145,20 +1145,20 @@ whether it leads to a failure.  For instance, consider the
 lines.  When run from the command line, this race is usually benign since
 most users will automatically recognize and ignore the difference.
 However, for applications that rely on one specific output, this race can
-be harmful and lead to a failure (\S\ref{sec:eval}).
+be harmful and lead to a failure (\S\ref{racepro:sec:eval}).
 
 To avoid false positives, \racepro validates whether detected races
 are harmful and reports only harmful races as bugs.  
 For each race, it creates an execution branch in which the racy system
 calls, which we refer to as \emph{anchor} system calls, would occur in
 a different order from the original recorded
-execution~(\S\ref{sec:branches}). It replays the modified 
+execution~(\S\ref{racepro:sec:branches}). It replays the modified 
 execution until the race occurs, then makes the execution
-go-live~(\S\ref{sec:reexec}).  It checks the live execution for
-failures~(\S\ref{sec:check}), and, if found, reports the race as a 
+go-live~(\S\ref{racepro:sec:reexec}).  It checks the live execution for
+failures~(\S\ref{racepro:sec:check}), and, if found, reports the race as a 
 bug.
 
-\subsubsection{Creating Execution Branches}  \label{sec:branches}
+\subsubsection{Creating Execution Branches}  \label{racepro:sec:branches}
 
 \racepro does not replay the original recorded execution, but
 instead replays an execution branch built from the original execution
@@ -1192,7 +1192,7 @@ to any of the anchor system calls.  By definition, the source of this
 happens-before edge is also the last system call of that process that must
 be included in the cut.  For instance, the unified vector-clock for the
 \code{read} and \code{execve}
-race in Figure~\ref{fig:psgrep} is $[3,3,2]$, and the consistent cut
+race in Figure~\ref{racepro:fig:psgrep} is $[3,3,2]$, and the consistent cut
 includes the second \code{fork} of $P_1$, \code{read} of $P_2$, and
 \code{execve} of $P_3$.
 
@@ -1231,14 +1231,14 @@ for a signal to be delivered earlier, \racepro simply inserts the signal
 delivery event at an earlier location which is thereby considered one
 of the anchors of the consistent cut.  In contrast, delivering a
 signal arbitrarily later is likely to cause replay
-divergence~(\S\ref{sec:reexec}).  Instead, \racepro only considers
+divergence~(\S\ref{racepro:sec:reexec}).  Instead, \racepro only considers
 delivering a signal later if it interrupted a system call in the
 recorded execution, in which case the signal is instead delivered
 promptly after the corresponding system call completes when replayed. 
 
 Reordering of the anchor system calls may also imply reordering of
 additional system calls that also access the same resources. Consider
-the execution scenario depicted in Figure~\ref{fig:reorder}, which
+the execution scenario depicted in Figure~\ref{racepro:fig:reorder}, which
 involves three processes and five system calls that access the same
 resource. The system calls $S_1$ and $S_5$ form a load-store race. To
 generate the modified execution for this race, \racepro will make the
@@ -1251,7 +1251,7 @@ either exclude $S_3$ or reorder $S_3$ with respect to $S_1$.
 partial order of system calls instead of the partial order of system
 calls in the original execution.
 
-\subsubsection{Replaying Execution Branches and Going Live}  \label{sec:reexec}
+\subsubsection{Replaying Execution Branches and Going Live}  \label{racepro:sec:reexec}
 
 \racepro's replayer provides deterministic replay of the originally
 recorded execution and also ensures that successful replay of a
@@ -1299,7 +1299,7 @@ S5:             syscall(R)
 \end{verbatim}
 \end{footnotesize}
 \end{minipage}
-\caption{\em Replay divergence due to reordering.} \label{fig:reorder}
+\caption{\em Replay divergence due to reordering.} \label{racepro:fig:reorder}
 \vskip -2.5mm
 \end{figure}
 
@@ -1318,7 +1318,7 @@ execution, but we have not found it a problem in our evaluation because
 tightly coupled processes should be recorded together anyway.
 
 \racepro can be applied recursively to detect races involving more system
-calls (\S\ref{sec:multilevel}). Since it already records the go-live
+calls (\S\ref{racepro:sec:multilevel}). Since it already records the go-live
 portion of modified executions, doing so is as easy as running the
 same detection logic on these new recordings. This essentially turns
 \racepro into a model checker~\cite{flanagan:dynamicpo}. However, we leave
@@ -1344,13 +1344,13 @@ end.
 Divergence is commonly caused when the reordering of the anchor system
 calls implies reordering of additional system calls that also access
 the same resources. Consider again the execution scenario depicted in
-Figure~\ref{fig:reorder} in which the system calls $S_1$ and
+Figure~\ref{racepro:fig:reorder} in which the system calls $S_1$ and
 $S_5$ form a load-store race and the modified execution branch
 reorders the systems calls as $S_3$, $S_4$, $S_5$, and $S_1$ while
 dropping $S_2$ as being outside the cut.  A replay divergence may
 occur if the execution of $S_5$ depended on $S_2$ which was dropped
 out, or if the execution of $S_4$ depends on $S_1$ which was reordered
-with respect to $S_4$. Figure~\ref{fig:diverge}a illustrates the
+with respect to $S_4$. Figure~\ref{racepro:fig:diverge}a illustrates the
 former scenario.   Reordering the two \code{creat} system calls would cause
 $P_2$ to call \code{unlink} before $P_1$'s \code{creat}.  The call will fail
 and $P_2$ will not call \code{creat} and thus diverge from the recorded
@@ -1358,7 +1358,7 @@ execution.
 
 Divergence can also be caused when processes rely on a specific
 execution ordering of system calls in a way that is not tracked by
-\racepro.  Figure~\ref{fig:diverge}b illustrates one such scenario where
+\racepro.  Figure~\ref{racepro:fig:diverge}b illustrates one such scenario where
 process $P_1$ executes system call $S_1$ to write data to a file, and
 process $P_2$'s execution depends on data read from file by $S_2$. If
 $P_2$ depends on the specific data written by $S_1$, then reordering
@@ -1411,7 +1411,7 @@ S3:		  write(F,y);
 \end{footnotesize}
     \center{\vskip -3mm \hskip -5mm \bf (b)}
   \end{minipage}
-  \caption{{\em Replay divergence examples.}} \label{fig:diverge}
+  \caption{{\em Replay divergence examples.}} \label{racepro:fig:diverge}
 \end{minipage}
 \vskip -3mm
 \end{figure}
@@ -1458,7 +1458,7 @@ compilation failure \\
 \end{tabular}
 \caption{{\em Bugs found by \racepro.}  Bugs are identified by
   ``distribution - bug ID''. New bugs  are identified as ``new - bug
-  number''}. \label{tab:bugs}
+  number''}. \label{racepro:tab:bugs}
 \vskip -4mm
 
 \vskip -2mm
@@ -1479,7 +1479,7 @@ Moreover, if the divergence is not due to untracked interactions or
 shared memory discussed above (or file locking, also untracked by
 \racepro), then there must exist another race that is ``tighter'' than the
 one being validated. The other race may involve the same resource or a
-different one. For example, in Figure~\ref{fig:diverge}b the race
+different one. For example, in Figure~\ref{racepro:fig:diverge}b the race
 between $S_1$ and $S_3$ causes divergence because of another race
 between $S_1$ and $S_2$. The latter race is ``tighter'' in the sense
 that $S_2$ is closer to $S_1$ because $S_2 \rightarrow S_3$; the race
@@ -1488,7 +1488,7 @@ other words, discarding races that cause replay divergence helps \racepro
 to find root-cause races. We believe the go-live mechanism can benefit
 existing replay-based thread-race classifiers.
 
-\subsubsection{Checking Execution Branches}  \label{sec:check}
+\subsubsection{Checking Execution Branches}  \label{racepro:sec:check}
 
 When the replay of an execution branch switches to live
 execution, \racepro no longer controls the execution. Rather, it records
@@ -1530,7 +1530,7 @@ useful for debugging, but without pointing out the root-cause.
 
 As in many other checking frameworks, \racepro can detect only what is checked.
 Although its built-in checkers can detect many errors
-(\S\ref{sec:bug}), it may miss domain-specific ``silent''
+(\S\ref{racepro:sec:bug}), it may miss domain-specific ``silent''
 corruptions.  Fortunately, recent work has developed techniques to check
 advanced properties such as conflict serializability or
 linearizability~\cite{linearizable:eurosys11}, which \racepro can leverage.
@@ -1542,7 +1542,7 @@ coverage.  A second source is checker inaccuracy.  If a checker is too
 permissive or no checker is provided to check for certain failures, \racepro
 would miss bugs.
 
-\subsection{Experimental Results} \label{sec:eval}
+\subsection{Experimental Results} \label{racepro:sec:eval}
 
 We have implemented a \racepro prototype in Linux.  The prototype
 consists of Linux kernel components for record, replay, and go-live, and a
@@ -1596,19 +1596,19 @@ new-4            &  19  &  4672  &  716   &  8     &  0     &  7    &  1   &  1.
     Record} and {\bf Replay} are the times to record and replay the
   executions, respectively. {\bf Generate} is the average time to
   generate an execution branch and {\bf Validate} the average time to
-  validate a race. } \label{tab:bug-stat}
+  validate a race. } \label{racepro:tab:bug-stat}
 
 \vskip -0mm
 \end{table*}
 
-\subsubsection{Bugs Found} \label{sec:bug}
+\subsubsection{Bugs Found} \label{racepro:sec:bug}
 
 We evaluated \racepro's effectiveness by testing to see if it could find
 both known and unknown bugs.  To find known bugs, we used \racepro on
 \nraceproold bugs from our study.  Bugs were selected based on whether
 we could find and compile the right version of the software and run
 it with \racepro.  Some of the
-bugs in \S\ref{sec:study} are in programs that we cannot compile, so we
+bugs in \S\ref{racepro:sec:study} are in programs that we cannot compile, so we
 excluded them from the experiments.  For each known bug, we wrote a shell
 script to perform the operations described in the bug report, without
 applying any stress to make the bug easily occur.  We ran this shell
@@ -1626,7 +1626,7 @@ from different windows and sessions.  Because compilation of software
 packages often involves multiple concurrent and inter-dependent
 processes, we also applied \racepro to the \code{make -j} command.
 
-Table~\ref{tab:bugs} shows all the bugs \racepro found.  \racepro found a
+Table~\ref{racepro:tab:bugs} shows all the bugs \racepro found.  \racepro found a
 total of \nracepro bugs, including all of the known bugs selected and
 \nracepronew previously unknown bugs.  We highlight a few interesting
 bugs.  Of the known bugs, the debian-294579 bug is the most serious:
@@ -1672,9 +1672,9 @@ which produces a race condition between the creation of an \code{\$OBJDIR}
 directory and the use of that directory to store object files from
 the compilation.
 
-\subsubsection{Bug Statistics} \label{sec:race}
+\subsubsection{Bug Statistics} \label{racepro:sec:race}
 
-Table~\ref{tab:bug-stat} shows various statistics for each detected
+Table~\ref{racepro:tab:bug-stat} shows various statistics for each detected
 bug, including the number of processes involved (Processes), the
 number of system calls recorded (Syscalls), the number of unique 
 shared resources tracked (Resources), the total number of races
@@ -1748,10 +1748,10 @@ Applications that do neither operations perform the same work
 whether recording or replaying, and sustain speedups close to 1.
 
 We also measured various overhead statistics involved in finding the
-bugs listed in Table~\ref{tab:bug-stat}.  These measurements were done
+bugs listed in Table~\ref{racepro:tab:bug-stat}.  These measurements were done
 on an HP DL360 G3 server with dual 3.06~GHz Intel Xeon CPUs, 4~GB RAM,
 and dual 18~GB local disks.  For
-each bug, Table~\ref{tab:bug-stat} shows the time to record the
+each bug, Table~\ref{racepro:tab:bug-stat} shows the time to record the
 execution (Record) and to 
 replay it (Replay), the average time to generate an execution branch
 for a race from a recorded execution (Generate), and the average time
@@ -1806,7 +1806,7 @@ machines to speed them up significantly.  Overall, the results show
 that \racepro can detect harmful process races not only automatically
 without human intervention, but efficiently.
 
-\subsection{Related Work} \label{sec:related}
+\subsection{Related Work} \label{racepro:sec:related}
 
 We previously presented in a workshop paper~\cite{racepro:hotos11} a
 preliminary design of \racepro, without the full design, implementation, and
@@ -1816,7 +1816,7 @@ discuss closely related work to \racepro.
 \para{Thread races.}  Enormous work has been devoted to detecting,
 diagnosing, avoiding, and repairing thread races
 (\eg,~\cite{racerx:sosp03,chord:pldi06,pinsel:pldi07,racefuzzer:pldi08,wu:loom:osdi10,yu:racetrack:sosp}).
-However, as discussed in \S\ref{sec:intro}, existing systems for detecting
+However, as discussed in \S\ref{racepro:sec:intro}, existing systems for detecting
 thread races do not directly address the challenges of detecting process
 races.  For instance, existing static race detectors work with programs
 written in only one language~\cite{racerx:sosp03,chord:pldi06}; the
@@ -1903,7 +1903,7 @@ runs deterministically in Determinator.  dOS makes legacy multithreaded
 programs deterministic even in the presence of races on memory and other
 shared resources.  None of these systems aim to detect process races.
 
-\subsection{Conclusion and Future Work} \label{sec:conclusion}
+\subsection{Conclusion and Future Work} \label{racepro:sec:conclusion}
 
 We have presented the first study of real process races, and the first
 system, \racepro, for effectively detecting process races beyond TOCTOU

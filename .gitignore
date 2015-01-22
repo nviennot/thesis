@@ -12,3 +12,8 @@ paper.log.errors
 *.tex~
 proposal.pdf
 proposal.toc
+
+thesis.lof
+thesis.lot
+thesis.pdf
+thesis.toc

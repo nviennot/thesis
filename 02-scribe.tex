@@ -1,6 +1,6 @@
 \section{Transparent, Lightweight Application Execution Replay \\
 on Commodity Multiprocessor Operating Systems}
-\label{ch:scribe}
+\label{scribe:ch:scribe}
 
 \subsection{Abstract}
 
@@ -179,7 +179,7 @@ replay performance on commodity multiprocessor systems that was not
 previously possible. 
 
 \subsection{Architecture Overview}
-\label{sec:arch}
+\label{scribe:sec:arch}
 
 \scribe{} can record and replay the execution of a group of processes
 and threads from any point in time.  We refer to a group of processes
@@ -236,40 +236,40 @@ stop the recording.
   {\em hw\_inst} & hardware instruction trap &
 	op-code and data, e.g. \code{RDTSC} and 64-bit
 	counter value 
-	& Section~\ref{sec:arch} \\
+	& Section~\ref{scribe:sec:arch} \\
   \hline
   {\em syscall\_ret} & system call return &
 	system call return value
-	& Section~\ref{sec:syscalls} \\
+	& Section~\ref{scribe:sec:syscalls} \\
   \hline
   {\em copy\_data} & data transfer to/from user space &
 	size and contents of data transfer
-	& Section~\ref{sec:syscalls} \\
+	& Section~\ref{scribe:sec:syscalls} \\
   \hline
   {\em page\_public} & make page public (not owned) &
 	page address
-	& Section~\ref{sec:memory} \\
+	& Section~\ref{scribe:sec:memory} \\
   \hline
   {\em page\_share\_read} & make page shared read-only &
 	page address, page sequence number
-	& Section~\ref{sec:memory} \\
+	& Section~\ref{scribe:sec:memory} \\
   \hline
   {\em page\_own\_write} & make page owned read/write &
 	page address, page sequence number
-	& Section~\ref{sec:memory} \\
+	& Section~\ref{scribe:sec:memory} \\
   \hline
   {\em rendezvous} & resource synchronization &
 	 resource sequence number
-	& Section~\ref{sec:rendezvous} \\
+	& Section~\ref{scribe:sec:rendezvous} \\
   \hline
   {\em signal\_receive} & process received signal &
 	signal number, whether or not in system call,
 	signal data
-	& Section~\ref{sec:sync} \\
+	& Section~\ref{scribe:sec:sync} \\
   \hline
   {\em async\_reset} & force a sync point &
 	process user space signature at forced sync point
-	& Section~\ref{sec:sync} \\
+	& Section~\ref{scribe:sec:sync} \\
   \hline
   \hline
 \end{tabular}
@@ -277,7 +277,7 @@ stop the recording.
 \vskip -5mm
 % \captionsetup{justification=centering}
 \caption{\scribe{} record-replay events}
-\label{tab:events}
+\label{scribe:tab:events}
 \vskip -1mm
 \end{table*}
 
@@ -335,7 +335,7 @@ them modifies it, for instance a \code{write} and \code{read} on a
 pipe.  \scribe{} tracks dependencies to preserve the partial order of
 related events during replay.  
 
-Table~\ref{tab:events} lists all
+Table~\ref{scribe:tab:events} lists all
 event types recorded and replayed by \scribe{}.  These events
 correctly account for all sources of nondeterministic execution that
 are needed to support deterministic replay: nondeterministic machine
@@ -358,15 +358,15 @@ its result.  For example, when the \code{RDTSC} instruction occurs,
 counter.  During replay, \scribe{} returns the recorded result
 instead of executing the instruction.
 
-Section~\ref{sec:syscalls} describes the {\em syscall\_ret} and {\em
+Section~\ref{scribe:sec:syscalls} describes the {\em syscall\_ret} and {\em
   copy\_data} events used for system calls and data transfer between
 kernel and user space,
 respectively.
-Section~\ref{sec:memory} describes the {\em page\_public}, {\em
+Section~\ref{scribe:sec:memory} describes the {\em page\_public}, {\em
   page\_share\_read}, and {\em page\_own\_write} events used for
-shared memory interleavings.  Section~\ref{sec:rendezvous} covers
+shared memory interleavings.  Section~\ref{scribe:sec:rendezvous} covers
 the {\em rendezvous} event used for ordering access to shared
-resources via system calls. Section~\ref{sec:sync} describes the {\em
+resources via system calls. Section~\ref{scribe:sec:sync} describes the {\em
   signal\_received} and {\em async\_reset} events used for signal
 delivery and for recording of asynchronous events, respectively.
 
@@ -374,7 +374,7 @@ delivery and for recording of asynchronous events, respectively.
   
 
 \subsection{System Calls}
-\label{sec:syscalls}
+\label{scribe:sec:syscalls}
 
 System calls are the predominant form for processes to interact with
 the environment and with other processes. System call interposition is
@@ -386,7 +386,7 @@ go live.  Instead, \scribe{} re-executes system calls during replay to
 ensure that the corresponding in-kernel state of a replayed session is
 updated properly so that it can transition to live execution at any
 time.  We first describe the basics of how \scribe{} handles system
-calls, then describe in Section~\ref{sec:rendezvous} how \scribe{}
+calls, then describe in Section~\ref{scribe:sec:rendezvous} how \scribe{}
 handles nondeterminism due to system calls that access shared
 resources. 
 
@@ -408,7 +408,7 @@ For system calls that transfer nondeterministic or external data from
 kernel to user space, \scribe{} records the data to the log
 queue of the calling process using the {\em copy\_data} event
 so that the same data can be output by the system call on replay.
-For example, Figure~\ref{fig:recplay} shows the recording of
+For example, Figure~\ref{scribe:fig:recplay} shows the recording of
 \code{gettimeofday}, which outputs to a data structure a time value
 which must be recorded. Similarly, all external input data, including
 network inputs and data from special devices such
@@ -431,7 +431,7 @@ significantly inflating the resulting log size.
 
 During replay, \scribe{} replays the system calls of each process
 independently, unless system calls access shared resources as discussed
-in Section~\ref{sec:rendezvous}.  When a replayed process invokes a
+in Section~\ref{scribe:sec:rendezvous}.  When a replayed process invokes a
 system call, \scribe{} intercepts it and uses the return value from the
 corresponding {\em syscall\_ret} event in the log queue of the calling
 process as the return value of the system call.  It does not return
@@ -441,7 +441,7 @@ result in the replay diverging from the recorded execution.
 For system calls that transfer nondeterministic data from kernel to
 user space, the data logged in the corresponding {\em copy\_data}
 event is also returned on replay.  For example,
-Figure~\ref{fig:recplay} shows the replay of the \code{gettimeofday} 
+Figure~\ref{scribe:fig:recplay} shows the replay of the \code{gettimeofday} 
 system call from an event log.
 
 \begin{figure}[t]
@@ -493,7 +493,7 @@ system call from an event log.
       return value.
     }
   }
-  \label{fig:recplay}
+  \label{scribe:fig:recplay}
   \vskip -3mm
 \end{figure}
 
@@ -550,7 +550,7 @@ that outcome for the wildstar argument.
     
 
 \subsubsection{Go Live}
-\label{sec:golive}
+\label{scribe:sec:golive}
 
 In most cases, executing recorded system calls during replay is
 sufficient to automatically replay the kernel state correctly, due to
@@ -623,7 +623,7 @@ application.
 
   
 \subsection{Shared Memory}
-\label{sec:memory}
+\label{scribe:sec:memory}
 
 Replaying shared memory interleaving is critical for deterministic
 replay, especially on multiprocessor machines.  Memory sharing happens
@@ -649,7 +649,7 @@ shared memory interleavings. This scheme requires a
 protocol to manage page ownership transitions, and a method to ensure
 that such transitions occur at precisely the same location in the
 execution during both record and replay. The latter problem is the
-key challenge, and is discussed in Section~\ref{sec:sync}.
+key challenge, and is discussed in Section~\ref{scribe:sec:sync}.
 
 \scribe{} employs a concurrent read, exclusive write (CREW)
 protocol~\cite{crew,instant-replay} for shared memory access, but with
@@ -758,7 +758,7 @@ owned page tracks its writer (owner).
       relative order. The data itself is deterministic and not logged.
     }
   }
-  \label{fig:rendezvous}
+  \label{scribe:fig:rendezvous}
   \vskip -2mm
 \end{figure*}
 
@@ -833,7 +833,7 @@ page table.
 
   
 \subsection{Rendezvous Points}
-\label{sec:rendezvous}
+\label{scribe:sec:rendezvous}
 
 System calls that access shared resources may cause nondeterminism
 arising from the order of the execution of {\em related} system calls
@@ -878,7 +878,7 @@ point.  By doing so, it will increment the sequence number and
 generate a matching {\em rendezvous} event. The sequence number in the
 {\em rendezvous} event indicates the exact access order for the
 resource, which can be used to enforce the order during replay.
-Figure~\ref{fig:rendezvous} shows the recording of
+Figure~\ref{scribe:fig:rendezvous} shows the recording of
 the \code{write} and \code{read} system calls using rendezvous points
 and the resulting log. 
 Ideally, for each rendezvous point, we could reuse the respective
@@ -886,7 +886,7 @@ kernel locking primitive already in place for the associated
 resource, but this involves kernel changes.  To avoid changing the
 underlying kernel, \scribe{} resorts to its own, separate mutex to
 interpose transparently at well-defined kernel entry points.
-Section~\ref{sec:results} shows that our approach incurs low overhead
+Section~\ref{scribe:sec:results} shows that our approach incurs low overhead
 on real applications. 
 
 During replay, \scribe{} replays the system calls of each process
@@ -897,12 +897,12 @@ process with matching (smallest) sequence number to enter at any
 single time. Processes with higher sequence numbers will block and
 wait for their turn.  \scribe{} exploits these rendezvous points to
 preserve the partial ordering of related system calls during replay.
-Figure~\ref{fig:rendezvous} illustrates the use of rendezvous points
+Figure~\ref{scribe:fig:rendezvous} illustrates the use of rendezvous points
 when replaying the \code{write} and \code{read} system calls.
 
   
 
-Table~\ref{tab:rendezvous} lists all categories of related systems
+Table~\ref{scribe:tab:rendezvous} lists all categories of related systems
 calls, and the respective resources used for rendezvous points.
 \scribe{} defines a special pseudo rendezvous point that
 is used for system calls that access properties global to the
@@ -976,7 +976,7 @@ and replay.
 \vskip -5mm
 % \captionsetup{justification=centering}
 \caption{List of rendezvous points categories.}
-\label{tab:rendezvous}
+\label{scribe:tab:rendezvous}
 \end{table}
 
 For system calls that operate on filesystem pathnames, including
@@ -1036,13 +1036,13 @@ file, \code{kill} uses capabilities to permit a signal, and
 
 Executing a system call may result in recording multiple
 rendezvous events.  The categories of rendezvous points listed in
-Table~\ref{tab:rendezvous} are not mutually exclusive.  For example,
+Table~\ref{scribe:tab:rendezvous} are not mutually exclusive.  For example,
 running \code{open} on a file already opened by another process, will
 result in a rendezvous event for the global resource, for the process
 descriptor, and for the inode resource.  
 
 \subsection{Sync Points}
-\label{sec:sync}
+\label{scribe:sec:sync}
 
 \begin{figure*}[t]
   \scriptsize
@@ -1136,7 +1136,7 @@ descriptor, and for the inode resource.
     }
   }
 
-  \label{fig:recasync}
+  \label{scribe:fig:recasync}
 \end{figure*}
 
 Asynchronous events cause nondeterminism arising from the timing of
@@ -1146,7 +1146,7 @@ place in the process's instruction stream as during recording. It is
 difficult because it could have occurred at an arbitrary location
 during the execution. The two predominant examples of asynchronous
 events are signal delivery and page ownership transfers for shared
-memory, described in Section~\ref{sec:memory}.
+memory, described in Section~\ref{scribe:sec:memory}.
 
 Consider signal delivery.  Signals are delivered in two steps.  First,
 the sender process sends a signal to the target process, which is
@@ -1160,7 +1160,7 @@ during its original execution.  This is difficult because the
 interrupt could have occurred at any time during execution.
 
 Consider page ownership transfers for managing shared memory.  As
-described in Section~\ref{sec:memory}, a process requesting access to
+described in Section~\ref{scribe:sec:memory}, a process requesting access to
 a shared memory page will page fault if it does not have the necessary
 ownership to read or write the page.  This fault occurs asynchronously
 with the execution of the process that owns the page.  Replaying this
@@ -1240,7 +1240,7 @@ examines the next event in its log queue; if it finds a
 {\em signal\_receive} event, it will
 deliver the designated signal to the process. The process will
 handle the signal as soon as it resumes to user space.
-Figure~\ref{fig:recasync}a illustrates record-replay of signals.
+Figure~\ref{scribe:fig:recasync}a illustrates record-replay of signals.
 
 One set of signals, \code{SIGSTOP} and \code{SIGCONT}, are treated
 differently.  Unlike other signals, which are replayed by arranging
@@ -1252,7 +1252,7 @@ will never check its queue for the corresponding
 ``stalled'' state in kernel space, and examines the following events in
 the queue. The next event may be either another {\em signal\_receive}
 event or a page ownership transition event, as discussed in
-Section~\ref{sec:memory}. \scribe{} 
+Section~\ref{scribe:sec:memory}. \scribe{} 
 processes the remaining events in the queue
 until it encounters a \code{SIGCONT}, and then allows the process to
 resume execution.  When a session that contains a stalled process
@@ -1275,7 +1275,7 @@ sync point.
 When a process tries to access an owned page it notifies the owner
 and, unlike with signals, blocks until access is granted.  Conversely,
 owner processes check for pending requests at every sync point and, if
-necessary, give up ownership. Figure~\ref{fig:recasync}b illustrates
+necessary, give up ownership. Figure~\ref{scribe:fig:recasync}b illustrates
 record-replay of memory interleaving.  Note that page faults due to
 the memory interleaving under the CREW protocol contribute
 significantly to the pool of sync points, adding to system calls.
@@ -1327,7 +1327,7 @@ replaying asynchronous events is predicated on the assumption that
 sync points occur frequently enough in real applications, since they
 often enter kernel mode by executing system calls or causing page
 faults. Based on this assumption, we expect any performance overhead
-to be low in practice.  Section~\ref{sec:results} presents
+to be low in practice.  Section~\ref{scribe:sec:results} presents
 experimental results that validate our assumption.
 
 In addition, for tracking shared memory, it assumes that real
@@ -1433,7 +1433,7 @@ openoffice  & OpenOffice 3.0.1 office suite in VNC
 \vskip -3mm
 % \captionsetup{justification=centering}
 \caption{Application scenarios}
-\label{tab:scenarios}
+\label{scribe:tab:scenarios}
 \end{center}
 \vskip -0.25in
 \end{table*}
@@ -1466,7 +1466,7 @@ point is rarely needed in practice for handling asynchronous events.
 \vspace{-1mm}
 
 \subsection{Performance Evaluation}
-\label{sec:results}
+\label{scribe:sec:results}
 
 We have implemented a \scribe{} prototype as a Linux kernel module and
 associated user-level tools.
@@ -1485,7 +1485,7 @@ and a server, we ran the clients on one blade and the server on another.
 
 We recorded and replayed a wide range of real applications, 
 listed in
-Table~\ref{tab:scenarios}.  The list includes (1)~server applications
+Table~\ref{scribe:tab:scenarios}.  The list includes (1)~server applications
 such as Apache in both multi-process ({\tt apache-p}) and multi-threaded
 ({\tt apache-t}) configurations, MySQL ({\tt mysql}), and an
 OpenSSH server ({\tt ssh-s}), (2)~utility programs such as
@@ -1505,7 +1505,7 @@ applications on the blade which lacks a monitor, we used VNC
     % \captionsetup{justification=centering}
     \smallcaption{Recording runtime overhead}
     \vskip 0.3in
-    \label{fig:overhead}
+    \label{scribe:fig:overhead}
   \end{minipage}
   \begin{minipage}[b]{0.33\linewidth}
     \centering
@@ -1514,7 +1514,7 @@ applications on the blade which lacks a monitor, we used VNC
     % \captionsetup{justification=centering}
     \smallcaption{Recording storage growth}
     \vskip 0.3in
-    \label{fig:storage}
+    \label{scribe:fig:storage}
   \end{minipage}
   \begin{minipage}[b]{0.33\linewidth}
     \centering
@@ -1523,7 +1523,7 @@ applications on the blade which lacks a monitor, we used VNC
     % \captionsetup{justification=centering}
     \smallcaption{No. of processes and threads}
     \vskip 0.3in
-    \label{fig:totals}
+    \label{scribe:fig:totals}
   \end{minipage}
   \vskip -0.35in
   \end{figure*}
@@ -1535,7 +1535,7 @@ applications on the blade which lacks a monitor, we used VNC
     % \captionsetup{justification=centering}
     \smallcaption{Sync points interval and length}
     \vskip 0.2in
-    \label{fig:syncpts}
+    \label{scribe:fig:syncpts}
   \end{minipage}
   \begin{minipage}[b]{0.33\linewidth}
     \centering
@@ -1544,7 +1544,7 @@ applications on the blade which lacks a monitor, we used VNC
     % \captionsetup{justification=centering}
     \smallcaption{Count of signals and memory}
     \vskip 0.2in
-    \label{fig:stats}
+    \label{scribe:fig:stats}
   \end{minipage}
   \begin{minipage}[b]{0.33\linewidth}
     \centering
@@ -1553,13 +1553,13 @@ applications on the blade which lacks a monitor, we used VNC
     % \captionsetup{justification=centering}
     \smallcaption{Delay of signals and memory}
     \vskip 0.2in
-    \label{fig:delays}
+    \label{scribe:fig:delays}
   \end{minipage}
   \vskip -0.3in
 \end{figure*}
 
 We measured the performance of \scribe{} using the benchmark workloads
-listed in Table~\ref{tab:scenarios}.  Applications were all run with
+listed in Table~\ref{scribe:tab:scenarios}.  Applications were all run with
 their default configurations.  Workloads were selected to
 stress the system to provide a conservative measure of performance.
 For example, {\tt firefox} runs the widely used SunSpider benchmark
@@ -1575,7 +1575,7 @@ execution versus recorded execution. Previous work shows that the
 overhead of the virtual execution environment is
 small~\cite{zap-systor10,zap02}.
 
-Figure~\ref{fig:overhead} shows the performance overhead of recording
+Figure~\ref{scribe:fig:overhead} shows the performance overhead of recording
 the application workloads.  Performance is measured as completion time
 in all cases except for {\tt apache-p} and {\tt apache-t} which report
 performance in completed requests per second. No frames were dropped
@@ -1586,7 +1586,7 @@ applications except for {\tt openoffice}, which was 15\%.  For all desktop
 applications, there was no user noticeable degradation in interactive
 performance.
 
-Figure~\ref{fig:overhead} also shows the performance of replaying the
+Figure~\ref{scribe:fig:overhead} also shows the performance of replaying the
 applications workloads. Performance is measured as completion time,
 normalized to execution with recording. Replaying speedup relative to
 recording was at least 1 in all cases, and reached as much as a factor
@@ -1611,7 +1611,7 @@ that spend much of their time sleeping: 3.9 for {\tt acrobat},
 Interactive workloads obtained
 the largest speedups: 19 for {\tt ssh-s} and 70 for {\tt ssh-c}.
 
-Figure~\ref{fig:storage} shows the storage growth rate of recording.
+Figure~\ref{scribe:fig:storage} shows the storage growth rate of recording.
 Storage requirements are decomposed into memory-related events ({\tt
   memory}), nondeterministic input data returned by system calls ({\tt
   input data}), and other data which is primarily system call return
@@ -1625,7 +1625,7 @@ remained a bit over 1.1\MB{}/\secs{}.  Most of the log of
 {\tt urandom} is due to input of random data, which does not compress
 well.  
 
-Figure~\ref{fig:totals} shows the average number of processes and
+Figure~\ref{scribe:fig:totals} shows the average number of processes and
 threads running for each application scenario.  The sum of the two is
 the average number of total Linux tasks running.  All workloads except {\tt
   editor} consisted of multiple processes or threads, demonstrating
@@ -1634,7 +1634,7 @@ multi-threaded application workloads.  Five of the scenarios used
 threads: {\tt apache-t}, {\tt mysql}, {\tt ssh-c}, {\tt firefox}, and 
 {\tt openoffice}. For all of these scenarios except {\tt ssh-c}, this
 correlates with the majority of the log storage consisting of memory
-events, as shown in Figure~\ref{fig:storage}.  The threads in {\tt
+events, as shown in Figure~\ref{scribe:fig:storage}.  The threads in {\tt
   ssh-c} are
 used in the benchmark to manage
 concurrent sessions.  They involve very little contention over shared
@@ -1642,7 +1642,7 @@ memory, and therefore do not contribute much to the log size.
 Conversely, {\tt apache-p} shows mild shared memory activity despite
 being a multi-process application rather than multi-threaded. 
 
-Figure~\ref{fig:syncpts} shows the time interval between consecutive
+Figure~\ref{scribe:fig:syncpts} shows the time interval between consecutive
 per process sync points for each application scenario. The average
 time interval is measured per process then averaged over all
 processes.  It is at most 30\us{} for all scenarios except {\tt make},
@@ -1658,7 +1658,7 @@ during the startup of each application.  If we exclude these outliers
 and compute the 99th percentile of the time interval between sync
 points, the time interval is less than 10\ms{}.
 
-Figure~\ref{fig:syncpts} also shows the average length of sync points
+Figure~\ref{scribe:fig:syncpts} also shows the average length of sync points
 per process for each application scenario. It is at least 300\us{} for
 all scenarios except {\tt untar} and {\tt mplayer}, in which it is
 over 50\us{}. More importantly, in all workloads the average time
@@ -1674,7 +1674,7 @@ for a short period.  This establishes the empirical grounds for
 \scribe{}'s reliance on sync points to successfully convert
 asynchronous events to synchronous ones in a timely manner.
 
-Figure~\ref{fig:stats} shows the total number of signals and shared
+Figure~\ref{scribe:fig:stats} shows the total number of signals and shared
 memory page faults due to \scribe{}'s page ownership management mechanism
 for each application scenario.  Page faults not due to \scribe{} are
 not included.  The totals are decomposed into those that are handled
@@ -1689,7 +1689,7 @@ kernel at a sync point.  Sync points not only happen frequently
 enough, but also endure long enough, that the vast majority of
 asynchronous events can be handled immediately without being deferred.
 
-Observe in Figure~\ref{fig:stats} that asynchronous events due to
+Observe in Figure~\ref{scribe:fig:stats} that asynchronous events due to
 shared memory page faults predominate over signals in scenarios that
 involve multiple threads or shared memory. In these scenarios, page
 faults due to \scribe{}'s page ownership management occur in larger
@@ -1701,7 +1701,7 @@ from 10\% in {\tt apache-p}, to 30\% in {\tt mysql}, {\tt apache-t},
 In other words, applications that need sync points for shared memory
 accesses are also likely to have sync points more frequently.
 
-Figure~\ref{fig:delays} shows the amount of delay incurred for signals
+Figure~\ref{scribe:fig:delays} shows the amount of delay incurred for signals
 and shared memory accesses. Signals were delayed at most 100\us{}
 on average, except {\tt ssh-c}, which reached 220\us{}. The average
 delay for only those few deferred signals that could not be handled
@@ -1743,7 +1743,7 @@ Our experiences and results demonstrate that sync points occur
 frequently and are useful for enabling deterministic replay.
 
 \subsection{Related Work}
-\label{sec:related}
+\label{scribe:sec:related}
 
 Replaying program execution has been of interest for over 40
 years~\cite{exdams}.  Hardware
@@ -1863,7 +1863,7 @@ provide whole system replay, \scribe{} can provide much more efficient
 application replay.   
 
 \subsection{Conclusions and Future Work}
-\label{sec:conclude}
+\label{scribe:sec:conclude}
 
 \scribe{} is the first operating system mechanism to provide transparent,
 deterministic execution record and replay of multi-threaded and
