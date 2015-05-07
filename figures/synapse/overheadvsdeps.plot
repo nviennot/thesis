@@ -1,4 +1,4 @@
-set terminal pdf dashed size 4,2.0
+set terminal pdf dashed size 6,3.0
 set output "overheadvsdeps.pdf"
 
 #set autoscale fix
