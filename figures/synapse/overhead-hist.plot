@@ -1,4 +1,4 @@
-set terminal pdf dashed size 3.5,1.5
+set terminal pdf dashed size 3.3,1.6
 set output "overhead-hist.pdf"
 
 # set key reverse Left horizontal at 13.8,111 width 3
@@ -13,9 +13,9 @@ set grid y
 set rmargin 4.5
 
 set nokey
-set label 'Crowdtap' at 0,108
-set label 'Diaspora' at 4,108
-set label 'Discourse' at 8,108
+set label 'Crowdtap' at -0.5,110
+set label 'Diaspora' at 3.8,110
+set label 'Discourse' at 7.7,110
 
 set ytics 20
 
