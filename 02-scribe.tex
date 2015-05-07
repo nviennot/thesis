@@ -2,34 +2,6 @@
 on Commodity Multiprocessor Operating Systems}
 \label{ch:scribe}
 
-\section{Abstract}
-
-We present \scribe{}, the first system to provide transparent,
-low-overhead application record-replay and the ability to go live from
-replayed execution.
-
-\scribe{} introduces new lightweight operating system mechanisms,
-rendezvous and sync points, to efficiently record nondeterministic
-interactions such as related system calls, signals, and shared memory
-accesses.  Rendezvous points make a partial ordering of execution
-based on system call dependencies sufficient for replay, avoiding the
-recording overhead of maintaining an exact execution ordering.  Sync
-points convert asynchronous interactions that can occur at arbitrary
-times into synchronous events that are much easier to record and
-replay.
-
-We have implemented \scribe{} without changing, relinking, or
-recompiling applications, libraries, or operating system kernels, and
-without any specialized hardware support such as hardware performance
-counters.  It works on commodity Linux operating systems, and commodity
-multi-core and multiprocessor hardware.  Our results show for the
-first time that an operating system mechanism can correctly and
-transparently record and replay multi-process and multi-threaded
-applications on commodity multiprocessors.  \scribe{} recording overhead
-is less than 2.5\% for server applications including Apache and MySQL,
-and less than 15\% for desktop applications including Firefox,
-Acrobat, OpenOffice, parallel kernel compilation, and movie playback.
-
 \section{Introduction}
 
 Deterministic application record and replay is the ability to record
@@ -226,59 +198,38 @@ saves them to permanent storage. Recording of a process ends when
 the process exits, or when \scribe{} explicitly tells the monitor to
 stop the recording.  
 
-\begin{table*}[t]
+\begin{table}[]
 \small
 \begin{center}
-\begin{tabular}{|c|l|l|l|}
-  \hline\hline
-  {\bf Event} & {\bf Description} & {\bf Payload} & {\bf Details} \\
+% \begin{tabular}{|c|l|l|l|}
+\begin{tabular}{|c|l|l|}
   \hline
-  {\em hw\_inst} & hardware instruction trap &
-	op-code and data, e.g. \code{RDTSC} and 64-bit
-	counter value 
-	& Section~\ref{scribe:sec:arch} \\
-  \hline
-  {\em syscall\_ret} & system call return &
-	system call return value
-	& Section~\ref{scribe:sec:syscalls} \\
-  \hline
-  {\em copy\_data} & data transfer to/from user space &
-	size and contents of data transfer
-	& Section~\ref{scribe:sec:syscalls} \\
-  \hline
-  {\em page\_public} & make page public (not owned) &
-	page address
-	& Section~\ref{scribe:sec:memory} \\
-  \hline
-  {\em page\_share\_read} & make page shared read-only &
-	page address, page sequence number
-	& Section~\ref{scribe:sec:memory} \\
-  \hline
-  {\em page\_own\_write} & make page owned read/write &
-	page address, page sequence number
-	& Section~\ref{scribe:sec:memory} \\
-  \hline
-  {\em rendezvous} & resource synchronization &
-	 resource sequence number
-	& Section~\ref{scribe:sec:rendezvous} \\
-  \hline
-  {\em signal\_receive} & process received signal &
-	signal number, whether or not in system call,
-	signal data
-	& Section~\ref{scribe:sec:sync} \\
-  \hline
-  {\em async\_reset} & force a sync point &
-	process user space signature at forced sync point
-	& Section~\ref{scribe:sec:sync} \\
-  \hline
-  \hline
+  % {\bf Event}             & {\bf Description}                & {\bf Payload}                                                & {\bf Details}                       \\ \hline
+  % {\em hw\_inst}          & hardware instruction trap        & op-code and data, e.g. \code{RDTSC} and 64-bit counter value & Section~\ref{scribe:sec:arch}       \\ \hline
+  % {\em syscall\_ret}      & system call return               & system call return value                                     & Section~\ref{scribe:sec:syscalls}   \\ \hline
+  % {\em copy\_data}        & data transfer to/from user space & size and contents of data transfer                           & Section~\ref{scribe:sec:syscalls}   \\ \hline
+  % {\em page\_public}      & make page public (not owned)     & page address                                                 & Section~\ref{scribe:sec:memory}     \\ \hline
+  % {\em page\_share\_read} & make page shared read-only       & page address, page sequence number                           & Section~\ref{scribe:sec:memory}     \\ \hline
+  % {\em page\_own\_write}  & make page owned read/write       & page address, page sequence number                           & Section~\ref{scribe:sec:memory}     \\ \hline
+  % {\em rendezvous}        & resource synchronization         & resource sequence number                                     & Section~\ref{scribe:sec:rendezvous} \\ \hline
+  % {\em signal\_receive}   & process received signal          & signal number, whether or not in system call, signal data    & Section~\ref{scribe:sec:sync}       \\ \hline
+  % {\em async\_reset}      & force a sync point               & process user space signature at forced sync point            & Section~\ref{scribe:sec:sync}       \\ \hline
+
+  {\bf Event}             & {\bf Description}                & {\bf Payload}                                                 \\ \hline
+  {\em hw\_inst}          & hardware instruction trap        & op-code and data, e.g. \code{RDTSC} and 64-bit counter value  \\ \hline
+  {\em syscall\_ret}      & system call return               & system call return value                                      \\ \hline
+  {\em copy\_data}        & data transfer to/from user space & size and contents of data transfer                            \\ \hline
+  {\em page\_public}      & make page public (not owned)     & page address                                                  \\ \hline
+  {\em page\_share\_read} & make page shared read-only       & page address, page sequence number                            \\ \hline
+  {\em page\_own\_write}  & make page owned read/write       & page address, page sequence number                            \\ \hline
+  {\em rendezvous}        & resource synchronization         & resource sequence number                                      \\ \hline
+  {\em signal\_receive}   & process received signal          & signal number, whether or not in system call, signal data     \\ \hline
+  {\em async\_reset}      & force a sync point               & process user space signature at forced sync point             \\ \hline
 \end{tabular}
 \end{center}
-\vskip -5mm
 % \captionsetup{justification=centering}
 \caption{\scribe{} record-replay events}
 \label{scribe:tab:events}
-\vskip -1mm
 \end{table*}
 
 \scribe{} can start replaying a session from the beginning of its
@@ -445,7 +396,7 @@ Figure~\ref{scribe:fig:recplay} shows the replay of the \code{gettimeofday}
 system call from an event log.
 
 \begin{figure}[t]
-  \scriptsize
+  \small
   \begin{center}
   \begin{tabular}{lll}
 
@@ -483,9 +434,8 @@ system call from an event log.
   \end{tabular}
   \end{center}
 
-  \vskip -5mm
-  \smallcaption{Record-replay of \code{gettimeofday}:
-    { \scriptsize
+  \caption{Record-replay of \code{gettimeofday}:
+    { 
       To record, \scribe{} invokes the system call with an in-kernel
       buffer (K), logs the return value and input data, copies the
       data to the user buffer (u) and returns. To replay it copies
@@ -494,7 +444,6 @@ system call from an event log.
     }
   }
   \label{scribe:fig:recplay}
-  \vskip -3mm
 \end{figure}
 
 Beyond dealing with the return value and nondeterministic data, we can
@@ -663,8 +612,8 @@ PTE will remain invalid to prevent access. A page that is shared for
 reading continuously tracks its list of readers, and an exclusively
 owned page tracks its writer (owner).
 
-\begin{figure*}[t]
-  \scriptsize
+\begin{figure}[t]
+  \small
   \begin{center}
   \begin{tabular}{lll|l}
 
@@ -749,9 +698,8 @@ owned page tracks its writer (owner).
   \end{tabular}
   \end{center}
 
-  \vskip -5mm
-  \smallcaption{Rendezvous points:
-    { \scriptsize
+  \caption{Rendezvous points:
+    {
       Process $A$ must pass a rendezvous point before it can invoke
       the system call in both record and replay. Process $B$ must do
       so too, but with a larger sequence number, thus preserving their
@@ -759,8 +707,7 @@ owned page tracks its writer (owner).
     }
   }
   \label{scribe:fig:rendezvous}
-  \vskip -2mm
-\end{figure*}
+\end{figure}
 
 Transitions between the page states are as follows. A {\em public} page
 becomes {\em shared\_read} or {\em owned\_write} on the first read or
@@ -938,42 +885,21 @@ This guarantees that the two methods to access shared mapped pages are
 properly coordinated, and that their order is preserved between record
 and replay.
 
-\begin{table}[b]
-\vskip -0.1in
-\small
+\begin{table}[]
 \begin{center}
 \begin{tabular}{|l|l|}
-  \hline\hline
-  {\bf System call category} & {\bf Rendezvous resource} \\
   \hline
-  actions on globals
-    & global (pseudo) \\
-  \hline
-  actions on open file objects
-    & {\tt inode} of the file \\
-  \hline
-  actions on IPC objects
-    & IPC objects \\
-  \hline
-  read/write shared mapped files
-    & memory page \\
-  \hline
-  actions on pathnames
-    & filesystem mount point \\
-  \hline
-  create file descriptors
-    & file descriptors table \\
-  \hline
-  modify memory layout
-    & memory descriptor \\
-  \hline
-  actions on process properties
-    & process descriptor \\
-  \hline
-  \hline
+  {\bf System call category}     & {\bf Rendezvous resource} \\ \hline
+  actions on globals             & global (pseudo)           \\ \hline
+  actions on open file objects   & {\tt inode} of the file   \\ \hline
+  actions on IPC objects         & IPC objects               \\ \hline
+  read/write shared mapped files & memory page               \\ \hline
+  actions on pathnames           & filesystem mount point    \\ \hline
+  create file descriptors        & file descriptors table    \\ \hline
+  modify memory layout           & memory descriptor         \\ \hline
+  actions on process properties  & process descriptor        \\ \hline
 \end{tabular}
 \end{center}
-\vskip -5mm
 % \captionsetup{justification=centering}
 \caption{List of rendezvous points categories.}
 \label{scribe:tab:rendezvous}
@@ -1044,8 +970,8 @@ descriptor, and for the inode resource.
 \section{Sync Points}
 \label{scribe:sec:sync}
 
-\begin{figure*}[t]
-  \scriptsize
+\begin{figure}[t]
+  \small
   \begin{center}
   \begin{tabular}{llll|l}
 
@@ -1122,9 +1048,8 @@ descriptor, and for the inode resource.
   \end{tabular}
   \end{center}
 
-  \vskip -1mm
-  \smallcaption{Asynchronous events record-replay:
-    { \scriptsize
+  \caption{Asynchronous events record-replay:
+    { 
       (a) The sender of a signal always skips the call and notifies
       the receiver instead; The receiver handles and logs the signal
       when it reaches a sync point.
@@ -1137,7 +1062,7 @@ descriptor, and for the inode resource.
   }
 
   \label{scribe:fig:recasync}
-\end{figure*}
+\end{figure}
 
 Asynchronous events cause nondeterminism arising from the timing of
 their occurrence.  Replaying asynchronous events is challenging
@@ -1369,12 +1294,13 @@ effectively create a new sync point.  The original pending signal or
 page ownership transfer can then be handled and its location with
 respect to the new sync point is precisely known.
 
-\begin{table*}[t]
-\begin{center}
+\begin{sidewaystable}
+% \begin{table}[t]
+% \begin{center}
 \small
-\begin{tabular}{|l|l|l|c|}   \hline\hline
+\begin{tabular}{|l|l|l|c|}   \hline
 \bf{Name} & \bf{Description} & {\bf Benchmark} & {\bf Time} \\
-\hline\hline 
+\hline
 apache-p    & Apache 2.0.54, 8 processes, {\tt prefork}
 	&  {\tt httperf 0.8} (rate=1500, num-calls=20)
 	&  189\secs \\
@@ -1428,15 +1354,14 @@ mplayer    & Mplayer 1.0rc2 movie player in VNC
 openoffice  & OpenOffice 3.0.1 office suite in VNC
 	&  {\tt Jungletest r27 (2009-03-08)} open document, export, close, and exit
 	&  4.9\secs \\
-\hline\hline
+\hline
 \end{tabular}
-\vskip -3mm
 % \captionsetup{justification=centering}
 \caption{Application scenarios}
 \label{scribe:tab:scenarios}
-\end{center}
-\vskip -0.25in
-\end{table*}
+% \end{center}
+% \end{table}
+\end{sidewaystable}
 
 During replay, the key issue is knowing when the process should
 consume the {\it async\_reset} event. Other approaches suggested the
@@ -1462,8 +1387,6 @@ continue normal replay.  Although this signature-based record and
 replay can be expensive, the overhead can be minimized by only
 recording differences in signatures.  More importantly, forcing a sync
 point is rarely needed in practice for handling asynchronous events.
-
-\vspace{-1mm}
 
 \section{Performance Evaluation}
 \label{scribe:sec:results}
@@ -1497,66 +1420,50 @@ Firefox ({\tt firefox}), Acrobat Reader ({\tt acroread}), MPlayer
 applications on the blade which lacks a monitor, we used VNC
 (TightVNC Server 1.3.9) to provide a virtual desktop. 
 
-\begin{figure*}[t]
-  \begin{minipage}[b]{0.33\linewidth}
+\begin{figure}[]
+  \begin{minipage}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=2.3in]{figures/scribe/overhead}
-    \vskip -0.21in
-    % \captionsetup{justification=centering}
-    \smallcaption{Recording runtime overhead}
-    \vskip 0.3in
+    \includegraphics[width=3.1in]{figures/scribe/overhead}
+    \caption{Recording runtime overhead}
     \label{scribe:fig:overhead}
   \end{minipage}
-  \begin{minipage}[b]{0.33\linewidth}
+  \begin{minipage}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=2.3in]{figures/scribe/storage}
-    \vskip -0.21in
-    % \captionsetup{justification=centering}
-    \smallcaption{Recording storage growth}
-    \vskip 0.3in
+    \includegraphics[width=3.1in]{figures/scribe/storage}
+    \caption{Recording storage growth}
     \label{scribe:fig:storage}
   \end{minipage}
-  \begin{minipage}[b]{0.33\linewidth}
+
+\end{figure}
+\begin{figure}[]
+  \begin{minipage}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=2.3in]{figures/scribe/totals}
-    \vskip -0.21in
-    % \captionsetup{justification=centering}
-    \smallcaption{No. of processes and threads}
-    \vskip 0.3in
+    \includegraphics[width=3.1in]{figures/scribe/totals}
+    \caption{No. of processes and threads}
     \label{scribe:fig:totals}
   \end{minipage}
-  \vskip -0.35in
-  \end{figure*}
-  \begin{figure*}
-  \begin{minipage}[b]{0.33\linewidth}
+  \begin{minipage}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=2.3in]{figures/scribe/syncpts2}
-    \vskip -0.21in
-    % \captionsetup{justification=centering}
-    \smallcaption{Sync points interval and length}
-    \vskip 0.2in
+    \includegraphics[width=3.1in]{figures/scribe/syncpts2}
+    \caption{Sync points interval and length}
     \label{scribe:fig:syncpts}
   \end{minipage}
-  \begin{minipage}[b]{0.33\linewidth}
+\end{figure}
+
+\begin{figure}
+  \begin{minipage}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=2.3in]{figures/scribe/stats}
-    \vskip -0.21in
-    % \captionsetup{justification=centering}
-    \smallcaption{Count of signals and memory}
-    \vskip 0.2in
+    \includegraphics[width=3.1in]{figures/scribe/stats}
+    \caption{Count of signals and memory}
     \label{scribe:fig:stats}
   \end{minipage}
-  \begin{minipage}[b]{0.33\linewidth}
+  \begin{minipage}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=2.3in]{figures/scribe/delays2}
-    \vskip -0.21in
-    % \captionsetup{justification=centering}
-    \smallcaption{Delay of signals and memory}
-    \vskip 0.2in
+    \includegraphics[width=3.1in]{figures/scribe/delays2}
+    \caption{Delay of signals and memory}
     \label{scribe:fig:delays}
   \end{minipage}
-  \vskip -0.3in
-\end{figure*}
+\end{figure}
 
 We measured the performance of \scribe{} using the benchmark workloads
 listed in Table~\ref{scribe:tab:scenarios}.  Applications were all run with

@@ -1,31 +1,6 @@
 \chapter{Pervasive Detection of Process Races in Deployed Systems}
 \label{ch:racepro}
 
-\section{Abstract}
-
-Process races occur when multiple processes access shared operating
-system resources, such as files, without proper synchronization.  
-We present the first study of real process races and the first system
-designed to detect them.  Our study of hundreds of applications shows
-that process races are numerous, difficult to debug, and a real threat
-to reliability.  
-To address this problem, we 
-created \racepro, a system for automatically detecting these races.
-\racepro checks deployed systems \emph{in-vivo} by recording live
-executions then deterministically replaying and checking them later.
-This approach increases checking coverage beyond the configurations or
-executions covered by software vendors or beta testing sites.  \racepro
-records multiple processes, detects races in the recording among
-system calls that may concurrently access shared kernel objects, then
-tries different execution orderings of such system calls to determine
-which races are harmful and result in failures.  To simplify race
-detection, \racepro models under-specified system calls based on load and
-store micro-operations.  To reduce false positives and negatives, \racepro
-uses a \emph{replay and go-live} mechanism to distill harmful races
-from benign ones.  We have implemented \racepro in Linux, shown that it
-imposes only modest recording overhead, and used it to detect a number
-of previously unknown bugs in real applications caused by process races.
-
 \section{Introduction} \label{racepro:sec:intro}
 
 While thread races have drawn much attention from the research

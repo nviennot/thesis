@@ -1,28 +1,6 @@
 \chapter{New Data Integration Abstractions for Agile Web Application Development}
 \label{ch:synapse}
 
-\begin{abstract}
-
-The growing demand for data-driven features in today's Web applications -- such
-as targeting, recommendations, or predictions -- has transformed those
-applications into complex conglomerates of services operating on each others'
-data without a coherent, manageable architecture. We
-present {\em \synapse}, an easy-to-use, strong-semantic system for
-large-scale, data-driven Web service integration. \synapse lets independent
-services cleanly share data with each other in an isolated and scalable way.
-The services run on top of their own databases, whose layouts and engines can
-be completely different, and incorporate read-only views of each others' shared
-data. \synapse synchronizes these views in real-time using a new scalable,
-consistent replication mechanism that leverages the high-level data models in
-popular MVC-based Web applications to replicate data across heterogeneous
-databases. We have developed \synapse on top of the popular Web framework
-Ruby-on-Rails. It supports data replication among a wide variety of SQL and
-NoSQL databases, including MySQL, Oracle, PostgreSQL, MongoDB, Cassandra,
-Neo4j, and Elasticsearch. We and others have built over a dozen microservices
-using \synapse with great ease, some of which are running in production with
-over 450,000 users.
-
-\end{abstract}
 \section{Introduction}
 \label{sec:intro}
 
