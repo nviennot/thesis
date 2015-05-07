@@ -145,6 +145,29 @@ results.  \S\ref{racepro:sec:related} discusses related work.  Finally,
 \S\ref{racepro:sec:conclusion} presents some concluding remarks and directions
 for future work.
 
+\begin{table}[t]
+\centering
+\begin{tabular}{@{}c@{}|cc|ccc@{}}
+  \multirow{2}{*}{\bf Distribution} & 
+    \multicolumn{2}{c|}{\bf Pages} &
+    \multicolumn{3}{c}{\bf Bugs} \\
+  & Returned & Sampled
+    & Total
+    & Process
+    & Thread \\
+  \hline
+  Ubuntu              & 3330 & 300  & 45  & 42 (1)   & 3   \\
+  Fedora/RedHat\,\,\, & 1070 & 100  & 52  & 30 (10)  & 22  \\
+  Gentoo              & 2360 & 60   & 31  & 23 (10)  & 8   \\
+  Debian              & 768  & 40   & 17  & 12 (4)   & 5   \\
+  CentOS              & 1500 & 40   & 5   & 2 (0)    & 3   \\
+  \hline                           
+  Total               & 9028 & 540  & 150 & 109 (25) & 41  \\
+\end{tabular}
+\caption{{\em Summary of collected pages and bugs.}} \label{racepro:tab:data}
+\end{table}
+
+
 \section{Process Race Study} \label{racepro:sec:study}
 
 We conducted a study of real process races with two key questions in
@@ -173,28 +196,6 @@ and manually examined (Sampled), the number of process races
 which were \toctou races, the number of thread races
 (Thread), and the total number of bugs in the sampled pages (Total).
 
-\begin{table}[b]
-\centering
-\begin{tabular}{@{}c@{}|cc|ccc@{}}
-  \multirow{2}{*}{\bf Distribution} & 
-    \multicolumn{2}{c|}{\bf Pages} &
-    \multicolumn{3}{c}{\bf Bugs} \\
-  & Returned & Sampled
-    & Total
-    & Process
-    & Thread \\
-  \hline
-  Ubuntu              & 3330 & 300  & 45  & 42 (1)   & 3   \\
-  Fedora/RedHat\,\,\, & 1070 & 100  & 52  & 30 (10)  & 22  \\
-  Gentoo              & 2360 & 60   & 31  & 23 (10)  & 8   \\
-  Debian              & 768  & 40   & 17  & 12 (4)   & 5   \\
-  CentOS              & 1500 & 40   & 5   & 2 (0)    & 3   \\
-  \hline                           
-  Total               & 9028 & 540  & 150 & 109 (25) & 41  \\
-\end{tabular}
-\caption{{\em Summary of collected pages and bugs.}} \label{racepro:tab:data}
-\end{table}
-
 \para{Process races are numerous.}  Of the \nbug sampled bugs, \nprace
 resulted in process races, a dominating majority; the other \nmrace
 bugs resulted in thread races.  However, thread races are
@@ -211,27 +212,22 @@ not contain enough information for us to understand the cause, so we
 did not include them in Table~\ref{racepro:tab:data}.
 
 \begin{figure}[t]
-  \hskip 5mm
   \includegraphics[width=0.45\linewidth,angle=270]{figures/racepro/race-effects}
-  \vskip -5mm
   \caption{\em Process races breakdown by effects.} \label{racepro:fig:effects}
-  \vskip -2mm
 \end{figure}
 
-\begin{figure*}[b]
+\begin{figure}[t]
 \centering
-\vskip -4mm
-\includegraphics[width=.30\linewidth]{figures/racepro/race-packages}
-\includegraphics[width=.30\linewidth]{figures/racepro/race-processes}
-\includegraphics[width=.30\linewidth]{figures/racepro/race-languages}
-\vskip -1mm
+\includegraphics[width=.45\linewidth]{figures/racepro/race-packages}
+\includegraphics[width=.45\linewidth]{figures/racepro/race-processes}
+\includegraphics[width=.45\linewidth]{figures/racepro/race-languages}
 \caption{{\em Process races breakdown.} X axis shows the number of software
   packages, processes, or programming languages involved.  Y axis shows
   the percentage of process races that involve the specific number of
   packages, processes, or languages.  To avoid inflating the number of
   processes, we count a run of a shell script as one process.  (Each external
   command in a script causes a \code{fork}.)} \label{racepro:fig:breakdown}
-\end{figure*}
+\end{figure}
 
 \para{Process races are dangerous.}  Compared to thread races that
 typically corrupt volatile application memory, process races
@@ -295,11 +291,10 @@ to use an algorithm that can detect order violations.
 
 \subsection{Process Race Examples} \label{racepro:sec:example}
 
-\begin{figure*}[t]
-\begin{minipage}{0.49\linewidth}
+\begin{figure}[t]
+\small
+\begin{minipage}{0.60\linewidth}
   \centering
-  \begin{minipage}{0.5\linewidth}
-\begin{footnotesize}
 \begin{verbatim}
 child = fork()
 setjmp(loc)
@@ -310,32 +305,23 @@ p = wait(...) [...returns]
 longjmp(loc)
 p = wait(...) // error (no child)
 \end{verbatim}
-\end{footnotesize}
-    \vskip -2mm
     \caption{{\em dash-MySQL race.}} \label{racepro:fig:dash-mysql}
-  \end{minipage}
 \end{minipage}
-\begin{minipage}{0.49\linewidth}
+\begin{minipage}{0.39\linewidth}
     \centering
-    \begin{minipage}{0.5\linewidth}
-\begin{footnotesize}
 \begin{verbatim}
 fd = open(H,RDONLY);
 read(fd, buf, ...);
 close(fd);
-... // update @buf@
+... // update buf
 ... // do work
 fd = open(H,WRONLY|TRUNC);
 write(fd, buf, ...);
 close(fd);
 \end{verbatim}
-\end{footnotesize}
-      \vskip -2mm
       \caption{{\em bash race.}} \label{racepro:fig:bash}
-    \end{minipage}
 \end{minipage}
-\vskip -2mm
-\end{figure*}
+\end{figure}
 
 \para{Bug 1: Upstart-MySQL.}  \code{mysqld} does not cleanly terminate
 during system shutdown, and the file system becomes corrupted.  This
@@ -349,30 +335,6 @@ Systems V initialization scripts and Upstart, a misconfiguration so
 that \code{S20sendsigs} does not wait for daemons started by Upstart,
 insufficient dependencies specified in MySQL's Upstart configuration
 file, and a large MySQL database that takes a long time to shut down.
-
-\begin{figure*}[b]
-\vskip -3mm
-\begin{minipage}{0.48\linewidth}
-  \centering
-  \includegraphics[width=\linewidth]{figures/racepro/flow}
-  \vspace{-7mm}
-  \caption{{\em \racepro Workflow.} Thin solid lines represent recorded
-    executions; thick solid lines represent replayed executions.  Dashed
-    arrows represent potentially buggy execution branches. The dotted
-    thick arrow represents the branch \racepro selects to
-    explore.} \label{racepro:fig:flow}
-\end{minipage}
-\hfill
-\begin{minipage}{0.47\linewidth}
-  \centering
-  \includegraphics[width=\linewidth]{figures/racepro/arch}
-  \vspace{-5.5mm}
-  \caption{{\em \racepro Architecture.} Components are shaded. The recorder
-    and the replayer run in kernel-space, and the explorer and the
-    checkers run in user-space.  Recorded executions and modified
-    executions are stored in files.} \label{racepro:fig:arch}
-\end{minipage}
-\end{figure*}
 
 \para{Bug 2: dash-MySQL.} The shell wrapper
 \code{mysql\_safe} of the MySQL server daemon \code{mysqld} goes into an
@@ -424,6 +386,27 @@ exits.  When multiple \code{bash} processes exit at the same time, the
 history file may be corrupted. 
 
 \section{Architecture Overview} \label{racepro:sec:overview}
+
+
+\begin{figure}[]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/racepro/flow}
+  \caption{{\em \racepro Workflow.} Thin solid lines represent recorded
+    executions; thick solid lines represent replayed executions.  Dashed
+    arrows represent potentially buggy execution branches. The dotted
+    thick arrow represents the branch \racepro selects to
+    explore.} \label{racepro:fig:flow}
+\end{figure}
+
+\begin{figure}[]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/racepro/arch}
+  \caption{{\em \racepro Architecture.} Components are shaded. The recorder
+    and the replayer run in kernel-space, and the explorer and the
+    checkers run in user-space.  Recorded executions and modified
+    executions are stored in files.} \label{racepro:fig:arch}
+\end{figure}
+
 
 \racepro is designed to automatically detect process races using the
 workflow shown in Figure~\ref{racepro:fig:flow}.  
@@ -521,7 +504,6 @@ processes but cannot be modified explicitly by processes.
 
 \begin{table}[t]
 \centering
-\vskip 1mm
 \begin{tabular}{cl}
 {\bf Object} & {\bf Description} \\
 \hline
@@ -676,10 +658,9 @@ conservative in flagging racy system calls and thereby identify
 impossible races.  However, such cases will be filtered later by
 \racepro's validation step (\S\ref{racepro:sec:validate}) and will not be reported.
 
-\begin{figure}[t]
+\begin{figure}[]
 \centering
-\includegraphics[width=1.0\linewidth]{figures/racepro/psgrep}
-\vspace{-6mm}
+\includegraphics[width=\linewidth]{figures/racepro/psgrep}
 \caption{{\em The Happens-before graph and respective vector-clocks
   (in brackets) for ps\,|\,grep\,X.} $P_{i=1,2,3}$ represent the processes
   involved. The \code{read} of process $P_2$ and the \code{execve} of
@@ -688,7 +669,6 @@ impossible races.  However, such cases will be filtered later by
   \code{wait} of $P_1$ and the \code{exit}s of $P_2$ and $P_3$ form a
   wait-wakeups race~(\S\ref{racepro:sec:wait-wakeup}). For clarity, not all
   system calls are shown.} \label{racepro:fig:psgrep}
-\vspace{-0mm}
 \end{figure}
 
 Figure~\ref{racepro:fig:psgrep} shows the happens-before graph for the example
@@ -823,8 +803,7 @@ call does a \emph{load} from the same location.
   \hline
 \end{tabular}
 \caption{{\em Micro-operations of common system calls.}}
-\vskip -3mm
-\label{racepro:tab:syscall-effects}.
+\label{racepro:tab:syscall-effects}
 \end{table}
 
 Table~\ref{racepro:tab:syscall-effects} shows the template of micro-operations
@@ -1016,11 +995,13 @@ $S_1$ and $S_2$.
 \begin{minipage}[b]{.40\linewidth}
 \begin{footnotesize}
 \begin{verbatim}
+       P1             P2
+-----------------------------
       ...
 S1: write(P,10);
-S2: write(P,10);   ...
-S3:   ...       read(P,20)
-                   ...
+S2: write(P,10);      ...
+S3:   ...          read(P,20)
+                      ...
 \end{verbatim}
 \end{footnotesize}
 \vspace{-5mm}
@@ -1030,10 +1011,12 @@ S3:   ...       read(P,20)
 \begin{minipage}[b]{.45\linewidth}
 \begin{footnotesize}
 \begin{verbatim}
+       P1             P2
+-----------------------------
       ...
 S1: write(P,10);
-S2:             read(P,20)
-S3: write(P,10);   ...
+S2:                read(P,20)
+S3: write(P,10);     ...
       ...
 \end{verbatim}
 \end{footnotesize}
@@ -1264,18 +1247,19 @@ process transition to live execution.
 \begin{minipage}{.65\linewidth}
 \begin{footnotesize}
 \begin{verbatim}
+       P1             P2             P3
+---------------------------------------------
         ...
 S1:  syscall(R);
-S2:  syscall(R);              ... 
-S3:     ...        ...    syscall(R);
-S4:             syscall(R)    ...
-S5:             syscall(R)
-                   ...
+S2:  syscall(R);                     ...
+S3:     ...           ...        syscall(R);
+S4:                syscall(R)        ...
+S5:                syscall(R)
+                      ...
 \end{verbatim}
 \end{footnotesize}
 \end{minipage}
 \caption{\em Replay divergence due to reordering.} \label{racepro:fig:reorder}
-\vskip -2.5mm
 \end{figure}
 
 \racepro works best when a go-live execution requests no inputs from users or
@@ -1360,38 +1344,40 @@ relatively unlikely to occur.
 
 \begin{figure}[t]
 \begin{minipage}{\linewidth}
-  \begin{minipage}{.49\linewidth}
+  \begin{minipage}{.6\linewidth}
 \begin{footnotesize}
 \begin{verbatim}
+       P1             P2
+-----------------------------
       ...
-S1: creat(F);   ...
-S2:   ...   r=unlink(F);
-            if (r==0)
-S3:             creat(F);
-                ...
+S1: creat(F);        ...
+S2:   ...        r = unlink(F);
+                 if (r == 0)
+S3:                  creat(F);
+                     ...
 \end{verbatim}
 \end{footnotesize}
-    \center{\vskip -3mm \hskip -5mm \bf (a)}
   \end{minipage}
-  \begin{minipage}{.49\linewidth}
+  \begin{minipage}{.39\linewidth}
 \begin{footnotesize}
 \begin{verbatim}
+       P1             P2
+-----------------------------
       ...
-S1: write(F,x);   ...
-S2:   ...     read(F,b);
-              if (b=='x')
-S3:		  write(F,y);
-                  ...
+S1: write(F,x);       ...
+S2:   ...         read(F,b);
+                  if (b == 'x')
+S3:                 write(F,y);
+                      ...
 \end{verbatim}
 \end{footnotesize}
-    \center{\vskip -3mm \hskip -5mm \bf (b)}
   \end{minipage}
   \caption{{\em Replay divergence examples.}} \label{racepro:fig:diverge}
 \end{minipage}
-\vskip -3mm
 \end{figure}
 
-\begin{table*}[t]
+\begin{sidewaystable}
+% \begin{table}[]
 \centering
 \setlength{\tabcolsep}{3pt}
 
@@ -1434,10 +1420,8 @@ compilation failure \\
 \caption{{\em Bugs found by \racepro.}  Bugs are identified by
   ``distribution - bug ID''. New bugs  are identified as ``new - bug
   number''}. \label{racepro:tab:bugs}
-\vskip -4mm
-
-\vskip -2mm
-\end{table*}
+% \end{table}
+\end{sidewaystable}
 
 Replay divergence is reportedly a serious problem for a previous race
 classifier~\cite{pinsel:pldi07}, where it can occur for two
@@ -1535,7 +1519,8 @@ known and unknown bugs, and measured its performance overhead.  For
 our experiments, the software used for \racepro was Linux kernel 2.6.35,
 Python 2.6.6, Cython 0.14, Networkx 1.1-2, and UnionFs-Fuse 0.23.
 
-\begin{table*}[t]
+
+\begin{sidewaystable}
 \centering
 \setlength{\tabcolsep}{3pt}
 
@@ -1573,8 +1558,7 @@ new-4            &  19  &  4672  &  716   &  8     &  0     &  7    &  1   &  1.
   generate an execution branch and {\bf Validate} the average time to
   validate a race. } \label{racepro:tab:bug-stat}
 
-\vskip -0mm
-\end{table*}
+\end{sidewaystable}
 
 \subsection{Bugs Found} \label{racepro:sec:bug}
 
