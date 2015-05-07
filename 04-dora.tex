@@ -1029,7 +1029,9 @@ patches often attempt to fix an edge case in an application.
 \section{Evaluation}
 \label{dora:sec:results}
 
-\begin{table*}[t]
+
+\begin{sidewaystable}
+% \begin{table*}[t]
 \begin{center}
 \small
 \begin{tabular}{|l|l|l|l|}   \hline
@@ -1086,7 +1088,66 @@ patches often attempt to fix an edge case in an application.
 \renewcommand\thetable{2}
 \caption{Application scenarios}
 \label{dora:tab:scenarios}
-\end{table*}
+% \end{table*}
+
+
+
+% \begin{table*}[t]
+\begin{center}
+\small
+\begin{tabular}{|l|l|l|}   \hline
+{\bf Name} & {\bf Debugging Change} & {\bf Replay Mutations} \\
+\hline\hline 
+		apache-log &
+		Modify log format in configuration file &
+		Add 1 {\tt fstat()}, 1 {\tt mmap()}, and 3 {\tt write()} per request
+		\\
+\hline
+		apache-sec &
+		Add print statements for debugging &
+		Add 1 {\tt fstat()}, 1 {\tt mmap()} and then 2 {\tt write()} per
+		request \\
+\hline
+		exim &
+		Recompile with debugging options enabled &
+		None \\
+\hline
+		mysql &
+		Add conditional print statements for debugging &
+		Add 1 {\tt fstat()}, 1 {\tt mmap()}, 1 memory event, 12 {\tt write()}
+		\\
+\hline
+		nginx &
+		Change the config file to enable debug messages &
+		Add 508 {\tt write()}, delete 1064 syscalls \\
+\hline
+		proftpd &
+		Recompile with debugging options enabled &
+		Add 1 {\tt close()} \\
+\hline
+		redis &
+		Log erroneous client requests &
+		Add 1 {\tt open()}, at least 3 {\tt write()} and 1 {\tt close()} per request
+		\\
+\hline
+		squid &
+		Save parsed requests to file &
+		Add 1 {\tt open()}, at least 10 {\tt write()} and 1 {\tt close()} per
+		request \\
+\hline
+		wget &
+		Change language from Italian to Japanese &
+		Replace 17 {\tt write()}, 24 {\tt mmap()}, 2 {\tt open()}, and delete
+		5 syscalls \\
+\hline
+\end{tabular}
+\end{center}
+\renewcommand\thetable{3}
+\caption{Application modifications for debugging}
+\label{dora:tab:debugging}
+% \end{table*}
+
+\end{sidewaystable}
 
 We have implemented a prototype of {\dora} in Linux. The recorder and
 replayer run in kernel space while the explorer runs in user space.
@@ -1168,61 +1229,6 @@ Table~\ref{dora:tab:debugging} lists the application changes needed to use vario
 debugging and diagnosis techniques for each scenario.
 {\dora} successfully found the $d$-optimal replay for all of these
 application changes. Table~\ref{dora:tab:debugging} shows the needed replay mutations.
-
-\begin{table*}[t]
-\begin{center}
-\small
-\begin{tabular}{|l|l|l|}   \hline
-{\bf Name} & {\bf Debugging Change} & {\bf Replay Mutations} \\
-\hline\hline 
-		apache-log &
-		Modify log format in configuration file &
-		Add 1 {\tt fstat()}, 1 {\tt mmap()}, and 3 {\tt write()} per request
-		\\
-\hline
-		apache-sec &
-		Add print statements for debugging &
-		Add 1 {\tt fstat()}, 1 {\tt mmap()} and then 2 {\tt write()} per
-		request \\
-\hline
-		exim &
-		Recompile with debugging options enabled &
-		None \\
-\hline
-		mysql &
-		Add conditional print statements for debugging &
-		Add 1 {\tt fstat()}, 1 {\tt mmap()}, 1 memory event, 12 {\tt write()}
-		\\
-\hline
-		nginx &
-		Change the config file to enable debug messages &
-		Add 508 {\tt write()}, delete 1064 syscalls \\
-\hline
-		proftpd &
-		Recompile with debugging options enabled &
-		Add 1 {\tt close()} \\
-\hline
-		redis &
-		Log erroneous client requests &
-		Add 1 {\tt open()}, at least 3 {\tt write()} and 1 {\tt close()} per request
-		\\
-\hline
-		squid &
-		Save parsed requests to file &
-		Add 1 {\tt open()}, at least 10 {\tt write()} and 1 {\tt close()} per
-		request \\
-\hline
-		wget &
-		Change language from Italian to Japanese &
-		Replace 17 {\tt write()}, 24 {\tt mmap()}, 2 {\tt open()}, and delete
-		5 syscalls \\
-\hline
-\end{tabular}
-\end{center}
-\renewcommand\thetable{3}
-\caption{Application modifications for debugging}
-\label{dora:tab:debugging}
-\end{table*}
 
 {\bf apache-log} was originally intended to show how {\dora} could be used
 for retroactive logging, but ended up
@@ -1351,7 +1357,9 @@ system calls.
 \subsection{Patch Validation}
 \label{dora:sec:validation}
 
-\begin{table*}[t]
+
+\begin{sidewaystable}
+% \begin{table*}[t]
 \begin{center}
 \small
 \begin{tabular}{|l|l|l|}   \hline
@@ -1398,7 +1406,8 @@ system calls.
 \renewcommand\thetable{5}
 \caption{Application patches tested against exploits}
 \label{dora:tab:exploits}
-\end{table*}
+% \end{table*}
+\end{sidewaystable}
 
 For each bug exhibited by the workloads listed in the third column of
 Table~\ref{dora:tab:scenarios}, we replayed the
