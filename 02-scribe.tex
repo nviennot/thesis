@@ -1420,49 +1420,53 @@ Firefox ({\tt firefox}), Acrobat Reader ({\tt acroread}), MPlayer
 applications on the blade which lacks a monitor, we used VNC
 (TightVNC Server 1.3.9) to provide a virtual desktop. 
 
-\begin{figure}[]
-  \begin{minipage}[b]{0.5\linewidth}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/scribe/overhead}
+  \vspace{-5em}
+  \caption{Recording runtime overhead}
+  \label{scribe:fig:overhead}
+\end{figure}
+
+\begin{figure}[t]
     \centering
-    \includegraphics[width=3.1in]{figures/scribe/overhead}
-    \caption{Recording runtime overhead}
-    \label{scribe:fig:overhead}
-  \end{minipage}
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \includegraphics[width=3.1in]{figures/scribe/storage}
+    \includegraphics[width=\linewidth]{figures/scribe/storage}
+  \vspace{-5em}
     \caption{Recording storage growth}
     \label{scribe:fig:storage}
-  \end{minipage}
-
 \end{figure}
-\begin{figure}[]
-  \begin{minipage}[b]{0.5\linewidth}
+
+\begin{figure}[t]
     \centering
-    \includegraphics[width=3.1in]{figures/scribe/totals}
+    \includegraphics[width=\linewidth]{figures/scribe/totals}
+  \vspace{-5em}
     \caption{No. of processes and threads}
     \label{scribe:fig:totals}
-  \end{minipage}
-  \begin{minipage}[b]{0.5\linewidth}
-    \centering
-    \includegraphics[width=3.1in]{figures/scribe/syncpts2}
-    \caption{Sync points interval and length}
-    \label{scribe:fig:syncpts}
-  \end{minipage}
 \end{figure}
 
-\begin{figure}
-  \begin{minipage}[b]{0.5\linewidth}
+\begin{figure}[t]
     \centering
-    \includegraphics[width=3.1in]{figures/scribe/stats}
+    \includegraphics[width=\linewidth]{figures/scribe/syncpts2}
+  \vspace{-5em}
+    \caption{Sync points interval and length}
+    \label{scribe:fig:syncpts}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/scribe/stats}
+  \vspace{-5em}
     \caption{Count of signals and memory}
     \label{scribe:fig:stats}
-  \end{minipage}
-  \begin{minipage}[b]{0.5\linewidth}
+\end{figure}
+
+\begin{figure}[t]
     \centering
-    \includegraphics[width=3.1in]{figures/scribe/delays2}
+    \includegraphics[width=\linewidth]{figures/scribe/delays2}
+  \vspace{-5em}
     \caption{Delay of signals and memory}
     \label{scribe:fig:delays}
-  \end{minipage}
 \end{figure}
 
 We measured the performance of \scribe{} using the benchmark workloads
