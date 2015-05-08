@@ -4,47 +4,75 @@
 \section{Introduction}
 \label{sec:intro}
 
-We live in a data-driven world. Web applications today -- from
-the simplest smartphone game to the Web's most complex application -- strive to
-acquire and integrate data into new, value-added services. Data -- such as user
-actions, social information, or locations -- can improve business revenues by
-enabling effective product placement and targeted advertisements. It can enhance
-user experience by letting applications predict and seamlessly adapt to changing
-user needs and preferences. It can enable a host of useful
-value-added features, such as recommendations for what to search for, what to
-buy, or where to eat. Agility and ease of integration of new data
-types and data-driven services are key requirements in this emerging data-driven
-Web world.
+Systems that provides fault-tolerance are typically built on top of
+application state record-replay mechanisms. Resilient distributed databases replicate data on
+different machines. Aside from fault-tolerance, running replicas provide other
+benefits such as horizontal scalability for load balancing. Databases (DBs) that
+implement data replication protocols often hide an underlying record-replay
+mechanism. Data replication can be seen as recording state modification on a
+primary and replayed on a replica. For example, many distributed databases such
+as MongoDB, RethinkDB or Elasticsearch provide a log based replication mechanism,
+an application state record-replay mechanism.  The target audience of these
+distributed databases are typically Web applications.
 
-Unfortunately, creating and evolving data-driven Web applications is
-difficult due to the lack of a coherent data architecture for
-Web applications. A typical Web application starts out as some core
-application logic backed by a single database (DB) backend.
-As data-driven features are added, the application's architecture becomes increasingly complex.
-The user base grows to a point where performance metrics drive developers to
-denormalize data. As features are removed and added, the DB schema becomes
-bloated, making it increasingly difficult to manage and evolve.
-To make matters worse, different data-driven features often require different
-data layouts on disk and even different DB engines.
+Web applications are increasingly built using a service-oriented
+architecture that integrates composable services using a variety of DBs.
 For example, graph-oriented DBs, such as Neo4j and Titan, optimize for
 traversal of graph data and are often used to implement recommendation
 systems~\cite{db-revolution}; search-oriented DBs, such as
 Elasticsearch and Solr, offer great performance for textual searches; and
 column-oriented DBs, such as Cassandra and HBase,
-are optimized for high write throughput.
 
-Because of the need to effectively manage, evolve, and specialize
-DBs to support new data-driven features, Web applications
-are increasingly built using a service-oriented architecture that
-integrates composable services using a variety and multiplicity of
-DBs, including SQL and NoSQL.
-These loosely coupled services with bounded contexts are called {\em
-microservices}~\cite{books/microservices}.
-Often, the same data, needed by different services, must be replicated across
-their respective DBs.
-Replicating the data in real time with good semantics across different DB
-engines is a difficult problem for which no good, general approach currently
-exists.
+Often, the same data, needed by multiple services, must be replicated across
+different DBs and kept in sync. Unfortunately, the data replication engines of
+these DBs are vendor specific and not compatible with each other. To complicate
+matters further, these replication engines offer very different consistency
+semantics which makes web development difficult.
+It is thus desirable to provide a generic data replication system compatible
+with most databases and offer an easy to understand consistency model in the
+context of Web applications.
+
+% We live in a data-driven world. Web applications today -- from
+% the simplest smartphone game to the Web's most complex application -- strive to
+% acquire and integrate data into new, value-added services. Data -- such as user
+% actions, social information, or locations -- can improve business revenues by
+% enabling effective product placement and targeted advertisements. It can enhance
+% user experience by letting applications predict and seamlessly adapt to changing
+% user needs and preferences. It can enable a host of useful
+% value-added features, such as recommendations for what to search for, what to
+% buy, or where to eat. Agility and ease of integration of new data
+% types and data-driven services are key requirements in this emerging data-driven
+% Web world.
+
+% Unfortunately, creating and evolving data-driven Web applications is
+% difficult due to the lack of a coherent data architecture for
+% Web applications. A typical Web application starts out as some core
+% application logic backed by a single database (DB) backend.
+% As data-driven features are added, the application's architecture becomes increasingly complex.
+% The user base grows to a point where performance metrics drive developers to
+% denormalize data. As features are removed and added, the DB schema becomes
+% bloated, making it increasingly difficult to manage and evolve.
+% To make matters worse, different data-driven features often require different
+% data layouts on disk and even different DB engines.
+% For example, graph-oriented DBs, such as Neo4j and Titan, optimize for
+% traversal of graph data and are often used to implement recommendation
+% systems~\cite{db-revolution}; search-oriented DBs, such as
+% Elasticsearch and Solr, offer great performance for textual searches; and
+% column-oriented DBs, such as Cassandra and HBase,
+% are optimized for high write throughput.
+
+% Because of the need to effectively manage, evolve, and specialize
+% DBs to support new data-driven features, Web applications
+% are increasingly built using a service-oriented architecture that
+% integrates composable services using a variety and multiplicity of
+% DBs, including SQL and NoSQL.
+% These loosely coupled services with bounded contexts are called {\em
+% microservices}~\cite{books/microservices}.
+% Often, the same data, needed by different services, must be replicated across
+% their respective DBs.
+% Replicating the data in real time with good semantics across different DB
+% engines is a difficult problem for which no good, general approach currently
+% exists.
 
 We present {\em \synapse}, the first easy-to-use and scalable
 cross-DB replication system for simplifying the development and 
@@ -61,24 +89,20 @@ share with or incorporate from other services in a simple
 publish/subscribe model.  The data is then delivered to the DBs
 in real-time, at scale, and with delivery semantic guarantees.
 
-\synapse makes this possible by leveraging the same abstractions
-that Web programmers already use in widely-used Model-View-Controller
-(MVC) Web frameworks, such as Ruby-on-Rails, Python Django, or PHP
-Symfony.  Using an MVC paradigm, programmers logically separate an
-application into \emph{models}, which describe the data persisted and
-manipulated, and \emph{controllers}, which are units of work that
-implement business logic and act on the models.
-Developers specify what data to share among services within model declarations through \synapse's intuitive API.
-Models are expressed in
-terms of high-level objects that are
-defined and automatically mapped to a DB via {\em Object/Relational
-  Mappers} (ORMs)~\cite{Barcia:2008aa}.  Although different DBs
-may need different ORMs, most ORMs expose a common high-level
-object API to developers that includes create, read, update, and delete
-operations.
-\ \synapse
-leverages this common object API and lets ORMs do the heavy lifting to
-provide a cross-DB translation layer among Web services.
+\synapse makes this possible by leveraging the same abstractions that Web
+programmers already use in widely-used Model-View-Controller (MVC) Web
+frameworks, such as Ruby-on-Rails, Python Django, or PHP Symfony.  Using an MVC
+paradigm, programmers logically separate an application into \emph{models},
+which describe the data persisted and manipulated, and \emph{controllers}, which
+are units of work that implement business logic and act on the models.
+Developers specify what data to share among services within model declarations
+through \synapse's intuitive API.  Models are expressed in terms of high-level
+objects that are defined and automatically mapped to a DB via {\em
+Object/Relational Mappers} (ORMs)~\cite{Barcia:2008aa}.  Although different DBs
+may need different ORMs, most ORMs expose a common high-level object API to
+developers that includes create, read, update, and delete operations.  \synapse
+leverages this common object API and lets ORMs do the heavy lifting to provide a
+cross-DB translation layer among Web services.
 
 \begin{table}[t]
 \centering {
@@ -95,7 +119,6 @@ provide a cross-DB translation layer among Web services.
 \caption{DB types and vendors supported by \synapse.}
 \label{tab:supported-orms}
 \end{table}
-
 
 We have built \synapse on Ruby-on-Rails and released it as open source software
  on GitHub~\cite{synapse-sources}. We demonstrate three
@@ -413,6 +436,51 @@ that are not in the DB schema.  We call these programmer-provided attributes
 as shown in \S\ref{sec:examples}.
 
 
+\subsection{Application State Record-Replay}
+\label{synapse:s:record-replay}
+
+\begin{table}[t]
+ \centering {
+  \begin{tabular}{l l l}\toprule
+    {\bf Property}         & {\bf \scribe}       & {\bf \synapse}                  \\ \midrule
+Replicated state           & OS state            & DB state                        \\
+Actors                     & Userspace processes & Web app processes (distributed) \\
+State mutation API         & System calls        & DB operations                   \\
+State mutation library     & libc                & DB driver                       \\
+Parallelism                & Multi-Core          & Distributed                     \\
+Synchronization engine     & Causal              & Causal                          \\
+Synchronization protocol   & CREW                & CREW                            \\
+Synchronization primitives & Rendezvous points   & Dependency tracking             \\
+Recorded events            & API calls           & DB data                         \\
+Log format                 & Binary              & JSON                            \\
+  \bottomrule
+  \end{tabular}
+ }
+ \caption{{\bf Similarities between \scribe and \synapse }
+ Each row depicts the equivalent entity with \scribe and \synapse.}
+ \label{synapse:tab:similarities}
+\end{table}
+
+\synapse is an application state record-replay system and share many
+similarities with application execution record-replay systems.
+Under \synapse architecture, the publisher application {\em records} operations that
+change its state, which is entirely contained in its DB.  At a later
+point in time, the subscriber {\em replays} these recorded operations mutating
+its state. Considering a publisher app that publishes all of its models, and a
+subscriber app running the same code as the publisher app that subscribes to all
+models, the subscriber is a perfect replica of the publisher. This replica
+can be used for fault-tolerance purposes, a typical use case of record-replay systems.
+
+\synapse shares many similarities with the execution record-replay system \scribe.
+Due to its go live feature, \scribe must maintain a consistent and valid OS
+kernel state at any point in time during replay because the application
+execution may continue uncontrolled at any point in time.
+From this perspective, \scribe (resp. \synapse) records and replays the state of
+the OS (resp. DB).
+Table~\ref{synapse:tab:similarities} summarizes the similarities between the
+two record-replay systems. The important takeaway is that both systems use a
+causal engine to execute state mutation operations.
+
 \subsection{\synapse Delivery Semantics}
 \label{sec:semantics}
 Update delivery semantics define the ordering of updates as viewed by subscribers and are an important part of \synapse's
@@ -517,6 +585,7 @@ predicate. \F~\ref{fig:welcome-email} shows a usage example and
 \S\ref{sec:arch:bootstrapping} describes this situation and
 explains how subscribers demanding higher semantics can deal with semantics
 degradation.
+
 \subsection{\synapse Programming by Example}
 \label{sec:examples}
 
@@ -783,6 +852,7 @@ attribute (interests\_virt) to insert the new interests
 received into the separate table.
 
 
+
 \section{\synapse Architecture}
 \label{sec:arch}
 
@@ -794,14 +864,6 @@ received into the separate table.
              objects and sends them to subscribers, which unmarshal and save them into their DBs.}}
  \label{fig:architecture}
 \end{figure}
-
-\begin{figure}[t]
- \centering
- \includegraphics[width=.45\linewidth,clip=true,trim=5in 0.4in 0 0]{figures/synapse/architecture-less-detail.pdf}
- \caption{{Published message format (JSON).}}
- \label{fig:architecture}
-\end{figure}
-
 \F~\ref{fig:architecture}(a) shows the \synapse architecture applied to an
 application with a single publisher and subscriber. The publisher and subscriber
 may be backed by different DBs with distinct engines, data models, and disk
@@ -843,6 +905,15 @@ message to the broker.
 
 \subsection{Model-Driven Replication}
 \label{sec:arch:cross-db-propagation}
+
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=.45\linewidth,clip=true,trim=5in 0.4in 0 0]{figures/synapse/architecture-less-detail.pdf}
+ \caption{{Published message format (JSON).}}
+ \label{fig:architecture}
+\end{figure}
+
 
 To synchronize distinct DBs, \synapse needs to (1) identify the objects being
 written on the publisher, (2) marshal them for shipping to the subscribers, (3)
@@ -1241,6 +1312,8 @@ We and others have built or modified 14 web applications to share data with
 one another via \synapse.  Those built by others have been
 deployed in production by a startup, \crowdtap.  The applications we built
 extend popular open-source apps to integrate them into data-driven ecosystems. 
+We also splitted a popular open-source app into a service oriented architecture
+to demonstrate the usefulness of \synapse in the context of single applications.
 Overall, our development and deployment experience has been positive: we made
 {\em no logical changes} to application code, only adding on
 average a single line of configuration per attribute of each model published.
@@ -1337,6 +1410,36 @@ between the users' interests and product descriptions. Such code need not be
 concerned with where the user's interests come from as they
 automatically exist as part of the data model (thanks to \synapse).
 
+\subsection{Splitting a monolithic app into services with \synapse}
+\label{synapse:sec:apps:gitlab}
+
+We used \synapse to split an open source monolithic application, GitLab, into a
+service oriented architecture application. GitLab is a source revision system
+frontend similar to GitHub.  GitLab is built on Ruby-on-Rails and used by more
+than 100,000 companies.  With \synapse, we were able to extract all email
+functionality into a separate service, independent of the core application,
+running on its own database.
+
+We extracted 276 lines from GitLab core application into the mailer.  10 models
+had to be published out of a total of 22.  To increase our confidence that the
+extraction was successful, we leveraged \synapse testing framework. We were able
+to migrate 124 tests cases (700 lines of code) related to the mailer from the
+GitLab core application to the extracted mailer service.  We did not have to
+rewrite or modify any of these test cases.  \synapse transparently reuse the
+data factories to mock \synapse messages as if they were received from the main
+application, exactly like it would happen in a deployed system. These passing
+test cases demonstrate the correctness of the feature extraction into its own
+service.
+
+Even through \synapse greatly eases data sharing between the two services,
+extracting the mailer functionality from the core GitLab application took
+a significant effort due to tight coupling between components in the original
+application.
+
+% However, the mailer sometimes needs to render the output of a {\tt git diff} on
+% a specific repository. Because git repositories are not replicated, the mailer
+% must communicate with the main application through a synchronous API to
+% retrieve computation on git repositories.
 
 \section{Evaluation}
 \label{sec:evaluation}
