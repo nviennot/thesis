@@ -1,0 +1,88 @@
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+We presented four different record-replay systems to achieve different goals.
+We introduced \scribe, an OS-level deterministic execution record-replay system
+to capture and reproduce hard to find bugs; \racepro, a process race detection
+system to improve software correctness in deployed systems; \dora, a mutable
+replay system to reproduce non-deterministic bugs with retroactive debugging;
+and \synapse, a application-state replication system for distributed
+applications to facilitate the use of heterogeneous databases in
+service-oriented architectures.
+
+First, we presented \scribe. The first operating system mechanism to provide transparent,
+deterministic execution record and replay of multi-threaded and multi-process
+applications on commodity multiprocessors and operating systems.  \scribe
+records and replays multiple processes by accounting for nondeterministic
+interactions among processes and their execution environment.  \scribe
+introduces \em{rendezvous} points to ensure correct partial ordering of execution
+based on system call dependencies, and \em{sync points} to convert asynchronous
+interactions that can occur at arbitrary times into synchronous events that are
+much easier to record and replay.  \scribe{} can transition an application to
+running live at any time, and use checkpoints to record and replay from any
+point in time.
+We demonstrated that \scribe can record and replay widely used server and
+desktop applications, including Apache, MySQL, Firefox, Acrobat, OpenOffice,
+parallel make, and MPlayer.  On a 4-CPU multiprocessor, \scribe{}'s recording
+overhead was under 2.5\% for server applications, and less than 15\% for desktop
+applications.  These results show for the first time a new level of transparent
+record and replay performance on commodity multiprocessor systems that was not
+previously possible. 
+
+Second, we have presented the first study of real process races, and the first
+system, \racepro, for effectively detecting process races beyond TOCTOU
+and signal races. Our study has shown that process races are
+numerous, elusive, and a real threat.  To address this problem, \racepro
+automatically detects process races, checking deployed
+systems \emph{in-vivo} by recording live executions and then checking
+them later.  It thus increases checking coverage beyond the
+configurations or executions covered by software vendors or beta
+testing sites.  First, \racepro records executions of multiple processes
+while tracking accesses to shared kernel resources via system
+calls. Second, it detects process races by modeling recorded system
+calls as load and store micro-operations to shared resources and
+leveraging existing memory race detection algorithms.  Third, for each
+detected race, it modifies the original recorded execution to
+reproduce the race by changing the order of system calls involved in
+the races.  It replays the modified recording up to the race, allows
+it to resume live execution, and checks for failures to determine if
+the race is harmful.  We have implemented \racepro, shown that it has
+low recording overhead so that it can be used with minimal impact on
+deployed systems, and used it with real applications to effectively
+detect \nracepro process races, including several previously unknown
+bugs in shells, databases, and makefiles.
+
+Third, we introduced the concept of mutable replay, and the first transparent
+mutable record-replay system with \dora allowing a recorded execution of an
+application to be replayed with a modified version of the application. This
+feature, not available in previous record-replay systems, enables powerful new
+functionality. In particular, \dora can help reproduce, diagnose, and fix
+software bugs by replaying a version of a recorded application that is
+recompiled with debugging information, reconfigured to produce verbose log
+output, modified to include additional print statements, or patched to fix a
+bug.  This is made possible by the use of lightweight operating system
+mechanisms to record and replay without imposing unnecessary timing and ordering
+constraints.  \dora introduces an explorer that directs the replay mechanism to
+identify a mutable replay of the modified application that minimizes differences
+with the original unmodified application execution.
+
+Lastly, we presented \synapse, an heterogeneous database replication system
+specifically designed for web applications in a service-oriented architecture (SOA).
+These applications run on top of their own databases,
+whose layouts, and engines can be completely different, and incorporate
+read-only views of each others' shared data.  Synapse synchronizes these views
+in real-time using a new scalable, consistent replication mechanism that
+leverages the high-level data models in popular MVC-based Web applications to
+replicate data across heterogeneous databases.
+\synapse leverages models and ORMs to perform data integration
+at data object level, which provides a level of compatibility between both SQL
+and NoSQL DBs. It leverages controllers to support application-specific
+consistency semantics without sacrificing scalability.  We have implemented
+\synapse for Ruby-on-Rails, shown that it provides good performance and
+scalability, and deployed it in production for a company.
+
+We have shown systems implementing transparent application execution
+record-replay to improve software reliability, and an application state
+record-replay system allowing services to cleanly share data among a web
+application in a service-oriented architecture. Our findings showcase the wide
+range of use cases of record-replay.
