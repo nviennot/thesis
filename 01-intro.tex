@@ -7,21 +7,19 @@ many potential uses, including diagnosing and debugging applications by
 capturing and reproducing hard to find bugs, dynamic application analysis by
 performing costly instrumentation on replicas that replay application behavior
 recorded on production systems, intrusion analysis by capturing intrusions
-involving non-deterministic effects, and fault-tolerance by providing replicas
-that replay execution and at the occurrence of a fault, go live in place of the
-previously running application instance.
+involving non-deterministic effects, and fault-tolerance by streaming
+a live recording of a primary server execution to its replicas.
 
 Many approaches have tried to provide transparent (i.e., which does not require
 application changes) record-replay functionality, but have suffered from
 fundamental limitations that make them unusable in many cases.  First, most
 approaches only support replaying the recorded application execution, and do not
-allow the replayed instance to go live and continue normal execution.  This only
-works for simple debugging uses.  It does not work for most scenarios, including
-any form of debugging that requires the replayed instance to go live, such as
-debugging past the end of a recorded execution, fault-tolerance which requires
-the replayed instance to be able to go live when the primary fails, or
-time-travel execution in which an application can go back in time and go live
-from any point in its recorded execution.
+allow the replayed instance to {\em go live} to continue normal execution.
+Allowing a replay to go live is necessary for most scenarios, including
+any form of debugging that requires debugging past the end of a recorded execution,
+or fault-tolerance which requires the replayed instance to be able to go live
+when the primary fails, or time-travel execution in which an application can go
+back in time and go live from any point in its recorded execution.
 
 Transparent application execution record-replay mechanisms can be implemented at different levels:
 hardware, VM, kernel, and userspace. Previous approaches that require
@@ -44,43 +42,224 @@ Today, most large scale web applications rely on many different databases as
 each database provides a specific feature-set. Unfortunately, the data replication
 engines of these databases are not compatible with each other, and offer very
 different consistency semantics. Because the same data often need to be
-replicated across all these database, it is desirable to provide a generic
-record-replay system compatible with such databases.
+replicated across all these database, it is desirable to provide a
+record-replay system compatible with many databases.
 
 First, we present \scribe (\S\ref{ch:scribe}), an OS-level record-replay
-mechanism.  Scribe introduces new lightweight OS mechanisms, rendezvous and sync
+mechanism. The main challenge when implementing such deterministic record-replay
+system is to keep the recording overhead low. To incur minimal record overhead,
+\scribe introduces two new lightweight OS mechanisms, rendezvous and sync
 points, to efficiently record nondeterministic interactions such as related
-system calls, signals, and shared memory accesses. Rendezvous points make a
-partial ordering of execution based on system call dependencies sufficient for
-replay, avoiding the recording overhead of maintaining an exact execution
-ordering.  Sync points convert asynchronous interactions that can occur at
+system calls, signals, and shared memory accesses. For example, when
+two concurrent processes access the same file, the original order in which
+each access took place must be preserved when replaying.
+Instead of recording the kernel scheduling decisions, \scribe piggy backs on
+existing kernel synchronization primitives such as inode mutexes or file
+descriptor locks, and records in which order these locks are taken by the kernel.
+We call these rendezvous points, and they make a partial ordering of execution
+based on system call dependencies sufficient for replay, avoiding the recording
+overhead of maintaining an exact execution ordering.
+
+Another difficult problem to achieve deterministic replay is to replay
+asynchronous interactions that can occur at arbitrary times during the
+execution. For example, POSIX signal delivery may occur at any point in the
+application instruction flow. Previous work have developed complex techniques
+of instrumenting applications with the use of hardware counter to precisely
+locate where a signal was delivered in the instruction flow.
+\scribe takes a different approach by delaying these asynchronous events
+during the recording to a point where it is much easier to replay
+deterministically. For example, when an application is being recorded,
+instead of delivering a signal in the middle of the instruction flow, \scribe
+delivers the signal at the next encountered sync point, such as a system call or
+a deterministic page fault. In other words,
+Sync points allow \scribe to convert asynchronous interactions that can occur at
 arbitrary times into synchronous events that are much easier to record and
-replay.
+replay. In our evaluation, we show that the introduced delay is imperceptible
+in application as sync points occur very frequently.
+
+With multi-threaded applications, replaying accesses to shared memory is
+difficult. The order in which each thread accesses a shared memory location must
+be replayed deterministically. To solve this problem, instead of doing any sort
+of binary instrumentation, \scribe leverages the MMU to monitor memory accesses
+through page faults. \scribe implements a concurrent read, exclusive write
+(CREW) protocol on shared pages. To do so, instead of having all threads share a
+common page table, threads access memory through a per-thread page table, which
+\scribe use to record access order with rendezvous points and sync points.
+At a given point in time, a page may be accessed by only a single thread, the
+owner. When another thread tries to access that same page, a fault occur,
+and an ownership relinquish request is issued to the current owner, which is
+processed at its next sync point. This lightweight mechanism allow low
+overhead of recording shared memory interaction.
+
+Our results show for the first time that (1) sync points are an effective,
+lightweight mechanism for handling nondeterminism due to signals and shared
+memory, (2) sync points occur often enough in real server and desktop
+applications that the vast majority of asynchronous events are handled
+instantaneously, and even when events are deferred, they are delayed for 25 to
+220\us{} on average, (3) an operating system mechanism can record-replay real
+multi-threaded and multi-process applications, (4) transparent, low-overhead
+record-replay can be done for workloads across a wide range of server and
+desktop applications, including Apache, MySQL, Firefox, Acrobat, OpenOffice,
+parallel make, and MPlayer.  On a 4-CPU multiprocessor, \scribe{}'s recording
+overhead was under 2.5\% for server applications, and less than 15\% for desktop
+applications.  These results show for the first time a new level of transparent
+record and replay performance on commodity multiprocessor systems that was not
+previously possible. 
 
 Second, we present \racepro (\S\ref{ch:racepro}), a process race detection
 system to improve software correctness. Process races occur when multiple
 processes access shared operating system resources, such as files, without
-proper synchronization.  Racepro leverages a low overhead record-replay
-mechanism to detect harmful races as it deployed systems as opposed to synthetic
-environments.
+proper synchronization.
+To better understand process races, we present the first study of real process
+races. We study hundreds of real applications across six Linux distributions and
+show that process races are numerous and a real threat to reliability and
+security. Detecting harmful races is difficult for three key challenges.
+The first is scope: process races are extremely heterogeneous.  They may involve
+many different programs.  These programs may be written in different programming
+languages, run within different processes or threads, and access diverse
+resources. The second challenge is coverage: although
+process races are numerous, each particular process race tends to be highly
+elusive.  They are timing-dependent, and tend to surface only in rare
+executions. Arguably worse than thread races, they may occur only under
+specific software, hardware, and user configurations at specific sites.  It is
+hopeless to rely on a few software vendors and beta testing sites to create all
+possible configurations and executions for checking.  The third challenge is
+algorithmic: what race detection algorithm can be used for detecting process
+Existing algorithms assume well-defined load and store instructions and thread
+synchronization primitives. However, the effects of system calls are often
+under-specified and process synchronization primitives are very different from
+those used in shared memory.
+
+\racepro addresses these challenges with four ideas.  First, it checks deployed
+systems \emph{in-vivo}.  While a deployed system is running, \racepro records
+the execution without doing any checking.  \racepro then systematically checks
+this recorded execution for races \emph{offline}.  By checking deployed systems,
+\racepro mitigates the coverage challenge because all user machines together can
+create a much larger and useful set of configurations and executions for
+checking.  By decoupling recording and checking, \racepro reduces its
+performance overhead on the deployed systems.
+Second, \racepro uses the application transparent \scribe engine to record
+deployed applications, mitigating the scope challenge, as no application source
+code or modifications of the checked applications are required, mitigating the
+scope challenge. Third, to detect process races in a recorded execution,
+\racepro models each system call by what we call \emph{load and store
+micro-operations} to shared kernel objects.  \racepro leverages \scribe's
+rendezvous points to facilitate the modeling of these two operations with low
+overhead.  Because these two operations are well-understood by existing race
+detection algorithms, \racepro can leverage these algorithms, mitigating the
+algorithmic challenge.  Fourth, to reduce false positives and negatives,
+\racepro uses \emph{replay and go-live} to validate detected races.  A race
+detected based on the micro-operations may be either \emph{benign} or
+\emph{harmful}, depending on whether it leads to a \emph{failure}, such as a
+segmentation fault or a program abort.  \racepro considers a change in the order
+of the system calls involved in a race to be an \emph{execution branch}.  To
+check whether this branch leads to a failure, \racepro replays the recorded
+execution until the \emph{reordered} system calls then resumes live execution.
+It then runs a set of built-in or user-provided checkers on the live execution
+to detect failures, and emits a bug report only when a real failure is detected.
+
+Our experimental results show that \racepro can be used in production
+environments with only modest recording overhead.  Furthermore, we show that
+\racepro can detect real bugs due to process races in widespread Linux
+deployed systems, including several previously unknown bugs in shells,
+databases, and makefiles.
 
 Third, we present \dora (\S\ref{ch:dora}), a mutable record-replay system which
 allows a recorded execution of an application to be replayed with a modified
 version of the application. This feature, not available in previous
-record-replay systems, enables powerful new functionality. In particular, Dora
+record-replay systems, enables powerful new functionality. In particular, \dora
 can help reproduce, diagnose, and fix software bugs by replaying a version of a
 recorded application that is recompiled with debugging information, reconfigured
 to produce verbose log output, modified to include additional print statements,
 or patched to fix a bug.
+We introduce the concept of mutable replay. Adding a \code{printf()} call
+to the replayed application is intuitively safe and the expected outcome clear,
+but changing thousands of lines of code in the application may incur significant
+differences from the original execution. Intuitively, a mutable replay system
+must find a execution that corresponds as much as possible to the original
+execution. We model the differences of two executions with a user-defined cost
+function, and provide a generic one that works well in most cases.
 
-Lastly, we present \synapse (\S\ref{ch:synapse}), an heterogeneous database
+\dora consists of three components: (1) a recorder that records application
+execution to a log similar to the \scribe engine, (2) a replayer that can replay
+a modified version of the application using the log, and (3) an explorer that
+uses the replayer to find the execution of the modified program that best
+corresponds to the log file. The recorder logs not only non-deterministic
+interactions but also deterministic information such as system call arguments,
+to allow the replayer to identify when a replay diverges from the original
+execution early.
+The explorer evaluates several possible execution paths to find a successful
+mutable replay. It performs a best-first search for an execution of
+the modified program that is as close to the original execution as
+possible according to some cost function. It begins by replaying a
+recorded execution on a modified program. When the replay diverges
+from the original execution, the explorer tries to determine
+why. For example, suppose the modified program made an unexpected
+\code{printf()} call. This could be a new call to produce debugging
+information, or it could simply occur earlier than expected because
+code was deleted. The explorer chooses the most promising possibility
+and communicates its decision to the replayer. This process repeats
+until a successful execution is found.
+
+{\dora} is designed to handle an wide range of real-world programs, including
+multi-threaded applications. It can support a broad range of useful application
+changes, but cannot support arbitrary changes; major changes to the process
+layout or shared memory layout are not supported. Despite this limitation,
+{\dora} is useful in a wide range of real-world use cases for testing,
+debugging, and validating application changes. In fact, we even found a
+previously unknown bug in Apache using {\dora}. {\dora}'s usefulness in practice
+makes sense given that bug fixes tend to be relatively small and rarely change
+core application semantics.
+
+Lastly, we present \synapse (\S\ref{ch:synapse}), an heterogeneous database (DB)
 replication system specifically designed for web applications. These web
 applications behave very differently compared to traditional single-host
 applications as they are distributed and have their state contained in
-databases.  Synapse lets independent services cleanly share data with each other
-in an isolated and scalable way. The services run on top of their own databases,
-whose layouts, and engines can be completely different, and incorporate
-read-only views of each others' shared data.  Synapse synchronizes these views
-in real-time using a new scalable, consistent replication mechanism that
-leverages the high-level data models in popular MVC-based Web applications to
-replicate data across heterogeneous databases.
+databases. Typically, web applications are comprised of many different
+services, each implementing a specific feature, using a specific database.
+For example, the recommendation feature of an e-commerce store can be
+implemented in a separate service powered by a graph DB, while the store
+frontend runs on a traditional SQL DB. These services share a common subset
+of the data, for example the recommendation feature would share the product
+and user data with the store frontend.
+Application state modifications consist of database primitive changes, such as a
+node insertion in a graph DB, or a row update in a SQL DB. 
+Designing a system that allow this common data subset to be synchronized across
+all the different DBs is challenging for four reasons. First, it should be
+compatible with a vast number of DBs, whose layouts and engines may be
+completely different. Second, it should be easy to use: orchestrating the data
+flows inside the internal eco-system of services should be seamless for developers.
+Third, it should provide good consistency guarantees at scale, and fourth
+the replication mechanism should be failure tolerant. Specifically, network partitions
+should not result in having half of the DBs missing some data.
+
+\synapse fulfill these requirements with a key insight. Unlike previous work,
+instead of operating at the DB level to perform replication, \synapse operates
+at the application level. Typically, web applications are structured following
+the model-view-controller (MVC) pattern. Data is accessed following an object-oriented
+abstraction with {\em models}, such as a User class with an email and name
+attribute.  Models are implemented on top of Object/Relational Mappers (ORMs).
+The ORM does the heavy lifting of interacting with the DB so the developers
+don't have to write DB queries. Over the years, many ORMs have been developed,
+each one targeting a different DB. These ORMs have a similar APIs.  For example,
+regardless of the combination ORM/DB, you can expect to just call
+\code{User.create}, and it would work with any DB. \synapse interposes on ORMs
+to monitor accesses to data objects. This allow Synapse to replicate data from
+one DB to another without developer intervention and without having to deal with
+the intricacy of each DBs. With this unified data layer, Synpase is compatible
+with many DBs.
+\synapse provides an easy-to-use API to describe data flows. Developers simply
+annotate their models with \synapse's \code{publish} and \code{subscribe}
+keywords.  Despite this simple API, developers can describe complex eco-systems
+of services. \synapse provides causal consistency delivery semantics by
+transparently intercepting and ordering all read and write queries to the DB in
+a similar fashion to \scribe's rendezvous points. Finally \synapse provides
+a fault-tolerant replication mechanism by implementing two phase commits all
+the way from the source DB to the destination DB.
+
+We have implemented \synapse for Ruby-on-Rails. We present some experimental
+data showing that \synapse scales well up to 60,000 updates/second for various
+workloads.  We and others have built or modified 14 web applications to share
+data with one another via \synapse. Those built by others have been deployed in
+production by a startup, \crowdtap.  The applications we built extend popular
+open-source applications to integrate them into data-driven ecosystems.
