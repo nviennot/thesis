@@ -237,20 +237,20 @@ should not result in having half of the DBs missing some data.
 instead of operating at the DB level to perform replication, \synapse operates
 at the application level. Typically, web applications are structured following
 the model-view-controller (MVC) pattern. Data is accessed following an object-oriented
-abstraction with {\em models}, such as a User class with an email and name
-attribute.  Models are implemented on top of Object/Relational Mappers (ORMs).
-The ORM does the heavy lifting of interacting with the DB so the developers
-don't have to write DB queries. Over the years, many ORMs have been developed,
-each one targeting a different DB. These ORMs have a similar APIs.  For example,
-regardless of the combination ORM/DB, you can expect to just call
-\code{User.create}, and it would work with any DB. \synapse interposes on ORMs
-to monitor accesses to data objects. This allow Synapse to replicate data from
-one DB to another without developer intervention and without having to deal with
-the intricacy of each DBs. With this unified data layer, Synpase is compatible
-with many DBs.
-\synapse provides an easy-to-use API to describe data flows. Developers simply
+abstraction with {\em Models}, such as a \code{User} class with attributes such
+as \code{email} and \code{name}. Models are implemented on top of Object/Relational Mappers (ORMs).
+The ORM does the heavy lifting of interacting with the DB so developers
+do not have to write DB queries. Over the years, many ORMs have been developed,
+each one targeting a different DB. Thankfully, all these ORMs expose a similar API
+to developers to interact with the DB. For example, invoking
+\code{User.create()} would create a new user, regardless of the combination
+ORM/DB.  \synapse interposes on these ORMs to monitor accesses to data objects.
+This allow Synapse to replicate data from
+one DB to another without developer intervention and with little DB-specific code.
+Further, \synapse provides an easy-to-use API to describe data flows. Developers simply
 annotate their models with \synapse's \code{publish} and \code{subscribe}
-keywords.  Despite this simple API, developers can describe complex eco-systems
+keywords to connect data models together.
+Despite this simple API, developers can describe complex eco-systems
 of services. \synapse provides causal consistency delivery semantics by
 transparently intercepting and ordering all read and write queries to the DB in
 a similar fashion to \scribe's rendezvous points. Finally \synapse provides
