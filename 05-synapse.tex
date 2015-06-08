@@ -1481,7 +1481,8 @@ two users in parallel, but processes each user's posts in serial order, thereby
 enforcing causality.
 
 
-\begin{sidewaysfigure}
+\begin{figure}
+% \begin{sidewaysfigure}
   \centering
   \includegraphics[width=\linewidth]{figures/synapse/diaspora1.pdf}
   \caption{{\bf Execution Sample:}
@@ -1490,7 +1491,7 @@ enforcing causality.
      \ding{176} each receive the decorated model with in parallel.}
   \label{fig:diaspora1}
 
-  \vspace{4em}
+  % \vspace{4em}
 
   \includegraphics[width=\linewidth]{figures/synapse/diaspora2.pdf}
   \caption{{\bf Execution with Subscriber Disconnection:}
@@ -1498,7 +1499,8 @@ enforcing causality.
     Mailer comes online and processes the each users first request \ding{176}, then
   each user's second request \ding{177} in parallel.}
   \label{fig:diaspora2}
-\end{sidewaysfigure}
+% \end{sidewaysfigure}
+\end{figure}
 
 \subsection{Application Overheads (Q1)}
 \label{sec:evaluation:overhead}

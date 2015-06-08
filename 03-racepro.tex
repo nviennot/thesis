@@ -1376,52 +1376,31 @@ S3:                 write(F,y);
 \end{minipage}
 \end{figure}
 
-\begin{sidewaystable}
-% \begin{table}[]
+% \begin{sidewaystable}
+\begin{table}[]
 \centering
 \setlength{\tabcolsep}{3pt}
 
-\begin{tabular}{cl}
-{\bf Bug ID} & {\bf Description} \\
+\begin{tabular}{cp{12cm}}
+{\bf Bug ID} & {\bf Description} \\ \hline
+debian-294579    & concurrent \code{adduser} processes read and write \code{/etc/passwd} without synchronization, corrupting this file           \\
+debian-438076    & \code{mv} unlinks the target file before calling atomic \code{rename}, violating the atomicity requirement on \code{mv}       \\
+debian-399930    & \code{logrotate} creates a new file then sets it writable, but deamons may observe it without write permissions               \\
+redhat-54127     & \code{ps | grep} race causes a wrong version of \code{licq 7.3} to be started                                                 \\
+launchpad-596064 & \code{upstart} does not wait until \code{smbd} creates a directory before spawning \code{nmbd}, which requires that directory \\
+launchpad-10809  & \code{bash} updates the history file without synchronization, corrupting this file                                            \\
 \hline
-
-debian-294579 & concurrent \code{adduser} processes read and write \code{/etc/passwd}
-without synchronization, corrupting this file \\
-
-debian-438076 & \code{mv} unlinks the target file before calling
-atomic \code{rename}, violating the atomicity requirement on \code{mv}\\
-
-debian-399930 & \code{logrotate} creates a new file then sets it
-writable, but deamons may observe it without write permissions \\
-
-redhat-54127 & \code{ps | grep} race causes a wrong version of \code{licq 7.3} to
-be started \\
-
-launchpad-596064 & \code{upstart} does not wait until \code{smbd} creates a directory
-before spawning \code{nmbd}, which requires that directory \\ 
-
-launchpad-10809 & \code{bash} updates the history file without
-synchronization, corrupting this file \\
-
-\hline
-
-new-1 & \code{tcsh 6.17} updates the history file without synchronization, even when ``savehist merge'' is set \\
-
-new-2 & \code{updatedb} removes old database before renaming
-the new one, so \code{locate} finds nothing (\code{findutils 4.4.2}) \\
-
-new-3 & concurrent \code{updatedb} processes may cause the database to be
-empty \\
-
-new-4 & incorrect dependencies in Makefile of \code{abr2gbr 1.0.3} may causes
-compilation failure \\
+new-1 & \code{tcsh 6.17} updates the history file without synchronization, even when ``savehist merge'' is set                    \\
+new-2 & \code{updatedb} removes old database before renaming the new one, so \code{locate} finds nothing (\code{findutils 4.4.2}) \\
+new-3 & concurrent \code{updatedb} processes may cause the database to be empty                                                   \\
+new-4 & incorrect dependencies in Makefile of \code{abr2gbr 1.0.3} may causes compilation failure                                 \\
 
 \end{tabular}
 \caption{{\em Bugs found by \racepro.}  Bugs are identified by
   ``distribution - bug ID''. New bugs  are identified as ``new - bug
   number''}. \label{racepro:tab:bugs}
-% \end{table}
-\end{sidewaystable}
+\end{table}
+% \end{sidewaystable}
 
 Replay divergence is reportedly a serious problem for a previous race
 classifier~\cite{pinsel:pldi07}, where it can occur for two
@@ -1520,32 +1499,52 @@ our experiments, the software used for \racepro was Linux kernel 2.6.35,
 Python 2.6.6, Cython 0.14, Networkx 1.1-2, and UnionFs-Fuse 0.23.
 
 
-\begin{sidewaystable}
-\centering
+% \begin{sidewaystable}
+\begin{table}
+% \centering
 \setlength{\tabcolsep}{3pt}
 
-\begin{tabular}{c|ccc|cccc|cccc}
+\begin{tabular}{c|ccc|cccc}
 {\bf } &
   \multicolumn{3}{|c}{\bf Statistics} &
-  \multicolumn{4}{|c}{\bf Number of Races} &
-  \multicolumn{4}{|c}{\bf Execution Times [seconds/race]} \\
-{\bf Name} & {\bf Processes} & {\bf Syscalls} & {\bf Resources} & 
-  {\bf Detected} & {\bf Diverged} & {\bf Benign} & {\bf Harmful} & 
-  {\bf Record} & {\bf Replay} & {\bf Generate} & {\bf Validate} \\
+  \multicolumn{4}{|c}{\bf Number of Races} \\
+  {\bf Name} & {\bf Processes} & {\bf Syscalls} & {\bf Resources} & 
+  {\bf Detected} & {\bf Diverged} & {\bf Benign} & {\bf Harmful} \\
 \hline
 
-debian-294579    &  19  &  5275  &  658   &  4232  &  3019  &  1171 &  42  &  2.47  &  2.43  &  3.42  &  2.92  \\
-debian-438076    &  21  &  1688  &  213   &  50    &  0     &  46   &  4   &  3.76  &  0.75  &  0.84  &  2.87  \\
-debian-399930    &  10  &  1536  &  279   &  17    &  0     &  13   &  4   &  0.59  &  0.57  &  0.75  &  0.84  \\
-redhat-54127     &  14  &  1298  &  229   &  35    &  15    &  16   &  4   &  0.27  &  0.25  &  0.66  &  0.41  \\
-launchpad-596064 &  34  &  5564  &  722   &  272   &  267   &  3    &  2   &  21.45 &  3.11  &  2.49  &  1.70  \\
-launchpad-10809  &  13  &  1890  &  205   &  143   &  117   &  16   &  10  &  0.27  &  0.25  &  0.81  &  0.44  \\
-new-1            &  12  &  2569  &  201   &  137   &  90    &  33   &  14  &  0.56  &  0.54  &  1.52  &  0.76  \\
-new-2            &  47  &  2621  &  467   &  82    &  13    &  27   &  42  &  0.89  &  0.88  &  1.44  &  1.16  \\
-new-3            &  30  &  4361  &  2981  &  17    &  0     &  13   &  4   &  2.63  &  2.61  &  2.34  &  2.98  \\
-new-4            &  19  &  4672  &  716   &  8     &  0     &  7    &  1   &  1.01  &  0.98  &  4.81  &  1.35  \\
-
+debian-294579    &  19  &  5275  &  658   &  4232  &  3019  &  1171 &  42  \\
+debian-438076    &  21  &  1688  &  213   &  50    &  0     &  46   &  4   \\
+debian-399930    &  10  &  1536  &  279   &  17    &  0     &  13   &  4   \\
+redhat-54127     &  14  &  1298  &  229   &  35    &  15    &  16   &  4   \\
+launchpad-596064 &  34  &  5564  &  722   &  272   &  267   &  3    &  2   \\
+launchpad-10809  &  13  &  1890  &  205   &  143   &  117   &  16   &  10  \\
+new-1            &  12  &  2569  &  201   &  137   &  90    &  33   &  14  \\
+new-2            &  47  &  2621  &  467   &  82    &  13    &  27   &  42  \\
+new-3            &  30  &  4361  &  2981  &  17    &  0     &  13   &  4   \\
+new-4            &  19  &  4672  &  716   &  8     &  0     &  7    &  1   \\
+\hline
+\hline
 \end{tabular}
+
+\begin{tabular}{c|cccc}
+{\bf } &
+  \multicolumn{4}{|c}{\bf Execution Times [seconds/race]} \\
+  {\bf Record} & {\bf Replay} & {\bf Generate} & {\bf Validate} \\
+\hline
+debian-294579    &  2.47  &  2.43  &  3.42  &  2.92  \\
+debian-438076    &  3.76  &  0.75  &  0.84  &  2.87  \\
+debian-399930    &  0.59  &  0.57  &  0.75  &  0.84  \\
+redhat-54127     &  0.27  &  0.25  &  0.66  &  0.41  \\
+launchpad-596064 &  21.45 &  3.11  &  2.49  &  1.70  \\
+launchpad-10809  &  0.27  &  0.25  &  0.81  &  0.44  \\
+new-1            &  0.56  &  0.54  &  1.52  &  0.76  \\
+new-2            &  0.89  &  0.88  &  1.44  &  1.16  \\
+new-3            &  2.63  &  2.61  &  2.34  &  2.98  \\
+new-4            &  1.01  &  0.98  &  4.81  &  1.35  \\
+\end{tabular}
+
+
+
 \caption{{\em Bug detection statistics.}  {\bf Processes} is the
   number of processes, {\bf Syscalls} the number of system calls
   occured, and {\bf Resources} the number of distinct shared resources
@@ -1558,7 +1557,8 @@ new-4            &  19  &  4672  &  716   &  8     &  0     &  7    &  1   &  1.
   generate an execution branch and {\bf Validate} the average time to
   validate a race. } \label{racepro:tab:bug-stat}
 
-\end{sidewaystable}
+% \end{sidewaystable}
+\end{table}
 
 \subsection{Bugs Found} \label{racepro:sec:bug}
 
