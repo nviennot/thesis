@@ -1,5 +1,7 @@
-\chapter{Conclusion}
+\chapter{Conclusion and Future Work}
 \label{ch:conclusion}
+
+\section{Conclusion}
 
 We presented four different record-replay systems to achieve different goals.
 We introduced \scribe, an OS-level deterministic execution record-replay system
@@ -10,28 +12,34 @@ and \synapse, a application-state replication system for distributed
 applications to facilitate the use of heterogeneous databases in
 service-oriented architectures.
 
-First, we presented \scribe. The first operating system mechanism to provide transparent,
-deterministic execution record and replay of multi-threaded and multi-process
-applications on commodity multiprocessors and operating systems.  \scribe
-records and replays multiple processes by accounting for nondeterministic
-interactions among processes and their execution environment.  \scribe
-introduces \em{rendezvous} points to ensure correct partial ordering of execution
-based on system call dependencies, and \em{sync points} to convert asynchronous
-interactions that can occur at arbitrary times into synchronous events that are
-much easier to record and replay.  \scribe{} can transition an application to
-running live at any time, and use checkpoints to record and replay from any
-point in time.
-We demonstrated that \scribe can record and replay widely used server and
-desktop applications, including Apache, MySQL, Firefox, Acrobat, OpenOffice,
-parallel make, and MPlayer.  On a 4-CPU multiprocessor, \scribe{}'s recording
-overhead was under 2.5\% for server applications, and less than 15\% for desktop
-applications.  These results show for the first time a new level of transparent
-record and replay performance on commodity multiprocessor systems that was not
-previously possible. 
+First, we presented \scribe{}, the first operating system mechanism to provide
+transparent, deterministic execution record and replay of multi-threaded and
+multi-process applications on commodity multiprocessors and operating systems.
+\scribe{} records and replays multiple processes by accounting for
+nondeterministic interactions among processes and their execution environment.
+\scribe{} introduces {\em rendezvous points} to ensure correct partial ordering
+of execution based on system call dependencies, and {\em sync points} to convert
+asynchronous interactions that can occur at arbitrary times into synchronous
+events that are much easier to record and replay.  \scribe{} can transition an
+application  to running live at any time, and use checkpoints to record and
+replay from any point in time.
+We have implemented \scribe{} without changing, relinking, or
+recompiling applications, libraries, or operating system kernels, and
+without any specialized hardware support. It works on commodity Linux
+operating systems, and commodity multi-core and multiprocessor
+hardware.  Our evaluation shows for the first time that an operating
+system mechanism can correctly and transparently record and replay
+multi-process and multi-threaded applications on multiprocessors.  The
+evaluation also provides strong empirical evidence that 
+real server and desktop applications perform frequent
+operating system activities which can serve as sync points.
+\scribe{} recording overhead is modest for server applications including Apache
+and MySQL, and for desktop applications including Firefox, Acrobat, OpenOffice,
+parallel kernel compilation, and movie playback.
 
 Second, we have presented the first study of real process races, and the first
 system, \racepro, for effectively detecting process races beyond TOCTOU
-and signal races. Our study has shown that process races are
+and signal races.   Our study has shown that process races are
 numerous, elusive, and a real threat.  To address this problem, \racepro
 automatically detects process races, checking deployed
 systems \emph{in-vivo} by recording live executions and then checking
@@ -53,7 +61,7 @@ detect \nracepro process races, including several previously unknown
 bugs in shells, databases, and makefiles.
 
 Third, we introduced the concept of mutable replay, and the first transparent
-mutable record-replay system with \dora allowing a recorded execution of an
+mutable record-replay system with \dora, allowing a recorded execution of an
 application to be replayed with a modified version of the application. This
 feature, not available in previous record-replay systems, enables powerful new
 functionality. In particular, \dora can help reproduce, diagnose, and fix
@@ -65,9 +73,23 @@ mechanisms to record and replay without imposing unnecessary timing and ordering
 constraints.  \dora introduces an explorer that directs the replay mechanism to
 identify a mutable replay of the modified application that minimizes differences
 with the original unmodified application execution.
+Our experimental results on a Linux prototype demonstrate that mutable
+replay is feasible across a wide range of real-world applications and
+application changes which can reach thousands of lines of code, even
+without support for major changes to core application semantics.  We
+show that mutable replay is useful for enabling common debugging
+techniques not possible with previous record-replay systems.  We
+also show that mutable replay enables validation of security patches
+against both exploits and production workloads. This is all
+accomplished without requiring source code modifications and with low
+recording overhead, enabling usage on production systems.  These
+results demonstrate that mutable replay has the potential to enable
+new techniques for debugging and patch testing and validation, which
+can lead to substantial improvements in software reliability and developer
+productivity.
 
 Lastly, we presented \synapse, an heterogeneous database replication system
-specifically designed for web applications in a service-oriented architecture (SOA).
+specifically designed for web applications in a service-oriented architecture.
 These applications run on top of their own databases,
 whose layouts, and engines can be completely different, and incorporate
 read-only views of each others' shared data.  Synapse synchronizes these views
@@ -81,8 +103,117 @@ consistency semantics without sacrificing scalability.  We have implemented
 \synapse for Ruby-on-Rails, shown that it provides good performance and
 scalability, and deployed it in production for a company.
 
-We have shown systems implementing transparent application execution
+We have shown four systems implementing transparent application execution
 record-replay to improve software reliability, and an application state
 record-replay system allowing services to cleanly share data among a web
-application in a service-oriented architecture. Our findings showcase the wide
-range of use cases of record-replay.
+application in a service-oriented architecture. Our findings showcase numerous
+use cases of record-replay, ranging from (1) debugging applications by capturing
+hard to find bugs and reproducing them with recompiled and reconfigured version
+of applications to greatly facilitate debugging, (2) dynamic application
+analysis by performing costly instrumentation on replicas that replay
+application behavior recorded on production systems, such as process race
+detection, and (3) heterogeneous database replication.
+
+\section{Future Work}
+
+The work developed in this dissertation raises the possibility for a number of
+improvements and challenging questions to consider for future research
+directions.
+While \scribe shows excellent recording overhead in many applications, it can
+exhibit high overhead with applications where multiple threads write at a
+very high rate to the same memory page, causing page ownership to ping-pong
+between threads degrading performance significantly.
+Page ownership ping-ponging may also occur due to false data sharing among
+threads. For example, if two private objects of two different threads are placed
+on the same page, \scribe would serialize accesses to these objects even though
+these objects are private to each thread.
+To alleviate this overhead issue, applications could cooperate with \scribe: instead
+of recording page access ordering transparently at the kernel level,
+applications could inform the recording engine about which objects are accessed.
+This cooperation can be done in two ways. With the first one,
+\scribe still performs memory tracking as usual, except that the recorded
+application is modified in a way to acquire and release pages ownership in
+specific hot code paths. In addition, the application would have to store
+unrelated objects on different pages to avoid false sharing effects.
+This method is tolerant to application bugs as the kernel would still serialize
+all memory accesses even in when hints given by the applications are incorrect.
+The second method is to offload all object accesses serialization to the application.
+Since the application should already have serialization primitives to protect
+multiple writers accessing the same object, this mechanism is analogous to
+\scribe's rendezvous points, but operating with the application objects as
+opposed to kernel objects. This mechanism would thus have a very modest overhead,
+despite high contention, and have no false sharing issues.
+However, if developers misuse these user-space
+rendezvous points, \scribe would no longer be able to guarantee deterministic
+replay, as opposed to the first method. This second method is thus more suitable
+to implement in runtime environments, such as the Java Virtual Machine (JVM).  In
+these cases, assuming the runtime environment is correctly implemented, \scribe
+would be able to guarantee deterministic replay with a much lower overhead.
+
+As an increasing number of applications are using higher level languages running
+atop of virtual machines, such as the JVM, the Ruby runtime, Python's interpreter,
+the V8 engine for JavaScript to name a few, it becomes natural to offload \scribe's
+recording engine of certain tasks. As discussed earlier, using user-space
+rendezvous points is beneficial for performance, but would also allow
+better application semantics extraction for use cases such as \racepro or \dora.
+Other tasks can be offloaded, such as the interaction tracking of the runtime
+environment with the kernel. For example, certain user-space API could cooperate
+with scribe to disable kernel-level recording of certain system calls, while performing
+its own recording. For example, when performing an HTTP request, only the request
+headers and body could be recorded, as opposed to recording the low-level
+interaction with the underlying sockets. In this case, achieving deterministic
+replay is still guaranteed while the recorded log no longer need to contain the
+information of doing DNS lookups, whether a keep-alive connection was used, if
+the connection was redirected through 302 status codes, or if the stream was
+encrypted through SSL.
+This hybrid approach can be done in many ways as user-space application often
+have deep call stacks spawning multiple libraries. For example, in Ruby, a call
+to \code{Net::HTTP.get(URI('www.google.com'))} invokes a few libraries written
+in Ruby, invoking the Ruby runtime, then libresolv, libnss, zlib, openssl, which
+in turn rely on libc to finally invoke around 50 system calls.
+Using a hybrid approach is versatile as one could instrument a specific set of APIs
+while retaining the original \scribe behavior for other unrelated APIs. This way,
+deterministic recording guarantees can still be preserved, even when a high-level
+application uses a non-instrumented C extension.
+Tools that leverage record-replay mechanisms such as \dora and \racepro can
+benefit hugely from these higher level of recording abstractions as the
+recorded log contains a more precise representation of application semantics.
+
+\racepro benefits directly from this hybrid approach. Since \racepro's race
+detection engine feeds directly from recorded object accesses via rendezvous points,
+using user-space rendezvous points would allow racepro to not only detect process
+races, but also application races. It would be able to do so much faster
+as the recorded log would be smaller and contain a lot less rendezvous points.
+
+\dora is currently limited as it explores program execution
+by removing and adding system calls. Leveraging application semantics allow
+much better exploration. For example, consider a recorded application that
+performs two HTTP GET requests that are sharing the same socket through HTTP
+pipelining. When operating at the kernel-level, \dora is not be able to
+find a good mutable replay as it would have to understand the underlying HTTP
+protocol to discard the appropriate data from the received buffer on the
+corresponding socket, which may be infeasible when using SSL connections.
+On the other hand, when recording at the HTTP API level, \dora would be able to
+just simply discard that one GET request from the recording to find the optimal
+replay. By using a hybrid recording approach, not only \dora would be able to
+find better mutable replays, but it would do so much quicker as there are
+less nodes to explore in the execution graph.
+
+Implementing a hybrid record-replay engine can be done for distributed
+applications. \synapse already tracks distributed application state through the DB.
+
+Additionally, both \racepro and \dora would benefit from a in-memory cloning
+mechanism applied to entire process container, with copy-on-write optimizations.
+Indeed, both engines replay many executions that are identical from their start
+up to a certain point. A lot of CPU is wasted replaying many times the same
+execution up to that point. For example, when \racepro explores a race after
+that point, it has to replay an entire execution up to that point, and then to
+the race to be analyzed. Having a checkpoints to replay from during the original
+execution would greatly improve performance as the majority of the CPU is wasted
+replaying the beginning of the execution. Similarly, \dora replays entire
+executions, while it would be much more efficient to replay from the point of
+divergence. Implementing an in-memory cloning mechanism represent a substantial
+amount of work as many kernel object would have to implement a copy-on-write
+mechanism.
+
+

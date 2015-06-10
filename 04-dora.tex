@@ -1462,6 +1462,7 @@ disk. The storage growth rates ranged from 10 KB/s to 130 KB/s. These
 storage requirements are modest considering our workloads. {\dora}
 would take almost three months to fill a 1 TB drive at the worst
 of these rates, which makes it an affordable and practical solution.
+
 \section{Related Work}
 \label{dora:sec:related}
 
@@ -1561,46 +1562,3 @@ sequences being used for matching are known in advance. In contrast,
 mutable replay must match a known execution log with an
 execution sequence that is not known in advance, so these algorithms cannot be
 directly applied.
-\section{Conclusions and Future Work}
-\label{dora:sec:conclude}
-
-{\dora} introduces the concept of mutable record-replay and is the
-first transparent mutable record-replay system.  It enables, for the first time,
-a recording of an application execution to be replayed
-using a modified version of the application for a large class of
-application changes.  This is made possible by the use of lightweight
-operating system mechanisms to record and replay without imposing
-unnecessary timing and ordering constraints.  {\dora} introduces an
-explorer that directs the replay mechanism to identify a mutable
-replay of the modified aplication that minimizes differences with the
-original unmodified application execution.
-
-Our experimental results on a Linux prototype demonstrate that mutable
-replay is feasible across a wide range of real-world applications and
-application changes which can reach thousands of lines of code, even
-without support for major changes to core application semantics.  We
-show that mutable replay is useful for enabling common debugging
-techniques not possible with previous record-replay systems.  We
-also show that mutable replay enables validation of security patches
-against both exploits and production workloads. This is all
-accomplished without requiring source code modifications and with low
-recording overhead, enabling usage on production systems.  These
-results demonstrate that mutable replay has the potential to enable
-new techniques for debugging and patch testing and validation, which
-can lead to substantial improvements in software reliability and developer
-productivity.
-
-We hope to explore a number of directions in future work.
-While we have explored a few ways in which mutable replay can be used in
-multicore debugging and patch validation, {\dora} provides a
-foundation for exploring other uses of mutable replay as well.
-We have evaluated a particular cost function and exploration
-algorithm for mutable replay, but much more can be done to consider
-alternatives that may be
-particularly suited for other use cases.  Furthermore, it would be
-beneficial to perform instrumentation at a higher level:
-if runtime systems like the Java
-Virtual Machine or the Ruby MRI were instrumented to work with
-{\dora}, mutable replay could be an even more effective tool to
-reproduce, diagnose, and fix software bugs for Web and mobile
-applications.

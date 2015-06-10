@@ -1729,7 +1729,6 @@ the timeout set to $0s$ and $\infty$, respectively.
 \section{Related Work}  
 \label{sec:related}
 
-
 \synapse builds on prior work in
 DB replication, data warehousing, federated
 DBs, publish/subscribe systems, and consistency models. We adopt various techniques from
@@ -1799,27 +1798,3 @@ These systems require programmers to specify which
 messages should be included in which unit of order, while \synapse \ {\em
 transparently} intercepts data updates, compiles their dependencies
 automatically, and publishes them.
-
-\section{Conclusions} \label{sec:conclusion}
-
-\synapse is an easy-to-use framework for structuring complex,
-heterogeneous-database Web applications into ecosystems of microservices that
-integrate data from one another through clean APIs.  \synapse builds upon
-commonly used abstractions provided by MVC Web frameworks, such as
-Ruby-on-Rails, Python Django, or PHP Symfony. It leverages models and ORMs to
-perform data integration at data object level, which provides a level of
-compatibility between both SQL and NoSQL DBs. It leverages controllers to
-support application-specific consistency semantics without sacrificing
-scalability.  We have implemented \synapse for Ruby-on-Rails,
-shown that it provides good performance and scalability, released it
-on GitHub~\cite{synapse-sources}, and deployed it in production to
-run the microservices for a company.
-
-\section{Acknowledgments}
-Kareem Kouddous and Michael D'Auria were instrumental in implementing,
-deploying and maintaining \synapse at \crowdtap.
-Atul Adya, Magda Balazinska, Ken Ross, and Serdar Tasiran provided
-helpful comments on the paper.
-This work was supported by a Google Research Award,
-NSF CNS-1162447, CNS-1422909, CCF-1162021, CNS-1351089,
-and DARPA FA8650-11-C-7190.
