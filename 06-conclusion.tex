@@ -199,9 +199,6 @@ replay. By using a hybrid recording approach, not only \dora would be able to
 find better mutable replays, but it would do so much quicker as there are
 less nodes to explore in the execution graph.
 
-Implementing a hybrid record-replay engine can be done for distributed
-applications. \synapse already tracks distributed application state through the DB.
-
 Additionally, both \racepro and \dora would benefit from a in-memory cloning
 mechanism applied to entire process container, with copy-on-write optimizations.
 Indeed, both engines replay many executions that are identical from their start
@@ -216,4 +213,83 @@ divergence. Implementing an in-memory cloning mechanism represent a substantial
 amount of work as many kernel object would have to implement a copy-on-write
 mechanism.
 
+Earlier, we introduced \synapse to record-replay application state in a
+distributed environment by interposing on database layer.  While \synapse
+records all application state modifications, it does not record enough
+information to deterministically replay an execution. For example, \synapse does
+not record any of the incoming HTTP requests made to the application.  Together
+with a hybrid record-replay implementation of \scribe, a useful distributed
+deterministic record-replay system can be built.  While previous work has
+explored the concept of distributed deterministic record-replay, it has failed
+to provide useful semantics to build higher level tools. For example,
+DDOS~\cite{ddos} records information at the packet level, and is not suitable
+for high level frameworks used in web applications.  With a hybrid record-replay
+system based on \scribe and \synapse, we could build a distributed deterministic
+record-replay system for web applications suitable for implementing higher level
+mechanisms such as race detection and mutable replay.
 
+This hybrid record-replay system would complement the original premise of
+\synapse which was to cleanly share data among services. \synapse currently
+sends application state modifications from publishers to subscribers through a
+message broker. The new hybrid system could publish additional messages
+interleaved with the existing state modifications messages, providing necessary
+information to do deterministic record-replay. For example, messages would include
+received HTTP requests, or API calls responses from third-party services such as
+payment gateways. Recording data based non-determinism is easy considering that
+these data accesses are typically made through well defined and simple API
+(unlike a UNIX kernel API). However, recording time based non-determinism is hard.
+Thankfully, the underlying mechanism of the causal delivery mechanism of \synapse
+is a mechanism similar to \scribe's rendezvous points allowing record-replay.
+The hybrid record-replay system can record both data and time based source
+of non-determinism in an efficient manner, send the recorded log to the message
+broker alongside with regular \synapse messages, and let subscriber services
+implement useful tools atop of record-replay.
+
+Being able to subscribe to message streams from publishers that allow
+deterministic record-replay allow, in addition to all the traditional \synapse
+use-cases, a set of new possibilities. A subscriber service can be deployed to
+perform race detection in the background with a similar engine to \racepro.
+Race detection can be very useful to save money. For example, \crowdtap suffered
+from a bug in an open-source application they used for their e-commerce store
+which allow users to redeem their points for Amazon gift cards.  The application
+was decrementing the inventory item quantity by reading the quantity and writing
+it back in a read-committed transaction (the default in most SQL databases) as
+opposed to a serializable transaction. The race manifested in giving away
+thousands of Amazon gift cards in excess. Having a subscriber service that
+detects races in the background could be valuable to improve software
+reliability.
+Further, a subscriber akin to \dora can be deployed to implement mutable replay.
+This can be useful to reproduce and debug eluding bugs. Adding logging after the
+fact can be very useful. At \crowdtap, a bug resulted in throwing away acquired
+gift cards due to a faulty retry loop in the gift card acquisition process.
+The bug was discovered when the accounting team confronted their Amazon bills
+with the numbers of given gift cards. Sadly, the developer implemented this
+feature without logging any requests which made the recovery of gift cards
+difficult. It would have been useful to replay the application with a code
+modification allowing logging of gift cards.
+To summarize, useful services can be implemented on top of deterministic
+record-replay for distributed web applications. We discussed race detection
+and mutable replay, but other use cases could be envisioned, like performing
+after the fact metric extraction, or performance analysis.
+Further, these added-value services could be implemented by third-party
+companies which would consume the message stream from the existing \synapse
+message broker of the application.
+
+In addition to backend record-replay, it would be useful to perform frontend
+record-replay as an increasing number of web applications are deploying
+substantial amount of logic in user devices. This avenue has already been
+explored by Mugshot~\cite{mugshot}, a lightweight record-replay engine for
+JavaScript that can run on unmodified browsers. By combining the recording
+of the client application and the backend application, a developer could replay
+a user session entirely from the frontend interactions down to the database,
+including possible recorded races. This would provide the ability to reproduce
+user behavior on the frontend, introspect interactions with other users through
+backend services, and provide an accurate time machine for after the fact auditing
+and code modifications.
+
+To conclude, we only scratched the surface of what we can do with record-replay
+mechanisms. Applications are increasingly built with high level abstractions, on
+heterogeneous machines, with complex distributed semantics. Our current set of
+record-replay tools are incapable of providing value for these applications. We
+discussed feasible research avenues to build tools suitable for these
+distributed applications.
