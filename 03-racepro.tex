@@ -133,7 +133,7 @@ desktop applications.  Furthermore, we show that \racepro can detect
 \nracepro real bugs due to process races in widespread Linux
 distributions. 
 
-This paper is organized as follows.  \S\ref{racepro:sec:study} presents a
+This chapter is organized as follows.  \S\ref{racepro:sec:study} presents a
 study of process races and several process race examples.
 \S\ref{racepro:sec:overview} presents an overview of the \racepro architecture.
 \S\ref{racepro:sec:record} describes the execution recording mechanism.
@@ -141,9 +141,10 @@ study of process races and several process race examples.
 micro-operations and the race detection algorithm.
 \S\ref{racepro:sec:validate} describes how replay and go-live are used to
 determine harmful races.  \S\ref{racepro:sec:eval} presents experimental
-results.  \S\ref{racepro:sec:related} discusses related work.  Finally, 
-\S\ref{racepro:sec:conclusion} presents some concluding remarks and directions
-for future work.
+results. Finally,  \S\ref{racepro:sec:related} discusses related work.
+% Finally, 
+% \S\ref{racepro:sec:conclusion} presents some concluding remarks and directions
+% for future work.
 
 \begin{table}[t]
 \centering
@@ -1377,11 +1378,11 @@ S3:                 write(F,y);
 \end{figure}
 
 % \begin{sidewaystable}
-\begin{table}[]
+\begin{table}[t]
 \centering
 \setlength{\tabcolsep}{3pt}
 
-\begin{tabular}{cp{12cm}}
+\begin{tabular}{c|p{12cm}}
 {\bf Bug ID} & {\bf Description} \\ \hline
 debian-294579    & concurrent \code{adduser} processes read and write \code{/etc/passwd} without synchronization, corrupting this file           \\
 debian-438076    & \code{mv} unlinks the target file before calling atomic \code{rename}, violating the atomicity requirement on \code{mv}       \\
@@ -1500,8 +1501,8 @@ Python 2.6.6, Cython 0.14, Networkx 1.1-2, and UnionFs-Fuse 0.23.
 
 
 % \begin{sidewaystable}
-\begin{table}
-% \centering
+\begin{table}[t]
+\centering
 \setlength{\tabcolsep}{3pt}
 
 \begin{tabular}{c|ccc|cccc}
@@ -1522,28 +1523,7 @@ new-1            &  12  &  2569  &  201   &  137   &  90    &  33   &  14  \\
 new-2            &  47  &  2621  &  467   &  82    &  13    &  27   &  42  \\
 new-3            &  30  &  4361  &  2981  &  17    &  0     &  13   &  4   \\
 new-4            &  19  &  4672  &  716   &  8     &  0     &  7    &  1   \\
-\hline
-\hline
 \end{tabular}
-
-\begin{tabular}{c|cccc}
-{\bf } &
-  \multicolumn{4}{|c}{\bf Execution Times [seconds/race]} \\
-  {\bf Record} & {\bf Replay} & {\bf Generate} & {\bf Validate} \\
-\hline
-debian-294579    &  2.47  &  2.43  &  3.42  &  2.92  \\
-debian-438076    &  3.76  &  0.75  &  0.84  &  2.87  \\
-debian-399930    &  0.59  &  0.57  &  0.75  &  0.84  \\
-redhat-54127     &  0.27  &  0.25  &  0.66  &  0.41  \\
-launchpad-596064 &  21.45 &  3.11  &  2.49  &  1.70  \\
-launchpad-10809  &  0.27  &  0.25  &  0.81  &  0.44  \\
-new-1            &  0.56  &  0.54  &  1.52  &  0.76  \\
-new-2            &  0.89  &  0.88  &  1.44  &  1.16  \\
-new-3            &  2.63  &  2.61  &  2.34  &  2.98  \\
-new-4            &  1.01  &  0.98  &  4.81  &  1.35  \\
-\end{tabular}
-
-
 
 \caption{{\em Bug detection statistics.}  {\bf Processes} is the
   number of processes, {\bf Syscalls} the number of system calls
@@ -1551,14 +1531,11 @@ new-4            &  1.01  &  0.98  &  4.81  &  1.35  \\
   tracked in the recorded executions. For races, {\bf Detected} is the
   number of races detected by \racepro, {\bf Diverged} the races for which
   the replay diverged (\ie, false positive), {\bf Benign} the benign
-  races, and {\bf Harmful} harmful races that led to failures.  {\bf
-    Record} and {\bf Replay} are the times to record and replay the
-  executions, respectively. {\bf Generate} is the average time to
-  generate an execution branch and {\bf Validate} the average time to
-  validate a race. } \label{racepro:tab:bug-stat}
+  races, and {\bf Harmful} harmful races that led to failures.} \label{racepro:tab:bug-stat}
 
 % \end{sidewaystable}
 \end{table}
+
 
 \subsection{Bugs Found} \label{racepro:sec:bug}
 
@@ -1679,6 +1656,31 @@ the affected file.
 
 \subsection{Performance Overhead} 
 
+\begin{table}[t]
+\centering
+% \setlength{\tabcolsep}{3pt}
+\begin{tabular}{c|cccc}
+  & 
+  \multicolumn{4}{|c}{\bf Execution Times [seconds/race]} \\
+  {\bf Name} & {\bf Record} & {\bf Replay} & {\bf Generate} & {\bf Validate} \\
+\hline
+debian-294579    &  2.47  &  2.43  &  3.42  &  2.92  \\
+debian-438076    &  3.76  &  0.75  &  0.84  &  2.87  \\
+debian-399930    &  0.59  &  0.57  &  0.75  &  0.84  \\
+redhat-54127     &  0.27  &  0.25  &  0.66  &  0.41  \\
+launchpad-596064 &  21.45 &  3.11  &  2.49  &  1.70  \\
+launchpad-10809  &  0.27  &  0.25  &  0.81  &  0.44  \\
+new-1            &  0.56  &  0.54  &  1.52  &  0.76  \\
+new-2            &  0.89  &  0.88  &  1.44  &  1.16  \\
+new-3            &  2.63  &  2.61  &  2.34  &  2.98  \\
+new-4            &  1.01  &  0.98  &  4.81  &  1.35  \\
+\end{tabular}
+\caption{{\em \racepro execution times.}  {\bf Record} and {\bf Replay} are the
+times to record and replay the executions, respectively. {\bf Generate} is the
+average time to generate an execution branch and {\bf Validate} the average time
+to validate a race.} \label{racepro:tab:bug-execution-times}
+\end{table}
+
 Low recording overhead is crucial
 because \racepro runs with deployed systems.  Low replay overhead is desirable
 because \racepro can check more execution branches within the same amount of
@@ -1707,10 +1709,10 @@ Applications that do neither operations perform the same work
 whether recording or replaying, and sustain speedups close to 1.
 
 We also measured various overhead statistics involved in finding the
-bugs listed in Table~\ref{racepro:tab:bug-stat}.  These measurements were done
+bugs listed in Table~\ref{racepro:tab:bug-execution-times}.  These measurements were done
 on an HP DL360 G3 server with dual 3.06~GHz Intel Xeon CPUs, 4~GB RAM,
 and dual 18~GB local disks.  For
-each bug, Table~\ref{racepro:tab:bug-stat} shows the time to record the
+each bug, Table~\ref{racepro:tab:bug-execution-times} shows the time to record the
 execution (Record) and to 
 replay it (Replay), the average time to generate an execution branch
 for a race from a recorded execution (Generate), and the average time
@@ -1767,10 +1769,7 @@ without human intervention, but efficiently.
 
 \section{Related Work} \label{racepro:sec:related}
 
-We previously presented in a workshop paper~\cite{racepro:hotos11} a
-preliminary design of \racepro, without the full design, implementation, and
-evaluation described in this paper.  In the remainder of this section, we
-discuss closely related work to \racepro.
+In this section, we discuss closely related work to \racepro.
 
 \para{Thread races.}  Enormous work has been devoted to detecting,
 diagnosing, avoiding, and repairing thread races

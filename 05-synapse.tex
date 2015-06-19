@@ -2,7 +2,7 @@
 \label{ch:synapse}
 
 \section{Introduction}
-\label{sec:intro}
+\label{synapse:sec:intro}
 
 Systems that provides fault-tolerance are typically built on top of
 application state record-replay mechanisms. Resilient distributed databases replicate data on
@@ -117,14 +117,14 @@ cross-DB translation layer among Web services.
  \bottomrule
  \end{tabular}}
 \caption{DB types and vendors supported by \synapse.}
-\label{tab:supported-orms}
+\label{synapse:tab:supported-orms}
 \end{table}
 
 We have built \synapse on Ruby-on-Rails and released it as open source software
  on GitHub~\cite{synapse-sources}. We demonstrate three
 key benefits.  First, \synapse supports the needs of modern Web
 applications by enabling them to use many combinations of
-\emph{heterogeneous DBs}, both SQL and NoSQL. Table~\ref{tab:supported-orms}
+\emph{heterogeneous DBs}, both SQL and NoSQL. Table~\ref{synapse:tab:supported-orms}
 shows the DBs we support, many of which are very popular.
 We show that adding support for new DBs incurs limited effort.  The translation
 between different DBs is often automatic through \synapse and its use of ORMs.
@@ -148,7 +148,7 @@ processing of updates as much as the workload and their semantic needs
 permit.
 
 \section{Background}
-\label{s:motivation}
+\label{synapse:sec:motivation}
 
 MVC (Model View Controller) is a widely-used Web application architecture supported by many frameworks including Struts (Java), Django (Python), Rails (Ruby),
 Symfony (PHP), Enterprise Java Beans (Java), and ASP.NET MVC (.NET).
@@ -212,11 +212,11 @@ Virtual attribute          & Deterministic functions (can be published).   \\
  }
  \caption{\synapse Abstractions and API.}
  
- \label{tab:api}
+ \label{synapse:tab:api}
 \end{table}
 
 \section{\synapse API}
-\label{sec:programming-model}
+\label{synapse:sec:programming-model}
 
 \synapse extends the MVC pattern to create an
 easy-to-use platform for integrating Web services that use
@@ -226,7 +226,7 @@ often used in practice for Web development, \synapse
 leverages them to provide a transparent and mostly automatic data
 propagation layer.
 
-Using the \synapse API shown in Table~\ref{tab:api}, developers make
+Using the \synapse API shown in Table~\ref{synapse:tab:api}, developers make
 simple modifications to their existing model definitions to share their data
 across services. At a high
 level, an application that uses \synapse consists of one or more publishers,
@@ -245,13 +245,13 @@ subscribers into publishers developers can create complex
 ecosystems of Web services that subscribe to data from each other, enhance it
 with new attributes, and publish it further.  This
 programming model is easy to use and supports powerful use
-cases as shown in \S\ref{sec:apps}.
+cases as shown in \S\ref{synapse:sec:apps}.
 We discuss the \synapse API using Ruby-on-Rails, but similar APIs can be
 built for other frameworks.
 
 
 \subsection{\synapse Abstractions}
-\label{sec:api}
+\label{synapse:sec:api}
 
 \begin{figure}
 \centering
@@ -279,14 +279,14 @@ end
 \end{minipage}
 \end{minipage}
 \caption{{Publisher (left), subscriber (right).}}
-\label{fig:pub-sub}
+\label{synapse:fig:pub-sub}
 \end{figure}
 
 {\bf Publishers.} 
 To publish a model, the developer simply specifies which attributes within that
 model should be shared.
 The code at the top of
-\F\ref{fig:pub-sub} shows how to publish
+\F\ref{synapse:fig:pub-sub} shows how to publish
 in Ruby using the {\code publish} keyword, with Synapse-specific code
 underlined.  
 Each published model has a globally unique URI, given by {\code
@@ -294,11 +294,11 @@ app\_name/model\_name}.  \synapse generates a publisher file for each
 publisher listing the various objects and fields being published and is made
 available to developers who want to create subscribers for the published data.
 A factory file is also made available for each publisher that provides sample
-data for writing integration tests (\S\ref{sec:testing}). 
+data for writing integration tests (\S\ref{synapse:sec:testing}). 
 Other API calls that
 can be used by publishers are {\code {\small add\_read\_deps}}, {\code {\small
 add\_write\_deps}}, and {\code {\small delivery\_mode}}, discussed in
-\S\ref{sec:semantics} and \S\ref{sec:arch:cross-db-causality}.
+\S\ref{synapse:sec:semantics} and \S\ref{synapse:sec:arch:cross-db-causality}.
 
 \begin{figure}
 \centering
@@ -319,12 +319,12 @@ end
 \end{lstlisting}
 \end{minipage}
 \caption{Callback example.}
-\label{fig:welcome-email}
+\label{synapse:fig:welcome-email}
 \end{figure}
 
 \heading{Subscribers.}
 To subscribe to a published model, the developer simply marks the attributes of
-interest accordingly.  In \F\ref{fig:pub-sub}, the code at the bottom
+interest accordingly.  In \F\ref{synapse:fig:pub-sub}, the code at the bottom
 shows how to subscribe in Ruby to the publisher at the top.  Since
 the model name is the same in the subscriber as the publisher, it does not
 need to be explicitly identified in conjunction with the 
@@ -352,9 +352,9 @@ The code on the right shows an example of an \emph{after} subscriber callback th
 sends a welcome email for each newly created User.
 These callbacks are particularly useful to adapt schemas
 between publishers and subscribers, as discussed in
-\S\ref{sec:examples}. 
+\S\ref{synapse:sec:examples}. 
 Other API calls that can be used by subscribers are {\code {\small bootstrap?}}
-and {\code {\small delivery\_mode}}, discussed in \S\ref{sec:semantics}.
+and {\code {\small delivery\_mode}}, discussed in \S\ref{synapse:sec:semantics}.
 
 \begin{figure}
 \centering
@@ -388,7 +388,7 @@ end
 \end{minipage}
 \end{minipage}
 \caption{Decorator example.}
-\label{fig:deco}
+\label{synapse:fig:deco}
 \end{figure}
 
 \heading{Decorators.}
@@ -401,15 +401,15 @@ decorators cannot update the attributes of the model that they subscribe
 to.  Third, decorators cannot publish attributes that they subscribe to.
 Our decorator \mbox{abstraction} encapsulates and enforces these 
 restrictions.
-As an example, the code at the top of \F\ref{fig:deco} shows a decorator
+As an example, the code at the top of \F\ref{synapse:fig:deco} shows a decorator
 service, which decorates the User model from Pub1 with the user's interests.
 The data used to compute those interests comes from other sources,
 such as social activity, but is omitted here. Other services can then subscribe
 to any subset of the model's attributes or decorations by specifying the
-originators of those attributes, as shown in the code at the bottom of \F\ref{fig:deco}.
+originators of those attributes, as shown in the code at the bottom of \F\ref{synapse:fig:deco}.
 Using decorators, one can construct complex ecosystems of services
 that enhance the data in various ways, as shown in the examples in
-\S\ref{sec:apps}.
+\S\ref{synapse:sec:apps}.
 
 \heading{Ephemerals and Observers.} \synapse aims to support as many use cases
 for data-driven integration as possible.  Often times we find it useful to
@@ -425,7 +425,7 @@ pass on (publish) the data onto persisting subscribers is useful in such cases.
 and/or {\em observers} (non-persisted subscribed models).  Aside from
 supporting application-driven needs, non-persisted models are often used to
 adapt mismatching data models across heterogeneous DBs, as shown in
-\S\ref{sec:examples}.
+\S\ref{synapse:sec:examples}.
 
 \heading{Virtual Attributes.} To perform data translation between ORMs,
 \synapse simply calls field getter methods on the publisher side, and then
@@ -433,11 +433,11 @@ calls the corresponding field setters on the subscriber side. \synapse
 additionally lets programmers introduce getters and setters for attributes
 that are not in the DB schema.  We call these programmer-provided attributes
 {\em virtual attributes}. Virtual attributes are valuable for schema mappings,
-as shown in \S\ref{sec:examples}.
+as shown in \S\ref{synapse:sec:examples}.
 
 
 \subsection{Application State Record-Replay}
-\label{synapse:s:record-replay}
+\label{synapse:sec:record-replay}
 
 \begin{table}[t]
  \centering {
@@ -482,7 +482,7 @@ two record-replay systems. The important takeaway is that both systems use a
 causal engine to execute state mutation operations.
 
 \subsection{\synapse Delivery Semantics}
-\label{sec:semantics}
+\label{synapse:sec:semantics}
 Update delivery semantics define the ordering of updates as viewed by subscribers and are an important part of \synapse's
 programming model. Different applications may 
 require different levels of semantics:  while some may be able to handle overwritten histories,
@@ -529,8 +529,8 @@ access control, foreign keys) without relying on caches (otherwise the publisher
 would be racy).
 This mode provides sufficient semantics for many Web applications
 without the performance limitations of global order delivery mode, as shown by 
-\F~\ref{fig:deps-example} in \S\ref{sec:arch} and our evaluation
-in \S\ref{sec:evaluation:delivery}. 
+\F~\ref{synapse:fig:deps-example} in \S\ref{synapse:sec:arch} and our evaluation
+in \S\ref{synapse:sec:evaluation:delivery}. 
 
 
 \heading{Weak Ordering.}
@@ -549,7 +549,7 @@ message loss.  For example, causal order delivery mode
 requires delivery of every single update for all objects, so loss
 of an update would result in failure.  In production, unfortunately,
 situations occur where messages may get lost despite the use of
-reliable components (see \S\ref{sec:eval:ease-of-use}).  Weak
+reliable components (see \S\ref{synapse:sec:eval:ease-of-use}).  Weak
 order delivery mode can ignore causal dependencies and only update
 to the latest version.
 
@@ -581,13 +581,13 @@ subscriber must catch up after a period of unavailability, \synapse
 forces the weak semantic (i.e., the subscriber may witness overwritten
 histories and out-of-order deliveries).  We signal such periods
 clearly to programmers in our API using the {\code bootstrap?}
-predicate. \F~\ref{fig:welcome-email} shows a usage example and
-\S\ref{sec:arch:bootstrapping} describes this situation and
+predicate. \F~\ref{synapse:fig:welcome-email} shows a usage example and
+\S\ref{synapse:sec:arch:bootstrapping} describes this situation and
 explains how subscribers demanding higher semantics can deal with semantics
 degradation.
 
 \subsection{\synapse Programming by Example}
-\label{sec:examples}
+\label{synapse:sec:examples}
 
 \synapse addresses many of the challenges of heterogeneous-DB applications automatically, often in a completely plug-and-play manner thanks to its use of ORM abstractions.
 In other cases, the programmer may need to perform explicit translations on the subscriber to align the data models.
@@ -598,6 +598,7 @@ Our experience suggests that \synapse's abstractions facilitate these translatio
 \begin{figure}[]
 \centering
 \begin{minipage}{\textwidth}
+\centering
 \begin{minipage}{.4\textwidth}
 \begin{lstlisting}[framexleftmargin=5pt]
 # Publisher 1 (Pub1).
@@ -610,7 +611,7 @@ class User
 end
 \end{lstlisting}
 \end{minipage}
-\hspace{7em}
+\hspace{3em}
 \begin{minipage}{.4\textwidth}
 \begin{lstlisting}[framexleftmargin=5pt]
 # Subscriber 1a (Sub1a).
@@ -626,7 +627,9 @@ end
 
 \vspace{2em}
 
+\centering
 \begin{minipage}{\textwidth}
+\centering
 \begin{minipage}{.4\textwidth}
 \begin{lstlisting}[framexleftmargin=5pt]
 # Subscriber 1b (Sub1b).
@@ -638,7 +641,7 @@ class User < Stretcher::Model
 end
 \end{lstlisting}
 \end{minipage}
-\hspace{7em}
+\hspace{3em}
 \begin{minipage}{.4\textwidth}
 \begin{lstlisting}[framexleftmargin=5pt]
 # Subscriber 1c (Sub1c).
@@ -657,13 +660,13 @@ end
 \caption{{\bf Example 1: Basic Integration.}
 Shows publishing/subscribing examples with actual ORMs.
 \synapse code is trivial. This is the common case in practice.}
-\label{fig:mongo-to-star}
+\label{synapse:fig:mongo-to-star}
 \end{figure}
 
 \heading{Example 1: Basic Integrations.}  Our experience suggests that most
 integrations with \synapse are entirely automatic and require only simple
 annotations of what should be published or subscribed to, similar to the ones shown
-in \F\ref{fig:pub-sub}.  For example, \F\ref{fig:mongo-to-star} shows the
+in \F\ref{synapse:fig:pub-sub}.  For example, \F\ref{synapse:fig:mongo-to-star} shows the
 integration of a MongoDB publisher (Pub1) with three
 subscribers: SQL (Sub1a), Elasticsearch (Sub1b), and
 MongoDB (Sub1c). The programmers write their models using
@@ -684,10 +687,8 @@ pair will face such difficulties, and vice versa, the same difficulty might be
 faced between other pairs than those we illustrate.
 
 
-
-
-
 \begin{figure}
+\centering
 \begin{minipage}{.45\textwidth}
 \begin{lstlisting}[framexleftmargin=5pt]
 # Publisher 2 (Pub2).
@@ -707,7 +708,7 @@ class Friendship < ActiveRecord::Base
 end
 \end{lstlisting}
 \end{minipage}
-\hfill
+\hspace{2em}
 \begin{minipage}{.45\textwidth}
 \begin{lstlisting}[framexleftmargin=5pt]
 # Subscriber 2 (Sub2).
@@ -740,7 +741,7 @@ end
 \caption{{\bf Example 2: SQL/Neo4j.}
 Pub2 (SQL) stores friendships in their own table; Sub2 (Neo4j) stores
 them as edges between Users. Edges are added through an Observer.}
-\label{fig:sql-to-neo4j}
+\label{synapse:fig:sql-to-neo4j}
 \end{figure}
 
 \heading{Example 2: Mapping Data Models with Observers.}
@@ -752,7 +753,7 @@ data items -- such as users in a social network or products in an e-commerce app
 -- as edges in a graph and is optimized for queries that must traverse the graph
 such as those of recommendation engines. In contrast, SQL stores relationships
 in separate tables. When integrating these two DBs, model mismatches may occur.
-\F\ref{fig:sql-to-neo4j} illustrates this use case with an example.
+\F\ref{synapse:fig:sql-to-neo4j} illustrates this use case with an example.
 
 Pub2, the main application, stores Users and their friends in a SQL DB.
 Sub2, an add-on recommendation engine, integrates the user and friendship
@@ -774,6 +775,7 @@ minimal and conceptually simple programmer input, lets the subscriber
 leverage Neo4j's full power.
 
 \begin{figure}
+\centering
 \begin{minipage}{.45\textwidth}
 \begin{lstlisting}[framexleftmargin=5pt]
 # Publisher 3 (Pub3).
@@ -797,7 +799,8 @@ class User < ActiveRecord::Base
  serialize :interests
 end
 \end{lstlisting}
-\end{minipage}\hfill
+\end{minipage}
+\hspace{2em}
 \begin{minipage}{.45\textwidth}
 \begin{lstlisting}[framexleftmargin=5pt]
 # Subscriber 3b (Sub3b).
@@ -826,7 +829,7 @@ Shows one publisher running on MongoDB (Pub3) and two SQL subscribers
 (Sub3a,b).  Default translations work, but may be suboptimal due to
 mismatches between DBs.  Optimizing translation is easy with \synapse.
 }
-\label{fig:mongo-sql}
+\label{synapse:fig:mongo-sql}
 \end{figure}
 
 \heading{Example 3: Matching Data Types with Virtual Attributes.}
@@ -836,12 +839,12 @@ MongoDB, a document-oriented database, has recently become popular among startup
  thanks to its schemaless data model that allows for frequent
 structural changes.  Since the DB imposes so little structure, importing data
 into or exporting data from MongoDB is typically similar to
-\F\ref{fig:mongo-to-star}.  We choose here a more corner case example to
+\F\ref{synapse:fig:mongo-to-star}.  We choose here a more corner case example to
 show \synapse's applicability to complex situations.
 
-\F~\ref{fig:mongo-sql} shows a MongoDB publisher (Pub3), which leverages a
+\F~\ref{synapse:fig:mongo-sql} shows a MongoDB publisher (Pub3), which leverages a
 special MongoDB feature that is not generally available in SQL,
-Array types, to store user interests.  \F\ref{fig:mongo-sql} shows two options
+Array types, to store user interests.  \F\ref{synapse:fig:mongo-sql} shows two options
 for integrating the interests in a SQL subscriber, both of which work with all SQL DBs. 
 The first option (Sub3a) is to automatically flatten the array and stores it as text, but this would not support efficient queries on interests.  
 
@@ -854,7 +857,7 @@ received into the separate table.
 
 
 \section{\synapse Architecture}
-\label{sec:arch}
+\label{synapse:sec:arch}
 
 \begin{figure}[t]
  \centering
@@ -862,9 +865,9 @@ received into the separate table.
  \caption{{{\bf The \synapse Architecture.} \synapse components are shaded.  To
              replicate data between heterogeneous DBs, \synapse marshals the publisher's
              objects and sends them to subscribers, which unmarshal and save them into their DBs.}}
- \label{fig:architecture}
+ \label{synapse:fig:architecture}
 \end{figure}
-\F~\ref{fig:architecture}(a) shows the \synapse architecture applied to an
+\F~\ref{synapse:fig:architecture} shows the \synapse architecture applied to an
 application with a single publisher and subscriber. The publisher and subscriber
 may be backed by different DBs with distinct engines, data models, and disk
 layouts. In our example, the publisher runs on PostgreSQL, a relational DB,
@@ -904,14 +907,14 @@ message to the broker.
 
 
 \subsection{Model-Driven Replication}
-\label{sec:arch:cross-db-propagation}
+\label{synapse:sec:arch:cross-db-propagation}
 
 
 \begin{figure}[t]
  \centering
  \includegraphics[width=.45\linewidth,clip=true,trim=5in 0.4in 0 0]{figures/synapse/architecture-less-detail.pdf}
  \caption{{Published message format (JSON).}}
- \label{fig:architecture}
+ \label{synapse:fig:json}
 \end{figure}
 
 
@@ -935,11 +938,11 @@ After intercepting a write, \synapse uses the ORM to map from the raw data
 written back to application objects (e.g., an instance of the {\tt User} model).
 The published attributes of these written object(s) are marshaled to JSON, and published
 along with object dependencies (described in
-\S\ref{sec:arch:cross-db-causality}) and a generation number (for recovery,
-described in \S\ref{sec:arch:bootstrapping}). When marshalling objects,
+\S\ref{synapse:sec:arch:cross-db-causality}) and a generation number (for recovery,
+described in \S\ref{synapse:sec:arch:bootstrapping}). When marshalling objects,
 \synapse also includes each object's complete inheritance tree, allowing
 subscribers to consume polymorphic models.
-\F~\ref{fig:architecture}(b) shows a write message produced
+\F~\ref{synapse:fig:json} shows a write message produced
 upon a {\code User} creation; the post object's marshalling is in the message's
 {\code attributes} field.
 
@@ -953,7 +956,7 @@ Different ORMs may have different names for these methods (e.g., {\tt find} vs
 {\tt find\_by}) but their translation is trivial. Any callbacks specified by the
 programmer are automatically called by the ORM.
 
-\subsection{Enforcing Delivery Semantics} \label{sec:arch:cross-db-causality}
+\subsection{Enforcing Delivery Semantics} \label{synapse:sec:arch:cross-db-causality}
 
 \synapse enforces update-message ordering from publishers to
 subscribers to be able to provide subscribers with a view of object updates that 
@@ -1017,7 +1020,7 @@ serializes all updates within a controller by adding the previously
 performed update's first write dependency as a read dependency to the
 next update operation.  To serialize all writes within a user context,
 it is sufficient to add the current user object as a write dependency
-to each write operation (shown in \F~\ref{fig:deps-example}(b)).
+to each write operation (shown in \F~\ref{synapse:fig:deps-example}(b)).
 To support weak order delivery from the
 publisher, \synapse only tracks the write dependency for each object
 being updated.  To support the same delivery mode at the subscriber as
@@ -1035,21 +1038,22 @@ for the respective object being updated by the message, but ignore
 other dependency information from a global or causal order delivery
 publisher.
 
-\F~\ref{fig:deps-example} shows an example of how the read and write 
+\F~\ref{synapse:fig:deps-example} shows an example of how the read and write 
 dependencies translate into dependencies in
-messages. Both publisher and subscriber use causal delivery mode. \F~\ref{fig:deps-example}(a) shows four code snippets
+messages. Both publisher and subscriber use causal delivery mode. \F~\ref{synapse:fig:deps-example}(a) shows four code snippets
 processing four user requests.  User1 creates a post, User2
 comments on it, User1 comments back on it, and then User1 updates the post.
 \synapse automatically detects four different writes, automatically detects
 their dependencies, updates the version store, and generates messages
-as shown in \F~\ref{fig:deps-example}(b). A subscriber processing these messages
-would follow the dependency graph shown in \F~\ref{fig:deps-example}(c) by
+as shown in \F~\ref{synapse:fig:deps-example}(b). A subscriber processing these messages
+would follow the dependency graph shown in \F~\ref{synapse:fig:deps-example}(c) by
 following the subscriber algorithm.
 
 
 
 \begin{figure}
-\begin{minipage}{.35\textwidth}
+\centering
+\begin{minipage}{.32\textwidth}
   \footnotesize
 \begin{lstlisting}[framexleftmargin=5pt]
 # Users are issuing requests
@@ -1079,9 +1083,10 @@ post.update(body: "hello")
         (a)
 \end{lstlisting}
 \hspace{1em}
+\vspace{1.7em}
 \includegraphics[width=4cm]{figures/synapse/dep-graph.pdf}
 \end{minipage}
-\hfill
+\hspace{3em}
 \begin{minipage}{0.45\textwidth}
   \footnotesize
 \begin{lstlisting}[framexleftmargin=5pt]
@@ -1127,7 +1132,7 @@ M4: {..., dependencies: ["u1": 2, "p1": 3]}
 (c) shows a dependency graph resulting from applying the subscriber algorithm.
 M2 and M3 are processed when the typo is present in the post.
 }
-\label{fig:deps-example}
+\label{synapse:fig:deps-example}
 \end{figure}
 
 \heading{Tracking Dependencies.}
@@ -1171,7 +1176,7 @@ encountering such query, \synapse unrolls the multi-object update into
 single-object updates.
 
 
-\heading{Scaling the Version Store.} \label{sec:arch:hashing}
+\heading{Scaling the Version Store.} \label{synapse:sec:arch:hashing}
 We implemented the version stores with Redis~\cite{redis}, an in-memory
 datastore. All \synapse operations are performed by atomically executing LUA scripts
 on Redis. This technique avoids costly round-trips, and simplifies the 2PC
@@ -1194,7 +1199,7 @@ As an interesting property, using a 1-entry dependency hash space is equivalent
 to using global ordering for both the publisher and its subscribers.
 
 \heading{Transactions.}
-\label{sec:arch:transactions}
+\label{synapse:sec:arch:transactions}
 When publishers support transactions, we enforce the same atomicity in messages delivery, allowing these properties to hold for subscribers.  All
 writes in a transaction are included in the same message.
 Subscribers process messages in a transaction with the highest level of isolation
@@ -1207,7 +1212,7 @@ publish the message to the reliable message broker. As an optimization,
 the publisher algorithm does not attempt to lock write dependencies as the
 underlying DB retains locks on the written objects until the commit is persisted.
 
-\subsection{Live Schema Migrations} \label{sec:arch:migations}
+\subsection{Live Schema Migrations} \label{synapse:sec:arch:migations}
 
 When deploying new features or refactoring code, it may happen that the local DB
 schema must be changed, or new data must be published or subscribed. A few rules
@@ -1225,7 +1230,7 @@ must be deployed first.
 Finally, once the new code is in place, a partial data bootstrap may be
 performed to allow subscribers to digest newly subscribed data.
 
-\subsection{Bootstrapping and Reliability} \label{sec:arch:bootstrapping}
+\subsection{Bootstrapping and Reliability} \label{synapse:sec:arch:bootstrapping}
 
 When a new subscriber comes online, it must synchronize with the publisher in a
 three-step bootstrapping process. First, all current publisher versions are sent
@@ -1234,7 +1239,7 @@ published during the previous steps are processed to finish synchronizing the
 objects and versions. Once all messages are processed, the subscriber is now
 {\em in sync} and operates with the configured delivery semantics.
 Subscriber code may call {\code Synapse.bootstrap?} to determine whether \synapse
-is still bootstrapping or in sync. \F~\ref{fig:welcome-email} shows an example of
+is still bootstrapping or in sync. \F~\ref{synapse:fig:welcome-email} shows an example of
 how the mailer subscriber checks for bootstrapping completion before sending emails.
 
 Should the subscriber fail, its queue may grow to an arbitrary size. To
@@ -1248,7 +1253,7 @@ side. When the subscriber's version store dies, a partial bootstrap is initiated
 the publisher's version store dies, a generation number reliably stored (e.g.,
 Chubby~\cite{chubby:osdi}, or ZooKeeper~\cite{zookeeper}) is incremented
 and publishing resumes. Messages embed this generation number as shown on
-\F~\ref{fig:architecture}(b). When subscribers see this new generation number
+\F~\ref{synapse:fig:json}. When subscribers see this new generation number
  in messages, they wait until all the previous generation messages are
 processed, flush their version store, and process the new generation messages.
 This generation change incurs a global synchronization barrier and
@@ -1256,7 +1261,7 @@ temporarily slows subscribers.
 
 
 \subsection{Testing Framework}
-\label{sec:testing}
+\label{synapse:sec:testing}
 
 \synapse provides a solid testing framework to help with development and
 maintenance of apps.  For instance, \synapse statically checks that subscribers
@@ -1292,21 +1297,21 @@ production environment.
  \caption{{\bf Support for Various DBs.}
  Shows ORM- and DB-specific lines of code (LoC) to support varied DBs.
  For ORMs supporting many DBs (e.g., ActiveRecord), adding a new DB comes for free.}
- \label{tab:db-heterogeneity}
+ \label{synapse:tab:db-heterogeneity}
 \end{table}
 
 \subsection{Supporting New DBs and ORMs}
 Adding subscriber support for a new ORM is trivial: a developer need only map the CRUD operations (create/read/update/delete) to \synapse's engine.
 To add publisher support for a new ORM, a developer needs to first plug into the ORM's interfaces to intercept queries on their way to the DB (all queries for causality and writes for replication).
-Then, the developer needs to add two phase commit hooks to the DB driver for transactional DBs (as discussed in \S\ref{sec:arch:transactions}).
+Then, the developer needs to add two phase commit hooks to the DB driver for transactional DBs (as discussed in \S\ref{synapse:sec:arch:transactions}).
 
-To illustrate the effort of supporting new DBs and ORMs, we report our development experience on the nine DBs listed in Table~\ref{tab:db-heterogeneity}.
+To illustrate the effort of supporting new DBs and ORMs, we report our development experience on the nine DBs listed in Table~\ref{synapse:tab:db-heterogeneity}.
 A single developer implemented support for our first DB, PostgreSQL in approximately one week, writing 474 lines of code specific to the ORM (ActiveRecord) and 44 lines specific to the DB for two phase commit.
 After building support for this DB, supporting other SQL DBs, such as MySQL and Oracle, was trivial: about 50 lines of DB-specific, each implemented in only several hours.
 Supporting subsequent DBs (e.g., MongoDB, TokuMX, and Cassandra) was equally easy and took only a few days and 200-300 lines of code per ORM.
 We find that supporting various DBs is a reasonable task for an experienced programmer.
 \section{Applications}
-\label{sec:apps}
+\label{synapse:sec:apps}
 
 We and others have built or modified 14 web applications to share data with
 one another via \synapse.  Those built by others have been
@@ -1320,7 +1325,7 @@ average a single line of configuration per attribute of each model published.
 
 
 \subsection{\synapse at \crowdtap}
-\label{sec:apps:crowdtap}
+\label{synapse:sec:apps:crowdtap}
 
 \crowdtap is an online marketing-services company contracted by major brands such as Verizon, AT\&T, Sony and MasterCard.
 \crowdtap has grown rapidly since its founding, and by October 2014 has seen over 450,000 users.
@@ -1342,7 +1347,7 @@ Synchronization of these DBs then became a challenge.
   \centering
   \includegraphics[width=\linewidth]{figures/synapse/eco-crowdtap.pdf}
   \caption{\textbf{\crowdtap's services.} Arrows show \synapse connections.}
-  \label{fig:crowdtap-ecosystem}
+  \label{synapse:fig:crowdtap-ecosystem}
 \end{figure}
 
 To address these challenges, \crowdtap began to experiment with \synapse,
@@ -1361,7 +1366,7 @@ engine subscribes to a similar number of models.
 \crowdtap's engineering management was so pleased with the ease of development,
 ease of maintenance, and performance of \synapse, that after this experience,
 all major features have been built with it.
-\F~\ref{fig:crowdtap-ecosystem} shows the high-level architecture of the
+\F~\ref{synapse:fig:crowdtap-ecosystem} shows the high-level architecture of the
 \synapse ecosystem at \crowdtap with the main app supported by eight
 microservices.
 \synapse-related code is trivial in size and logic.
@@ -1370,7 +1375,7 @@ However, \synapse-related configuration lines are minimal: only 360 (less
 than 7 lines of configuration per model, on average).
 
 \crowdtap has chosen different delivery semantics for their various subscribers
-(shown with different arrows in \F\ref{fig:crowdtap-ecosystem}). While all
+(shown with different arrows in \F\ref{synapse:fig:crowdtap-ecosystem}). While all
 publishers are configured to support causal delivery mode, subscribers are
 configured with either causal or weak delivery modes, depending on their
 semantics requirements. The mailer service registers for data from
@@ -1379,13 +1384,13 @@ In contrast, the analytics engine lacks stringent order
 requirements, hence selects a weak consistency mode.
 
 \subsection{Integrating Open-Source Apps with \synapse}
-\label{sec:apps:social}
+\label{synapse:sec:apps:social}
 
 \begin{figure}[t]
 \centering
    \includegraphics[width=2.4in]{figures/synapse/eco-social.pdf}
    \caption{\bf{Social Product Recommender.} Arrows show \synapse connections.}
-   \label{fig:social-ecosystem}
+   \label{synapse:fig:social-ecosystem}
 \end{figure}
 
 We used \synapse to build a new feature for \emph{Spree}, a popular open source
@@ -1393,7 +1398,7 @@ e-commerce application that powers over 45,000 e-commerce websites world wide~\c
 By integrating \emph{Diaspora}, a Facebook-like open source social networking
 application and \emph{Discourse}, an open source discussion board, with Spree, we
 were able to create a social-based product recommender.
-\F\ref{fig:social-ecosystem} shows the architecture of the ecosystem.
+\F\ref{synapse:fig:social-ecosystem} shows the architecture of the ecosystem.
 We started by configuring Diaspora and Discourse to publish the models
 for posts, friends, and access control lists.
 We needed to add only several lines of declarative configuration each app: 23
@@ -1442,7 +1447,7 @@ application.
 % retrieve computation on git repositories.
 
 \section{Evaluation}
-\label{sec:evaluation}
+\label{synapse:sec:evaluation}
 
 
 We leverage both our deployment and the applications we built to answer three
@@ -1461,18 +1466,18 @@ we next discuss each evaluation question in turn.
 
 
 \subsection{Sample Executions}
-\label{sec:evaluation:sample-runs}
+\label{synapse:sec:evaluation:sample-runs}
 
 To build intuition into how \synapse behaves and the kinds of overheads it
 brings, we show two sample executions of our open-source ecosystem
-applications (see \S\ref{sec:apps:social}). All applications are configured
+applications (see \S\ref{synapse:sec:apps:social}). All applications are configured
 with a causal delivery mode, hence the examples reflect this mode's functioning.
 
-\F~\ref{fig:diaspora1} shows a timeline of the applications' execution
+\F~\ref{synapse:fig:diaspora1} shows a timeline of the applications' execution
 starting with a user's post to Diaspora and ending with Spree's receipt of the
 semantically-enhanced User model. We observe that \synapse delivers messages
 shortly after publication (within 5ms), in parallel to both the mailer and
-the semantic analyzer.  \F~\ref{fig:diaspora2}  illustrates visually
+the semantic analyzer.  \F~\ref{synapse:fig:diaspora2}  illustrates visually
 \synapse's causal engine in action. It shows two users posting messages on
 different Diaspora profiles app while a Mailer subscriber is deployed to notify
 a user's friends whenever the user makes a new post.  Initially, the mailer is
@@ -1489,7 +1494,7 @@ enforcing causality.
      \ding{172} a user posts on Diaspora. The mailer \ding{173} and semantic
      analyzer \ding{174} receive the post in parallel. Diaspora \ding{175} and Spree
      \ding{176} each receive the decorated model with in parallel.}
-  \label{fig:diaspora1}
+  \label{synapse:fig:diaspora1}
 
   % \vspace{4em}
 
@@ -1498,12 +1503,12 @@ enforcing causality.
     \ding{172} and \ding{174} User 1 posts. \ding{173} and \ding{175} User 2 posts.
     Mailer comes online and processes the each users first request \ding{176}, then
   each user's second request \ding{177} in parallel.}
-  \label{fig:diaspora2}
+  \label{synapse:fig:diaspora2}
 % \end{sidewaysfigure}
 \end{figure}
 
 \subsection{Application Overheads (Q1)}
-\label{sec:evaluation:overhead}
+\label{synapse:sec:evaluation:overhead}
 
 \begin{table}[t]
   \small
@@ -1526,7 +1531,7 @@ enforcing causality.
           messages, average number of dependencies between messages,
           the average controller execution time, and the average overhead from
         \synapse.}
-     \label{tab:crowdtap-overheads}
+     \label{synapse:tab:crowdtap-overheads}
 \end{table}
 
 We next evaluate \synapse's publishing overheads in the context of real
@@ -1540,7 +1545,7 @@ published, the total execution time of the controller, and the
 \synapse execution time within these controllers.
 For each of these quantities, we measured the arithmetic mean and $99^{th}$  percentile.
 
-\F~\ref{tab:crowdtap-overheads} shows our results. In total, 55 controllers
+\F~\ref{synapse:tab:crowdtap-overheads} shows our results. In total, 55 controllers
 were invoked. We show average overheads across them, as well as detailed
 information about the five most frequently accessed controllers, which account
 for over 70\% of the traffic. On average, \synapse overheads are low: 8\%.
@@ -1559,7 +1564,7 @@ Indeed, \synapse is unlikely to be the cause of these latency spikes as the
 $99^{th}$ percentile of its execution time remains under $0.2$s.
 
 To complement our \crowdtap results, we measured controllers in our open-source
-applications, as well. \F~\ref{fig:app-overheads} shows the \synapse
+applications, as well. \F~\ref{synapse:fig:app-overheads} shows the \synapse
 overheads for several controllers within Diaspora and Discourse (plus
 \crowdtap for consistency). Grey areas are \synapse overheads. Overheads
 remain low for the two open-source applications when benchmarked with synthetic
@@ -1576,19 +1581,19 @@ performance under stress, a topic that we discuss next.
  \includegraphics[width=0.8\linewidth]{figures/synapse/overhead-hist.pdf}
  \caption{\synapse overhead (gray parts) for 3 controllers in 3 different
  applications. Labels give the total controller times.}
- \label{fig:app-overheads}
+ \label{synapse:fig:app-overheads}
 \end{figure}
 
 
 
 \subsection{Scalability (Q2)}
-\label{sec:evaluation:scalability}
+\label{synapse:sec:evaluation:scalability}
 
 \begin{figure}[]
   \centering
   \includegraphics[width=\linewidth]{figures/synapse/overheadvsdeps.pdf}
   \caption{Publisher overhead on different DBs.}
-  \label{fig:overhead}
+  \label{synapse:fig:overhead}
 \end{figure}
 
 
@@ -1598,7 +1603,7 @@ performance under stress, a topic that we discuss next.
   \caption{Throughput vs number of workers end to end benchmark.
       Each line represents a different DB setup.
     The slowest end in each pair is annotated with a (*) symbol.}
-    \label{fig:dbs-throughput}
+    \label{synapse:fig:dbs-throughput}
 \end{figure}
 
 
@@ -1607,12 +1612,12 @@ performance under stress, a topic that we discuss next.
   \includegraphics[width=\linewidth]{figures/synapse/throughputvsworkerssaturate.pdf}
   \caption{Throughput vs number of workers with subscribers running a 100ms callback.
   Each line represents a different delivery mode.}
-  \label{fig:parallel-throughput}
+  \label{synapse:fig:parallel-throughput}
 \end{figure}
 
 To evaluate \synapse throughput and latency under high load, we developed a
 stress-test microbenchmark, which simulates a social networking site. Users
-continuously create posts and comments, similar to the code on \F~\ref{fig:deps-example}.
+continuously create posts and comments, similar to the code on \F~\ref{synapse:fig:deps-example}.
 Comments are related to posts and create
 cross-user dependencies. We issue traffic as fast as possible to saturate \synapse, with a
 uniform distribution of 25\% posts and 75\% comments. We run this experiment
@@ -1623,7 +1628,7 @@ subscribers. We measure a variety of metrics, including the overheads for
 creating a post, as well as \synapse's throughput.
 
 \heading{Overheads under Heavy Load.}
-\F~\ref{fig:overhead} shows the overheads for different DBs with increasing
+\F~\ref{synapse:fig:overhead} shows the overheads for different DBs with increasing
 numbers of dependencies. Focusing on the one-dependency case (x=1), \synapse
 adds overheads ranging from 4.5ms overhead on Cassandra to 6.5ms on PostgreSQL.
 This is in comparison to the 0.81ms and 1.9ms latencies that PostgreSQL and
@@ -1632,11 +1637,11 @@ realistic Web controller latencies of tens of ms, these overheads are barely
 user-visible. As the number of dependencies increases, the overhead grows slowly
 at first, remaining below 10ms for up to 20 dependencies. It then shoots up to a
 high 173ms for 1,000 dependencies. Fortunately, as shown in
-\F~\ref{tab:crowdtap-overheads}, dependencies in real applications remain
+\F~\ref{synapse:tab:crowdtap-overheads}, dependencies in real applications remain
 low enough to avoid causing a bottleneck.
 
 \heading{Cross-DB Throughputs.}
-\F~\ref{fig:dbs-throughput} shows how \synapse's end-to-end throughput scales
+\F~\ref{synapse:fig:dbs-throughput} shows how \synapse's end-to-end throughput scales
 with the number of publisher/subscriber workers, for various DB
 combinations, as well as for our
 DB-less models (observer to ephemeral). We keep the number of dependencies per
@@ -1653,11 +1658,11 @@ instance, PostgreSQL bottlenecks at 12,000 writes/s, and Elasticsearch at
 
 
 \subsection{Delivery Semantic Comparison (Q3)}
-\label{sec:evaluation:delivery}
+\label{synapse:sec:evaluation:delivery}
 
 \synapse supports three delivery modes -- global, causal, and weak -- which
 provide different scaling properties.
-\F\ref{fig:parallel-throughput} compares subscriber scalability with 
+\F\ref{synapse:fig:parallel-throughput} compares subscriber scalability with 
 increased number of subscriber workers available to process writes in parallel.
 We configure subscribers with a 100-ms callback delay to simulate
 heavy processing, such as sending emails.
@@ -1673,7 +1678,7 @@ In practice, we recommend choosing causal for the publisher and either the
 causal or weak mode for subscribers.
 
 \subsection{Production Notes (Q4)}
-\label{sec:eval:ease-of-use}
+\label{synapse:sec:eval:ease-of-use}
 
 \crowdtap has given us very positive feedback on \synapse's
 usability and value, including the following interesting stories from
@@ -1727,7 +1732,7 @@ Given these semantics, \synapse's weak and causal modes are achieved with
 the timeout set to $0s$ and $\infty$, respectively.
 
 \section{Related Work}  
-\label{sec:related}
+\label{synapse:sec:related}
 
 \synapse builds on prior work in
 DB replication, data warehousing, federated
