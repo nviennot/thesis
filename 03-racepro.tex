@@ -141,10 +141,8 @@ study of process races and several process race examples.
 micro-operations and the race detection algorithm.
 \S\ref{racepro:sec:validate} describes how replay and go-live are used to
 determine harmful races.  \S\ref{racepro:sec:eval} presents experimental
-results. Finally,  \S\ref{racepro:sec:related} discusses related work.
-% Finally, 
-% \S\ref{racepro:sec:conclusion} presents some concluding remarks and directions
-% for future work.
+results. \S\ref{racepro:sec:related} discusses related work.  Finally, 
+\S\ref{racepro:sec:conclusion} presents some concluding remarks.
 
 \begin{table}[t]
 \centering
@@ -1860,3 +1858,20 @@ and process races, into exceptions.  A program conforming to this model
 runs deterministically in Determinator.  dOS makes legacy multithreaded
 programs deterministic even in the presence of races on memory and other
 shared resources.  None of these systems aim to detect process races.
+
+\section{Conclusion} \label{racepro:sec:conclusion}
+
+We have presented the first study of real process races, and the first
+system, \racepro, for effectively detecting process races beyond TOCTOU
+and signal races.   Our study has shown that process races are
+numerous, elusive, and a real threat.  To address this problem, \racepro
+automatically detects process races, checking deployed
+systems \emph{in-vivo} by recording live executions and then checking
+them later.  It thus increases checking coverage beyond the
+configurations or executions covered by software vendors or beta
+testing sites. \racepro builds atop of \scribe, our transparent, low overhead
+record-replay engine described in the previous chapter.
+The race detection accuracy depends on the quality of the checker which runs
+modified executions. The checker would thus greatly benefit from a replay engine
+tolerant to modifications in the execution. We introduce this concept and
+propose an implementation in the next chapter.

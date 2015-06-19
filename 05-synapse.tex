@@ -147,6 +147,15 @@ workloads.  To achieve these goals, it lets subscribers parallelize their
 processing of updates as much as the workload and their semantic needs
 permit.
 
+This chapter is organized as follows.
+\S\ref{synapse:sec:motivation} introduces the MVC abstraction for Web applications.
+\S\ref{synapse:sec:programming-model} describes the \synapse API.
+\S\ref{synapse:sec:arch} covers the \synapse architecture.
+\S\ref{synapse:sec:apps} demonstrate the usefulness of \synapse in three real world applications.
+\S\ref{synapse:sec:evaluation} presents experimental results.
+\S\ref{synapse:sec:related} discusses related work.
+Finally, \S\ref{synapse:sec:conclusion} presents some concluding remarks.
+
 \section{Background}
 \label{synapse:sec:motivation}
 
@@ -1310,6 +1319,7 @@ A single developer implemented support for our first DB, PostgreSQL in approxima
 After building support for this DB, supporting other SQL DBs, such as MySQL and Oracle, was trivial: about 50 lines of DB-specific, each implemented in only several hours.
 Supporting subsequent DBs (e.g., MongoDB, TokuMX, and Cassandra) was equally easy and took only a few days and 200-300 lines of code per ORM.
 We find that supporting various DBs is a reasonable task for an experienced programmer.
+
 \section{Applications}
 \label{synapse:sec:apps}
 
@@ -1803,3 +1813,24 @@ These systems require programmers to specify which
 messages should be included in which unit of order, while \synapse \ {\em
 transparently} intercepts data updates, compiles their dependencies
 automatically, and publishes them.
+
+\section{Conclusions} \label{sec:conclusion}
+
+\synapse is an easy-to-use framework for structuring complex,
+heterogeneous-database Web applications into ecosystems of microservices that
+integrate data from one another through clean APIs.  \synapse builds upon
+commonly used abstractions provided by MVC Web frameworks, such as
+Ruby-on-Rails, Python Django, or PHP Symfony. It leverages models and ORMs to
+perform data integration at data object level, which provides a level of
+compatibility between both SQL and NoSQL DBs. It leverages controllers to
+support application-specific consistency semantics without sacrificing
+scalability.  We have implemented \synapse for Ruby-on-Rails,
+shown that it provides good performance and scalability, released it
+on GitHub~\cite{synapse-sources}, and deployed it in production to
+run the microservices for a company.
+Under the cover, \synapse embeds a record-replay engine that implement a partial
+ordering mechanism akin to \scribe's rendezvous points. We have shown many
+similarities between the \scribe record-replay engine and \synapse.
+Due to these similarities, we expect record-replay applications such as \racepro
+and \dora to be implementable for distributed applications using \synapse.  We
+discuss such possibilities in the next chapter.

@@ -145,20 +145,19 @@ vulnerabilities, and (4) replay benchmark workloads to validate
 application patches and version upgrades despite changes in thousands of lines
 of code.
 
-	We present the design, implementation, and evaluation of the
-	{\dora} mutable replay system.
-	Section~\ref{dora:sec:definition} provides a definition of mutable replay.
-	Section~\ref{dora:sec:recorder} describes the {\dora} recorder.
-	Section~\ref{dora:sec:replayer} describes the {\dora} replayer.
-	Section~\ref{dora:sec:explorer} describes the {\dora} explorer and presents an
-	example illustrating the use of the system.
-	Section~\ref{dora:sec:properties} presents some key properties that
-        can be guaranteed regarding
-	{\dora}'s mutable replay behavior.
-	Section~\ref{dora:sec:limitations} discusses limitations of the current system.
-	Section~\ref{dora:sec:results} presents experimental results.
-	Section~\ref{dora:sec:related} discusses related work.
-	Finally, we present some concluding remarks and directions for future work.
+We present the design, implementation, and evaluation of the
+{\dora} mutable replay system.
+\S\ref{dora:sec:definition} provides a definition of mutable replay.
+\S\ref{dora:sec:recorder} describes the {\dora} recorder.
+\S\ref{dora:sec:replayer} describes the {\dora} replayer.
+\S\ref{dora:sec:explorer} describes the {\dora} explorer and presents an
+example illustrating the use of the system.
+\S\ref{dora:sec:properties} presents some key properties that can be guaranteed regarding
+{\dora}'s mutable replay behavior.
+\S\ref{dora:sec:limitations} discusses limitations of the current system.
+\S\ref{dora:sec:results} presents experimental results.
+\S\ref{dora:sec:related} discusses related work.
+Finally, \S\ref{dora:sec:conclusion} presents some concluding remarks.
 
 \section{Mutable Replay Concept}
 \label{dora:sec:definition}
@@ -218,9 +217,9 @@ core application semantics~\cite{delta,mreplay-feas}.  The same is
 typically true of code instrumentation added to a program for
 debugging. Based on this observation, we designed {\dora} with a
 $d$ function that has useful properties for testing and debugging.  In
-this context, Section~\ref{dora:sec:results} shows that {\dora} is able
+this context, \S\ref{dora:sec:results} shows that {\dora} is able
 to find $d$-optimal mutable replays in practice using real-world
-applications. Furthermore, Section~\ref{dora:sec:properties} presents
+applications. Furthermore, \S\ref{dora:sec:properties} presents
 guarantees that can be made about the optimality of {\dora}'s
 approximation algorithm.
 
@@ -260,7 +259,7 @@ Intuitively, we want the {\tt gettimeofday()} call in the replay of the
 modified program to return the same time returned in the recorded
 execution of the original program.
 We will show that {\dora} does this, producing a $d$-optimal replay
-with the cost function described in Section~\ref{dora:sec:explorer}. 
+with the cost function described in \S\ref{dora:sec:explorer}. 
 
 \section{Recorder}
 \label{dora:sec:recorder}
@@ -273,7 +272,7 @@ is unnecessary for application replay and would significantly
 complicate mutable replay.  Second, {\dora} records the execution
 of system calls in a manner that enables system calls and their effects
 on the kernel to be fully executed during replay.  As discussed in
-Section~\ref{dora:sec:replayer}, this is essential for mutable replay
+\S\ref{dora:sec:replayer}, this is essential for mutable replay
 because there are times when {\dora} must transition processes
 from controlled replay to live execution to enable mutable replay.
 Third, {\dora}'s recorder can record the execution of multiple
@@ -452,7 +451,7 @@ handler.
 Recording performance can be negatively impacted for applications that
 exhibit an enormous number of ownership transitions.  Nevertheless,
 {\dora} performs well for a wide range of 
-real-world applications as shown in Section~\ref{dora:sec:results}.
+real-world applications as shown in \S\ref{dora:sec:results}.
 
 \subsection{Additional Information for Mutable Replay}
 
@@ -565,7 +564,7 @@ possible orderings.  Second, it must ensure that the semantics of the
 event are consistent with the semantics of the recorded execution.
 Finally, it is useful to be able to deterministically reproduce these
 decisions in subsequent replays, as explained in
-Section~\ref{dora:sec:explorer}. 
+\S\ref{dora:sec:explorer}. 
 
 To handle these responsibilities, the replayer switches the process
 that encountered the addition from controlled replay into 
@@ -582,7 +581,7 @@ for new system calls, signals, and shared memory accesses.
 
 \paragraph{System calls.}
 When encountering a new system call, {\dora} executes the
-call and records the execution as discussed in Section~\ref{dora:sec:recorder}.
+call and records the execution as discussed in \S\ref{dora:sec:recorder}.
 This is possible because the replayer fully executes system calls and
 their effects instead of just emulating them, ensuring that it is
 possible to switch a process to normal execution at any time.
@@ -723,7 +722,7 @@ validate the correctness of the patch.
 Since {\dora} faithfully replays kernel actions, the system is always in a state that allows
 it to transition to live execution. Linux namespaces~\cite{namespaces:linux06}
 create a consistent environment for processes before and after they go live.
-Examples of this are demonstrated in Section~\ref{dora:sec:results}.
+Examples of this are demonstrated in \S\ref{dora:sec:results}.
 \section{Explorer}
 \label{dora:sec:explorer}
 
@@ -791,7 +790,7 @@ replay from the checkpoint instead of from the beginning of
 execution~\cite{dejaview,zap07,zap02}.
 
 While any function satisfying the properties specified in
-Section~\ref{dora:sec:definition} can be used for $d$, we present a simple
+\S\ref{dora:sec:definition} can be used for $d$, we present a simple
 function that has useful properties for debugging purposes.
 Since matches are desirable and additions and deletions are undesirable,
 each match has a cost of $-M$ and each addition or deletion has a cost of
@@ -813,7 +812,7 @@ events long, so this would not be feasible.
 
 \paragraph{Example.}
 To make this process more clear, we return to the example introduced in
-Section~\ref{dora:sec:definition}, in which a program that prints the time to
+\S\ref{dora:sec:definition}, in which a program that prints the time to
 {\tt stdout} is modified to write the time to a file.
 Figure~\ref{dora:fig:diff} illustrates how the explorer replays the
 modified program in Figure~\ref{dora:fig:code-example} using the recorded execution
@@ -1085,10 +1084,10 @@ bugs, as listed in the second column of Table~\ref{dora:tab:workloads}.
 We verified that {\dora} can
 deterministically replay the original recorded applications and then
 replayed the executions with modified applications.
-Section~\ref{dora:sec:debugging} shows that
+\S\ref{dora:sec:debugging} shows that
 {\dora} can replay these workloads using reconfigured or
 modified applications with additional debugging or other
-instrumentation. Section~\ref{dora:sec:validation} shows
+instrumentation. \S\ref{dora:sec:validation} shows
 how {\dora} can replay the exploits in Table~\ref{dora:tab:workloads}
 using patched versions of the applications to help developers
 verify that the bug patches successfully resolve the problems.
@@ -1097,10 +1096,10 @@ replay the workloads listed in the second column of
 Table~\ref{dora:tab:workloads} using the patched versions of the
 applications to help system administrators verify that the patches
 do not introduce errors in production workloads.
-Section~\ref{dora:sec:upgrades} shows that {\dora} can
+\S\ref{dora:sec:upgrades} shows that {\dora} can
 verify production workloads on a series of release upgrades for the
 applications listed in Table~\ref{dora:tab:upgrades}.
-Finally, Section~\ref{dora:sec:performance} presents record-replay
+Finally, \S\ref{dora:sec:performance} presents record-replay
 overhead for the production workloads.
 
 
@@ -1564,3 +1563,26 @@ sequences being used for matching are known in advance. In contrast,
 mutable replay must match a known execution log with an
 execution sequence that is not known in advance, so these algorithms cannot be
 directly applied.
+
+\section{Conclusions}
+\label{dora:sec:conclusion}
+
+{\dora} introduces the concept of mutable record-replay and is the first
+transparent mutable record-replay system.  It enables, for the first time, a
+recording of an application execution to be replayed using a modified version of
+the application for a large class of application changes.  {\dora} introduces an
+explorer that directs the replay mechanism to identify a mutable replay of the
+modified aplication that minimizes differences with the original unmodified
+application execution.
+Our experimental results on a prototype built atop of \scribe demonstrate that
+mutable replay is feasible across a wide range of real-world applications and
+application changes which can reach thousands of lines of code, even without
+support for major changes to core application semantics. We show that mutable
+replay is useful for enabling common debugging techniques not possible with
+previous record-replay systems. Mutable replay can also be useful for a vast
+number of use cases, including race detection systems such as \racepro.
+While we explored mutable replay on applications implemented on a POSIX
+interface, our \dora prototype cannot be directly applied to all types of
+applications, in particular distributed applications. In the next chapter, we
+introduce \synapse, an application state record-replay engine for distributed
+applications.

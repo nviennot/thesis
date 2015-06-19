@@ -150,6 +150,16 @@ results show for the first time a new level of transparent record and
 replay performance on commodity multiprocessor systems that was not
 previously possible. 
 
+This chapter is organized as follows.
+\S\ref{scribe:sec:arch} presents an overview of \scribe's architecture.
+\S\ref{scribe:sec:syscalls} describes how system calls are recorded and replayed
+\S\ref{scribe:sec:memory} describes how shared memory interleavings are recorded replayed.
+\S\ref{scribe:sec:rendezvous} covers the {\em rendezvous} event used for ordering access to shared resources.
+\S\ref{scribe:sec:sync} describes signal delivery and the recording of asynchronous events.
+\S\ref{scribe:sec:results} presents experimental results.
+\S\ref{scribe:sec:related} discusses related work.
+Finally, \S\ref{scribe:sec:conclusion} presents some concluding remarks.
+
 \section{Architecture Overview}
 \label{scribe:sec:arch}
 
@@ -206,15 +216,15 @@ stop the recording.
 \begin{tabular}{|c|l|l|}
   \hline
   % {\bf Event}             & {\bf Description}                & {\bf Payload}                                                & {\bf Details}                       \\ \hline
-  % {\em hw\_inst}          & hardware instruction trap        & op-code and data, e.g. \code{RDTSC} and 64-bit counter value & Section~\ref{scribe:sec:arch}       \\ \hline
-  % {\em syscall\_ret}      & system call return               & system call return value                                     & Section~\ref{scribe:sec:syscalls}   \\ \hline
-  % {\em copy\_data}        & data transfer to/from user space & size and contents of data transfer                           & Section~\ref{scribe:sec:syscalls}   \\ \hline
-  % {\em page\_public}      & make page public (not owned)     & page address                                                 & Section~\ref{scribe:sec:memory}     \\ \hline
-  % {\em page\_share\_read} & make page shared read-only       & page address, page sequence number                           & Section~\ref{scribe:sec:memory}     \\ \hline
-  % {\em page\_own\_write}  & make page owned read/write       & page address, page sequence number                           & Section~\ref{scribe:sec:memory}     \\ \hline
-  % {\em rendezvous}        & resource synchronization         & resource sequence number                                     & Section~\ref{scribe:sec:rendezvous} \\ \hline
-  % {\em signal\_receive}   & process received signal          & signal number, whether or not in system call, signal data    & Section~\ref{scribe:sec:sync}       \\ \hline
-  % {\em async\_reset}      & force a sync point               & process user space signature at forced sync point            & Section~\ref{scribe:sec:sync}       \\ \hline
+  % {\em hw\_inst}          & hardware instruction trap        & op-code and data, e.g. \code{RDTSC} and 64-bit counter value & \S\ref{scribe:sec:arch}       \\ \hline
+  % {\em syscall\_ret}      & system call return               & system call return value                                     & \S\ref{scribe:sec:syscalls}   \\ \hline
+  % {\em copy\_data}        & data transfer to/from user space & size and contents of data transfer                           & \S\ref{scribe:sec:syscalls}   \\ \hline
+  % {\em page\_public}      & make page public (not owned)     & page address                                                 & \S\ref{scribe:sec:memory}     \\ \hline
+  % {\em page\_share\_read} & make page shared read-only       & page address, page sequence number                           & \S\ref{scribe:sec:memory}     \\ \hline
+  % {\em page\_own\_write}  & make page owned read/write       & page address, page sequence number                           & \S\ref{scribe:sec:memory}     \\ \hline
+  % {\em rendezvous}        & resource synchronization         & resource sequence number                                     & \S\ref{scribe:sec:rendezvous} \\ \hline
+  % {\em signal\_receive}   & process received signal          & signal number, whether or not in system call, signal data    & \S\ref{scribe:sec:sync}       \\ \hline
+  % {\em async\_reset}      & force a sync point               & process user space signature at forced sync point            & \S\ref{scribe:sec:sync}       \\ \hline
 
   {\bf Event}             & {\bf Description}                & {\bf Payload}                                                 \\ \hline
   {\em hw\_inst}          & hardware instruction trap        & op-code and data, e.g. \code{RDTSC} and 64-bit counter value  \\ \hline
@@ -311,21 +321,6 @@ its result.  For example, when the \code{RDTSC} instruction occurs,
 counter.  During replay, \scribe{} returns the recorded result
 instead of executing the instruction.
 
-Section~\ref{scribe:sec:syscalls} describes the {\em syscall\_ret} and {\em
-  copy\_data} events used for system calls and data transfer between
-kernel and user space,
-respectively.
-Section~\ref{scribe:sec:memory} describes the {\em page\_public}, {\em
-  page\_share\_read}, and {\em page\_own\_write} events used for
-shared memory interleavings.  Section~\ref{scribe:sec:rendezvous} covers
-the {\em rendezvous} event used for ordering access to shared
-resources via system calls. Section~\ref{scribe:sec:sync} describes the {\em
-  signal\_received} and {\em async\_reset} events used for signal
-delivery and for recording of asynchronous events, respectively.
-
- 	
-  
-
 \section{System Calls}
 \label{scribe:sec:syscalls}
 
@@ -339,7 +334,7 @@ go live.  Instead, \scribe{} re-executes system calls during replay to
 ensure that the corresponding in-kernel state of a replayed session is
 updated properly so that it can transition to live execution at any
 time.  We first describe the basics of how \scribe{} handles system
-calls, then describe in Section~\ref{scribe:sec:rendezvous} how \scribe{}
+calls, then describe in \S\ref{scribe:sec:rendezvous} how \scribe{}
 handles nondeterminism due to system calls that access shared
 resources. 
 
@@ -384,7 +379,7 @@ significantly inflating the resulting log size.
 
 During replay, \scribe{} replays the system calls of each process
 independently, unless system calls access shared resources as discussed
-in Section~\ref{scribe:sec:rendezvous}.  When a replayed process invokes a
+in \S\ref{scribe:sec:rendezvous}.  When a replayed process invokes a
 system call, \scribe{} intercepts it and uses the return value from the
 corresponding {\em syscall\_ret} event in the log queue of the calling
 process as the return value of the system call.  It does not return
@@ -600,7 +595,7 @@ shared memory interleavings. This scheme requires a
 protocol to manage page ownership transitions, and a method to ensure
 that such transitions occur at precisely the same location in the
 execution during both record and replay. The latter problem is the
-key challenge, and is discussed in Section~\ref{scribe:sec:sync}.
+key challenge, and is discussed in \S\ref{scribe:sec:sync}.
 
 \scribe{} employs a concurrent read, exclusive write (CREW)
 protocol~\cite{crew,instant-replay} for shared memory access, but with
@@ -835,7 +830,7 @@ kernel locking primitive already in place for the associated
 resource, but this involves kernel changes.  To avoid changing the
 underlying kernel, \scribe{} resorts to its own, separate mutex to
 interpose transparently at well-defined kernel entry points.
-Section~\ref{scribe:sec:results} shows that our approach incurs low overhead
+\S\ref{scribe:sec:results} shows that our approach incurs low overhead
 on real applications. 
 
 During replay, \scribe{} replays the system calls of each process
@@ -1075,7 +1070,7 @@ place in the process's instruction stream as during recording. It is
 difficult because it could have occurred at an arbitrary location
 during the execution. The two predominant examples of asynchronous
 events are signal delivery and page ownership transfers for shared
-memory, described in Section~\ref{scribe:sec:memory}.
+memory, described in \S\ref{scribe:sec:memory}.
 
 Consider signal delivery.  Signals are delivered in two steps.  First,
 the sender process sends a signal to the target process, which is
@@ -1089,7 +1084,7 @@ during its original execution.  This is difficult because the
 interrupt could have occurred at any time during execution.
 
 Consider page ownership transfers for managing shared memory.  As
-described in Section~\ref{scribe:sec:memory}, a process requesting access to
+described in \S\ref{scribe:sec:memory}, a process requesting access to
 a shared memory page will page fault if it does not have the necessary
 ownership to read or write the page.  This fault occurs asynchronously
 with the execution of the process that owns the page.  Replaying this
@@ -1181,7 +1176,7 @@ will never check its queue for the corresponding
 ``stalled'' state in kernel space, and examines the following events in
 the queue. The next event may be either another {\em signal\_receive}
 event or a page ownership transition event, as discussed in
-Section~\ref{scribe:sec:memory}. \scribe{} 
+\S\ref{scribe:sec:memory}. \scribe{} 
 processes the remaining events in the queue
 until it encounters a \code{SIGCONT}, and then allows the process to
 resume execution.  When a session that contains a stalled process
@@ -1256,7 +1251,7 @@ replaying asynchronous events is predicated on the assumption that
 sync points occur frequently enough in real applications, since they
 often enter kernel mode by executing system calls or causing page
 faults. Based on this assumption, we expect any performance overhead
-to be low in practice.  Section~\ref{scribe:sec:results} presents
+to be low in practice.  \S\ref{scribe:sec:results} presents
 experimental results that validate our assumption.
 
 In addition, for tracking shared memory, it assumes that real
@@ -1760,3 +1755,24 @@ overhead than \scribe{} for kernel compilation due to frequent system
 activities that result in kernel-level sharing.  While SMP-ReVirt can
 provide whole system replay, \scribe{} can provide much more efficient
 application replay.   
+
+\section{Conclusion}
+\label{scribe:sec:conclusion}
+
+\scribe is the first operating system mechanism to provide transparent,
+deterministic execution record and replay of multi-threaded and multi-process
+applications on commodity multiprocessors and operating systems. \scribe records
+and replays multiple processes by accounting for nondeterministic interactions
+among processes and their execution environment.  \scribe introduces {\em
+rendezvous points} to ensure correct partial ordering of execution based on
+system call dependencies, and {\em sync points} to convert asynchronous
+interactions that can occur at arbitrary times into synchronous events that are
+much easier to record and replay.
+Using these two mechanisms, we show that \scribe{} recording overhead is modest
+for various server and desktop applications.
+\scribe can transition an application to running live at any time, and use
+checkpoints to record and replay from any point in time.
+This go-live feature is instrumental for certain record-replay applications. We
+built \racepro, a process race detection system atop of \scribe, that leverage
+this go-live feature when performing race triage. We describe \racepro in the
+next chapter.
