@@ -2,24 +2,38 @@
 
 Deterministic application record and replay is the ability to record
 application execution and deterministically replay it at a later time.
+Record-replay is similar to an application execution time machine.
 Record-replay has many potential uses, including diagnosing
 and debugging applications by capturing and reproducing hard to find
-bugs.
+bugs. Recording an application execution with acceptable performance can be
+challenging. For example, the recording much be done in such way that all thread
+interactions in the application can be faithfully reproduced when replaying.
 
-First, we present \scribe, an OS-level deterministic record-replay mechanism.
-\scribe introduces new lightweight OS mechanisms, rendezvous and sync points, to
-efficiently record nondeterministic interactions such as related system calls,
-signals, and shared memory accesses.
-Second, we present \racepro, a process race detection system to improve
+In this thesis, we explore four record-replay systems enabling various use cases.
+We first present \scribe, an OS-level deterministic record-replay mechanism.
+\scribe introduces two new lightweight OS mechanisms, rendezvous point and sync
+points, to efficiently record nondeterministic interactions such as related
+system calls, signals, and shared memory accesses. \scribe allows the capture
+and replication of hard to find bugs to facilitate debugging and serves as a
+solid foundation for our two following systems.
+We then present \racepro, a process race detection system to improve
 software correctness. Process races occur when multiple processes access shared
 operating system resources, such as files, without proper synchronization.
+\racepro records application executions in deployed systems, allowing offline
+race detection by analyzing the previously recorded log. \racepro then replays
+the application and forces the manifestation of detected races to check their
+effect on the application. Upon failure, \racepro reports potentially harmful
+races to developers.
 Third, we present \dora, a mutable record-replay system which allows a recorded
 execution of an application to be replayed with a modified version of the
-application.
-Lastly, we present \synapse, an heterogeneous database replication system
-specifically designed for web applications.
-
-These four systems share many similarities as they are built on top of
-record-replay systems. This thesis describes these four systems.
+application. Mutable record-replay provides a number of benefits for
+reproducing, diagnosing, and fixing software bugs. Given a recording and a
+modified application, finding a mutable replay is challenging, and undecidable
+in the general case. Despite the difficulty of the problem, we show a very
+simple but effective algorithm to search for suitable replays.
+Lastly, we move away from transparent execution record-replay engines to
+application state record-replay in distributed engines. We present \synapse,
+an heterogeneous database replication system designed for web applications,
+that shares many similarities with our traditional record-replay engine, \scribe.
 
 \end{abstract}

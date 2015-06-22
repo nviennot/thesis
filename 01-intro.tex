@@ -2,13 +2,30 @@
 \label{ch:intro}
 
 Deterministic application record and replay is the ability to record application
-execution and deterministically replay it at a later time.  Record-replay has
+execution and deterministically replay it at a later time. 
+Record-replay is similar to an application execution time machine, allowing
+one to make an execution go backward in time. Record-replay has
 many potential uses, including diagnosing and debugging applications by
 capturing and reproducing hard to find bugs, dynamic application analysis by
 performing costly instrumentation on replicas that replay application behavior
 recorded on production systems, intrusion analysis by capturing intrusions
 involving non-deterministic effects, and fault-tolerance by streaming
 a live recording of a primary server execution to its replicas.
+
+Implementing deterministic execution record-replay can be challenging for a
+variety of reasons. First, all sources of non-determinism must be captured and recorded.
+Sources of non-determinism can be categorized in 1) data related non-determinism
+and 2) timing related non-determinism. Data related non-determinism is the easiest
+to capture. It includes recording all external inputs such as incoming network
+packets, or user keystrokes. Timing related non-determinism is harder to capture,
+especially when the recorded application runs on multiple CPUs simultaneously.
+Application threads or processes access data and resources in an undefined
+order, resulting in many different possible schedules. Another example is the
+delivery of POSIX signals which can occur at an arbitrary point in time in the
+application execution timeline. It is sufficient to record all sources of
+non-determinism, both data and timing sources, to replay an application
+execution deterministically. However, doing so with good performance is crucial
+since recording is done in deployed systems.
 
 Many approaches have tried to provide transparent (i.e., which does not require
 application changes) record-replay functionality, but have suffered from
@@ -27,7 +44,7 @@ specialized hardware are not suitable for any deployments on the cloud.
 Mechanisms implemented at the VM level suffer from performance issues
 due to unnecessary kernel recording overhead.  Userspace record-replay systems
 are not suitable for generic multi-processor support as they lack the ability to
-instrument memory accesses efficiently. The only viable level for
+instrument memory accesses efficiently. A good candidate for
 a multi-processor, hardware agnostic, transparent, record-replay system is the
 kernel level. However, implementing a record-replay system at the kernel level
 is challenging. Delivering asynchronous events, for example signals or

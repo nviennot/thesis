@@ -4,8 +4,13 @@
 \section{Introduction}
 \label{synapse:sec:intro}
 
-Systems that provides fault-tolerance are typically built on top of
-application state record-replay mechanisms. Resilient distributed databases replicate data on
+So far, we have explored the usefulness of execution record-replay mechanisms
+with the introduction the \scribe, \racepro, and \dora
+systems. These systems prime use case is to improve software robustness by
+facilitating debugging and detecting previously unknown bugs.
+Systems that provides fault-tolerance are typically built on top of application
+state record-replay mechanisms as opposed to execution record-replay mechanisms.
+Resilient distributed databases replicate data on
 different machines. Aside from fault-tolerance, running replicas provide other
 benefits such as horizontal scalability for load balancing. Databases (DBs) that
 implement data replication protocols often hide an underlying record-replay

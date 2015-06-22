@@ -3,6 +3,12 @@
 
 \section{Introduction} \label{racepro:sec:intro}
 
+After presenting \scribe, our transparent record-replay engine most suited for
+application debugging by capturing and reproducing hard to find bugs, we explore
+ways to reveal dormant bugs in applications, and catch them before they happen.
+Specifically, we explore the effect of bugs due to harmful process races in
+software, and how to detect them using record-replay mechanisms.
+
 While thread races have drawn much attention from the research
 community~\cite{cui:tern:osdi10,racerx:sosp03,racefuzzer:pldi08,wu:loom:osdi10,yu:racetrack:sosp},
 little has been done for \emph{process races}, where multiple
@@ -82,7 +88,7 @@ on the deployed systems.
 
 Second, \racepro records a deployed system as a system-wide, deterministic
 execution of multiple processes and threads. \racepro uses lightweight OS
-mechanisms developed in our previous work~\cite{scribe:sigmetrics10}
+mechanisms developed in our previous work \scribe
 to transparently and efficiently record nondeterministic interactions
 such as related system calls, signals, and shared memory accesses.
 No source code or modifications of
@@ -109,7 +115,7 @@ so that either may wake up a waiting parent.
 To our knowledge, no previous algorithm directly handles wait-wakeup races.
 
 Fourth, to reduce false positives and negatives, \racepro uses 
-\emph{replay and go-live} to validate detected races.
+\emph{replay and go-live} to validate detected races, a core feature of \scribe.
 A race detected based on the micro-operations may be either \emph{benign}
 or \emph{harmful}, depending on whether it leads to a \emph{failure}, such
 as a segmentation fault or a program abort.
@@ -1479,6 +1485,16 @@ coverage.  A second source is checker inaccuracy.  If a checker is too
 permissive or no checker is provided to check for certain failures, \racepro
 would miss bugs.
 
+While our checkers benefit from running on live executions, \racepro is unable
+to replay production workload recorded after the race is triggered.
+\racepro would benefit from a built-in checker that would replay the rest of the
+recorded execution. The ability to replay production workload after the race is
+triggered would provide confidence that the race is benign.
+Replaying a recorded execution after introducing modifications is difficult due
+to the unknown behavior and side-effects of the application during the
+divergence. We explore the feasibility of such mutable replay capability in the
+next chapter with \dora.
+
 \section{Experimental Results} \label{racepro:sec:eval}
 
 We have implemented a \racepro prototype in Linux.  The prototype
@@ -1861,7 +1877,7 @@ shared resources.  None of these systems aim to detect process races.
 
 \section{Conclusion} \label{racepro:sec:conclusion}
 
-We have presented the first study of real process races, and the first
+We presented the first study of real process races, and the first
 system, \racepro, for effectively detecting process races beyond TOCTOU
 and signal races.   Our study has shown that process races are
 numerous, elusive, and a real threat.  To address this problem, \racepro
@@ -1869,9 +1885,9 @@ automatically detects process races, checking deployed
 systems \emph{in-vivo} by recording live executions and then checking
 them later.  It thus increases checking coverage beyond the
 configurations or executions covered by software vendors or beta
-testing sites. \racepro builds atop of \scribe, our transparent, low overhead
+testing sites. \racepro builds on \scribe, our transparent, low overhead
 record-replay engine described in the previous chapter.
 The race detection accuracy depends on the quality of the checker which runs
-modified executions. The checker would thus greatly benefit from a replay engine
+modified executions. The checker would thus benefit from a replay engine
 tolerant to modifications in the execution. We introduce this concept and
-propose an implementation in the next chapter.
+propose an implementation in the next chapter with \dora.

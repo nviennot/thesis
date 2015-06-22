@@ -37,6 +37,9 @@ bugs. For instance, mutable record-replay can replay a version
 of the recorded application that is recompiled with debugging information,
 reconfigured to produce verbose log output, or modified to include additional
 code instrumentation such as print statements.
+Further, in the previous chapter we introduced \racepro, a process races
+detection system, and noted that it would benefit from the ability to replay a
+modified recorded execution to improve the accuracy of its race checkers.
 
 Mutable record-replay can also replay a recorded
 application execution of a production workload using
@@ -1574,7 +1577,8 @@ the application for a large class of application changes.  {\dora} introduces an
 explorer that directs the replay mechanism to identify a mutable replay of the
 modified aplication that minimizes differences with the original unmodified
 application execution.
-Our experimental results on a prototype built atop of \scribe demonstrate that
+We implemented a \dora prototype based on our previously introduced \scribe engine.
+Our experimental results demonstrate that
 mutable replay is feasible across a wide range of real-world applications and
 application changes which can reach thousands of lines of code, even without
 support for major changes to core application semantics. We show that mutable
