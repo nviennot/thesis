@@ -327,7 +327,7 @@ instead of executing the instruction.
 System calls are the predominant form for processes to interact with
 the environment and with other processes. System call interposition is
 used to record and replay the execution of system calls.
-Unlike other approaches~\cite{liblog,jockey,flashback}, \scribe{} does
+Unlike other approaches~\cite{liblog,jockey,srinivasan:flashback}, \scribe{} does
 not simply feed processes with logged data to simulate the effect of
 system calls.  This is not sufficient to enable replayed execution to
 go live.  Instead, \scribe{} re-executes system calls during replay to
@@ -1663,7 +1663,7 @@ application, library, and programming language approaches to provide
 transparent record-replay for unmodified applications.
 
 Other operating system mechanisms have also been
-proposed~\cite{rr,bressoud-tft,flashback,rr-realtime} that interpose
+proposed~\cite{rr,bressoud-tft,srinivasan:flashback,rr-realtime} that interpose
 between applications and the operating system.  None of them
 provides record-replay for multi-threaded and
 multi-process applications.  In fact, only TFT~\cite{bressoud-tft}
@@ -1672,7 +1672,7 @@ shows any record-replay results for real applications, namely
 quite high.  Unlike \scribe{}, TFT is only designed to replay a single
 process.  Debugging using deterministic replay (DUDR)~\cite{rr-realtime}
 presents only a paper design with no implementation or evaluation,
-while Flashback~\cite{flashback} and RR~\cite{rr} are largely
+while Flashback~\cite{srinivasan:flashback} and RR~\cite{rr} are largely
 incomplete with no results beyond those for a single, simple test
 program.  In contrast, \scribe{} demonstrates for the first time that
 record-replay of real multi-threaded and multi-process applications is

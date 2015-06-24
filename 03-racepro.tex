@@ -571,7 +571,7 @@ can exclusively modify that page during the interval and treat it like
 private memory, avoiding the need to track all memory accesses during such
 ownership periods.  Transitioning page ownership from one process or
 thread to another is done using a concurrent read, exclusive write
-(CREW) protocol~\cite{smp-revirt:vee08,instant-replay}.  To ensure
+(CREW) protocol~\cite{smp-revirt,instant-replay}.  To ensure
 that ownership transitions occur at precisely the same location 
 in the execution during both record and replay, \racepro defers such
 transitions until the owner reaches a sync point.  When a process
@@ -1504,7 +1504,7 @@ validating races.  The current prototype has several limitations.  For
 replaying executions and isolating the side effects of replay, \racepro
 must checkpoint system states.  It currently checkpoints only file
 system states, though switching to better checkpoint
-mechanism~\cite{zap:osdi02} is straightforward.  \racepro detects idle
+mechanism~\cite{zap02} is straightforward.  \racepro detects idle
 state simply by reading \code{/proc/loadavg}, and can benefit from a more
 sophisticated idle detection algorithm~\cite{boinc}.
 
