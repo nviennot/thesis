@@ -212,15 +212,15 @@ Observer                   & DB-less subscriber.                           \\
 Virtual attribute          & Deterministic functions (can be published).   \\
 \bottomrule
  \toprule {\bf API}                          & {\bf Description}                           \\ \midrule
- {\code {publish}},            & Annotations to denote which attributes to   \\
- {\code {subscribe}}           & publish or subscribe.                       \\ \midrule
- {\code {before\_create}},     & Re-purposed active model callbacks for      \\
- {\code {before\_update}},     & subscriber update notification. Similar     \\
- {\code {before\_destroy}}     & callbacks for after\_create/update/destroy. \\ \midrule
- {\code {add\_read\_deps,}}    & Specify explicit dependencies for read and  \\
- {\code {add\_write\_deps}}    & write DB queries.                           \\ \midrule
- {\code {delivery\_mode}}      & Parameter for selecting delivery semantic.  \\ \midrule
- {\code {bootstrap?}}          & Predicate method denoting bootstrap mode.   \\
+ {\tt {publish}},            & Annotations to denote which attributes to   \\
+ {\tt {subscribe}}           & publish or subscribe.                       \\ \midrule
+ {\tt {before\_create}},     & Re-purposed active model callbacks for      \\
+ {\tt {before\_update}},     & subscriber update notification. Similar     \\
+ {\tt {before\_destroy}}     & callbacks for after\_create/update/destroy. \\ \midrule
+ {\tt {add\_read\_deps,}}    & Specify explicit dependencies for read and  \\
+ {\tt {add\_write\_deps}}    & write DB queries.                           \\ \midrule
+ {\tt {delivery\_mode}}      & Parameter for selecting delivery semantic.  \\ \midrule
+ {\tt {bootstrap?}}          & Predicate method denoting bootstrap mode.   \\
  \bottomrule
  \end{tabular}
  }
@@ -301,17 +301,16 @@ To publish a model, the developer simply specifies which attributes within that
 model should be shared.
 The code at the top of
 \F\ref{synapse:fig:pub-sub} shows how to publish
-in Ruby using the {\code publish} keyword, with Synapse-specific code
+in Ruby using the {\tt publish} keyword, with Synapse-specific code
 underlined.  
-Each published model has a globally unique URI, given by {\code
+Each published model has a globally unique URI, given by {\tt
 app\_name/model\_name}.  \synapse generates a publisher file for each
 publisher listing the various objects and fields being published and is made
 available to developers who want to create subscribers for the published data.
 A factory file is also made available for each publisher that provides sample
 data for writing integration tests (\S\ref{synapse:sec:testing}). 
 Other API calls that
-can be used by publishers are {\code {\small add\_read\_deps}}, {\code {\small
-add\_write\_deps}}, and {\code {\small delivery\_mode}}, discussed in
+can be used by publishers are {\tt add\_read\_deps}, {\tt add\_write\_dep}}, and {\tt delivery\_mode}, discussed in
 \S\ref{synapse:sec:semantics} and \S\ref{synapse:sec:arch:cross-db-causality}.
 
 \begin{figure}
@@ -342,7 +341,7 @@ interest accordingly.  In \F\ref{synapse:fig:pub-sub}, the code at the bottom
 shows how to subscribe in Ruby to the publisher at the top.  Since
 the model name is the same in the subscriber as the publisher, it does not
 need to be explicitly identified in conjunction with the 
-{\code subscribe} keyword. 
+{\tt subscribe} keyword. 
 A subscriber application can subscribe to some or all of a publisher's
 models, and can subscribe to models from multiple publishers. While
 there may be many subscribers for a given model, there can only be one
@@ -360,15 +359,15 @@ application-specific processing of updates before applying them to their
 DBs. For example, a subscriber may need to compute new fields,
 denormalize data, or send a notification.  \synapse supports this by
 piggybacking upon active model callbacks often supported by MVC frameworks,
-including {\code \small before/after\_create}, {\code \small before/after\_update}, or
-{\code \small  before/after\_destroy}.
+including {\tt before/after\_create}, {\tt before/after\_update}, or
+{\tt before/after\_destroy}.
 The code on the right shows an example of an \emph{after} subscriber callback that
 sends a welcome email for each newly created User.
 These callbacks are particularly useful to adapt schemas
 between publishers and subscribers, as discussed in
 \S\ref{synapse:sec:examples}. 
-Other API calls that can be used by subscribers are {\code {\small bootstrap?}}
-and {\code {\small delivery\_mode}}, discussed in \S\ref{synapse:sec:semantics}.
+Other API calls that can be used by subscribers are {\tt bootstrap?}
+and {\tt delivery\_mode}, discussed in \S\ref{synapse:sec:semantics}.
 
 \begin{figure}
 \centering
@@ -505,7 +504,7 @@ applications may be able to  handle updates in any order, others may expect them
 order that respects application logic. In support of applications with
 different needs, and inspired by well-established prior
 art~\cite{Birman:1991:LCA:128738.128742}, \synapse allows
-publishers and subscribers to use the {\code delivery\_mode} configuration directive
+publishers and subscribers to use the {\tt delivery\_mode} configuration directive
 to select among three delivery semantics: {\em global}, {\em causal},
 and {\em weak}. 
 
@@ -594,7 +593,7 @@ There is only one constraint on delivery mode choice in
 subscriber must catch up after a period of unavailability, \synapse
 forces the weak semantic (i.e., the subscriber may witness overwritten
 histories and out-of-order deliveries).  We signal such periods
-clearly to programmers in our API using the {\code bootstrap?}
+clearly to programmers in our API using the {\tt bootstrap?}
 predicate. \F~\ref{synapse:fig:welcome-email} shows a usage example and
 \S\ref{synapse:sec:arch:bootstrapping} describes this situation and
 explains how subscribers demanding higher semantics can deal with semantics
@@ -685,7 +684,7 @@ integration of a MongoDB publisher (Pub1) with three
 subscribers: SQL (Sub1a), Elasticsearch (Sub1b), and
 MongoDB (Sub1c). The programmers write their models using
 the specific syntax that the underlying ORM
-provides.  Barring the {\code {\footnotesize publish/subscribe}} keywords, the
+provides.  Barring the {\tt publish/subscribe} keywords, the
 models are exactly how each programmer would write them if they were not using
 \synapse (i.e., the data were local to their service).  In our experience
 deploying \synapse, this is by far the most
@@ -940,8 +939,8 @@ Although steps 1 and 4 seem completely DB specific, we leverage ORMs to abstract
 To intercept writes, \synapse uses a DB-engine specific query interceptor.
 Collecting information about objects written is
 generally straightforward, as many DBs can easily output the rows affected
-by each query. For example, in SQL, an {\code INSERT}, or {\code DELETE}
-query ending with {\code RETURNING *} will return the contents of the
+by each query. For example, in SQL, an {\tt INSERT}, or {\tt DELETE}
+query ending with {\tt RETURNING *} will return the contents of the
 written rows. Many DBs support this feature, including: Oracle, PostgreSQL, SQL
 Server, MongoDB, TokuMX, and RethinkDB. For DBs without this feature
 (e.g., MySQL, Cassandra), we develop a protocol that involves performing an additional
@@ -957,14 +956,14 @@ described in \S\ref{synapse:sec:arch:bootstrapping}). When marshalling objects,
 \synapse also includes each object's complete inheritance tree, allowing
 subscribers to consume polymorphic models.
 \F~\ref{synapse:fig:json} shows a write message produced
-upon a {\code User} creation; the post object's marshalling is in the message's
-{\code attributes} field.
+upon a {\tt User} creation; the post object's marshalling is in the message's
+{\tt attributes} field.
 
 On the subscriber, \synapse unmarshals a new or updated object by (1)
 instantiating a new instance of that type, or finding it in the DB based on its primary key with
 the ORM's {\tt find} method, (2) recursively assigning its
 subscribed attributes from those included in the message by calling the
-object setter methods, and (3) calling the {\code save} or {\code
+object setter methods, and (3) calling the {\tt save} or {\tt
 destroy} method on the object. For a delete operation, step (2) is skipped.
 Different ORMs may have different names for these methods (e.g., {\tt find} vs
 {\tt find\_by}) but their translation is trivial. Any callbacks specified by the
@@ -1162,7 +1161,7 @@ error-prone.
 
 \synapse always infers the correct set of dependencies when encountering read
 queries that return objects, including joins. For example, when running a query
-of the form \\ \mbox{{\code "SELECT id,... FROM table WHERE ..."}}, \synapse registers an
+of the form {\tt SELECT id,... FROM table WHERE ...}, \synapse registers an
 object dependency on each returned row. Note that \synapse automatically injects
 primary key selectors in read queries if these are missing.
 In our experience, read queries returning objects constitute the vast majority
@@ -1170,7 +1169,7 @@ of true dependency queries. The other types of read queries are aggregations
 (e.g., count) and their results are not true dependencies in practice. However,
 in the hypothetical case where one would need to track dependencies on such
 queries, \synapse lets developers express explicit dependencies with 
-{\code {\small add\_read\_deps}} and {\code {\small add\_write\_deps}}
+{\tt add\_read\_deps} and {\tt add\_write\_deps}
 to synchronize arbitrary read queries with any write queries.
 In over a dozen applications we integrated with \synapse, we have not
 encountered one single query that could be considered as a dependency but is not
@@ -1179,7 +1178,7 @@ marked as such by \synapse automatically.
 \synapse always infers the correct set of dependencies when
 encountering write queries.
 When encountering write queries issued to transactional DBs, \synapse infers
-the updated objects from the result of the write query (with {\code RETURNING
+the updated objects from the result of the write query (with {\tt RETURNING
 *}), or by performing an additional read query.  It registers these objects as
 write dependencies, which are later used during the commit operation. With
 non-transactional DBs, \synapse supports write queries that update at most one,
@@ -1252,7 +1251,7 @@ in bulk and saved in the subscriber's version store. Second, all objects in the 
 published during the previous steps are processed to finish synchronizing the
 objects and versions. Once all messages are processed, the subscriber is now
 {\em in sync} and operates with the configured delivery semantics.
-Subscriber code may call {\code Synapse.bootstrap?} to determine whether \synapse
+Subscriber code may call {\tt Synapse.bootstrap?} to determine whether \synapse
 is still bootstrapping or in sync. \F~\ref{synapse:fig:welcome-email} shows an example of
 how the mailer subscriber checks for bootstrapping completion before sending emails.
 
@@ -1421,7 +1420,7 @@ for Diaspora (compared to its 30k lines of code), 5 for Discourse (compared to
 its 21k lines), and 7 for Spree (compared to its 37k lines).
 
 Next, we built a semantic analyzer that subscribes to these posts and extracts topics of interest, decorating Users with apparent topics of interest (using an out-of-the-box semantic analyzer, Textalytics~\cite{textalytics}).
-The analyzer publishes its decorated {\code User} model (with user interests) to Spree.
+The analyzer publishes its decorated {\tt User} model (with user interests) to Spree.
 
 Finally, since Spree did not have \emph{any} recommendation mechanism in place, we added several lines of code to it to implement generic targeted searching.
 With this code in place, one can construct as complex of a recommendation engine as
@@ -1567,13 +1566,13 @@ For each of these quantities, we measured the arithmetic mean and $99^{th}$  per
 were invoked. We show average overheads across them, as well as detailed
 information about the five most frequently accessed controllers, which account
 for over 70\% of the traffic. On average, \synapse overheads are low: 8\%.
-For the most popular two controllers ({\code awards/index} and {\code
+For the most popular two controllers ({\tt awards/index} and {\tt
 brands/show}), the overheads are even lower: 0.0-0.8\%. This is because they
 exhibit very few published messages (writes). As expected, \synapse overhead
 is higher in controllers that publish more messages, showing an average overhead
-of 37.9\% for the controller {\code actions/update}.
+of 37.9\% for the controller {\tt actions/update}.
 The number of dependencies stays low enough to not become a bottleneck with
-{\code actions/index} showing 17.8 dependencies per message on average.
+{\tt actions/index} showing 17.8 dependencies per message on average.
 To further illustrate \synapse's impact, we also show the $99^{th}$ percentile
 of controller execution time and \synapse's execution time within the controller.
 Some controller executions are long ($>1$ second). These high response times may
@@ -1586,7 +1585,7 @@ applications, as well. \F~\ref{synapse:fig:app-overheads} shows the \synapse
 overheads for several controllers within Diaspora and Discourse (plus
 \crowdtap for consistency). Grey areas are \synapse overheads. Overheads
 remain low for the two open-source applications when benchmarked with synthetic
-workloads. Read-only controllers, such as {\code stream/index} and {\code
+workloads. Read-only controllers, such as {\tt stream/index} and {\tt
 topics/index} in Diaspora and Discourse, respectively, exhibit near-zero
 overheads; write controllers have up to 20\% overhead.
 

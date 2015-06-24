@@ -1601,7 +1601,7 @@ on average, except {\tt ssh-c}, which reached 220\us{}. The average
 delay for only those few deferred signals that could not be handled
 instantly was at most 1\ms{}. CPU intensive workloads without shared
 memory produce sync points only due to system calls, and sustain longer
-delays for deferred signals.  For example, in {\tt make}, 135 SIGCHLD
+delays for deferred signals.  For example, in {\tt make}, 135 {\tt SIGCHLD}
 signals were deferred as the parent process waited to be scheduled
 while compilations occupied the CPUs. Only when it was scheduled, it
 reached a sync point and handled the signal. However, even without
