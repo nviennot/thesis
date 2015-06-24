@@ -1,6 +1,6 @@
-set terminal pdf dashed size 9,2.5 font 'Times-Roman,16'
+set terminal pdf dashed size 7.5,2.2 font 'Times-Roman,16'
 set tmargin at screen 0.99
-set lmargin at screen 0.115
+set lmargin at screen 0.075
 set rmargin at screen 0.99
 set output 'diaspora2.pdf'
 set object 1 rect from 0.0,0.6 to 54.982421875,1.4 fc ls 4 fs pattern 7 bo -1
@@ -15,7 +15,7 @@ set ytics axis nomirror rotate by 45 offset 0,0.2
 set yrange [-0.5:2.3]
 set mytics 0.1
 set ytics ("Mailer" 0,"Diaspora" 1)
-set xlabel 'Time [ms]' offset 0,0
+set xlabel 'Time [ms]' offset 0,0.4
 set xrange [0.0:397.76122802734375]
 set grid xtics
 set label '0' at 0,-0.7 center

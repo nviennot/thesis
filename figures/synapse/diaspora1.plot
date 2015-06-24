@@ -1,6 +1,6 @@
-set terminal pdf dashed size 9,2.5 font 'Times-Roman,16'
+set terminal pdf dashed size 7.5,2.2 font 'Times-Roman,16'
 set tmargin at screen 0.99
-set lmargin at screen 0.115
+set lmargin at screen 0.09
 set rmargin at screen 0.99
 set output 'diaspora1.pdf'
 set object 1 rect from 0.0,2.6 to 68.799560546875,3.4 
