@@ -11,7 +11,7 @@
 \usepackage{fancyhdr}
 \usepackage{afterpage}
 
-\usepackage{hyperref}
+\usepackage[pagebackref]{hyperref}
 \hypersetup{
   pdftitle={\thesistitle},
   pdfauthor={\thesisauthor},
@@ -24,6 +24,19 @@
   citecolor=blue,
 }
 \usepackage[all]{hypcap}
+
+\renewcommand*{\backreflastsep}{, }
+\renewcommand*{\backreftwosep}{, }
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{%
+  \ifcase #1 %
+No citations.% use \relax if you do not want the "No citations" message
+  \or
+(page #2).%
+  \else
+(pages #2).%
+  \fi%
+}
 
 % \usepackage[hyphens]{url}
 %
