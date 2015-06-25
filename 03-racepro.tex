@@ -152,24 +152,21 @@ results. \S\ref{racepro:sec:related} discusses related work.  Finally,
 
 \begin{table}[t]
 \centering
-\begin{tabular}{@{}c@{}|cc|ccc@{}}
-  \multirow{2}{*}{\bf Distribution} & 
-    \multicolumn{2}{c|}{\bf Pages} &
-    \multicolumn{3}{c}{\bf Bugs} \\
-  & Returned & Sampled
-    & Total
-    & Process
-    & Thread \\
-  \hline
+\begin{tabular}{c|cc|ccc}
+  \toprule
+                                    & \multicolumn{2}{c|}{\bf Pages} & \multicolumn{3}{c}{\bf Bugs} \\
+  {\bf Distribution} & {\bf Returned} & {\bf Sampled} & {\bf Total} & {\bf Process} & {\bf Thread} \\ \midrule
   Ubuntu              & 3330 & 300  & 45  & 42 (1)   & 3   \\
   Fedora/RedHat\,\,\, & 1070 & 100  & 52  & 30 (10)  & 22  \\
   Gentoo              & 2360 & 60   & 31  & 23 (10)  & 8   \\
   Debian              & 768  & 40   & 17  & 12 (4)   & 5   \\
   CentOS              & 1500 & 40   & 5   & 2 (0)    & 3   \\
-  \hline                           
-  Total               & 9028 & 540  & 150 & 109 (25) & 41  \\
+  \midrule
+  {\bf Total}         & 9028 & 540  & 150 & 109 (25) & 41  \\
+  \bottomrule
 \end{tabular}
-\caption{{\em Summary of collected pages and bugs.}} \label{racepro:tab:data}
+\caption{{\bf Summary of Collected Pages and Bugs.}}
+\label{racepro:tab:data}
 \end{table}
 
 
@@ -218,7 +215,8 @@ did not include them in Table~\ref{racepro:tab:data}.
 
 \begin{figure}[t]
   \includegraphics[width=0.45\linewidth,angle=270]{figures/racepro/race-effects}
-  \caption{\em Process races breakdown by effects.} \label{racepro:fig:effects}
+  \caption{{\bf Process Races Breakdown by Effects.}}
+  \label{racepro:fig:effects}
 \end{figure}
 
 \begin{figure}[t]
@@ -226,7 +224,7 @@ did not include them in Table~\ref{racepro:tab:data}.
 \includegraphics[width=.45\linewidth]{figures/racepro/race-packages}
 \includegraphics[width=.45\linewidth]{figures/racepro/race-processes}
 \includegraphics[width=.45\linewidth]{figures/racepro/race-languages}
-\caption{{\em Process races breakdown.} X axis shows the number of software
+\caption{{\bf Process Races Breakdown.} X axis shows the number of software
   packages, processes, or programming languages involved.  Y axis shows
   the percentage of process races that involve the specific number of
   packages, processes, or languages.  To avoid inflating the number of
@@ -296,11 +294,11 @@ to use an algorithm that can detect order violations.
 
 \subsection{Process Race Examples} \label{racepro:sec:example}
 
-\begin{figure}[t]
-\small
-\begin{minipage}{0.60\linewidth}
-  \centering
-\begin{verbatim}
+\begin{figure}
+\centering
+\begin{minipage}{.4\textwidth}
+  \begin{rbox}
+\begin{lstlisting}[language=C,framexleftmargin=5pt]
 child = fork()
 setjmp(loc)
 p = wait(...) [blocks...]
@@ -309,12 +307,16 @@ p = wait(...) [...returns]
 ...          // signaled
 longjmp(loc)
 p = wait(...) // error (no child)
-\end{verbatim}
-    \caption{{\em dash-MySQL race.}} \label{racepro:fig:dash-mysql}
+\end{lstlisting}
+\end{rbox}
+\vspace{-1.5em}
+  \caption{{\bf dash-MySQL Race.}}
+  \label{racepro:fig:dash-mysql}
 \end{minipage}
-\begin{minipage}{0.39\linewidth}
-    \centering
-\begin{verbatim}
+\hspace{3em}
+\begin{minipage}{.4\textwidth}
+  \begin{rbox}
+\begin{lstlisting}[language=C,framexleftmargin=5pt]
 fd = open(H,RDONLY);
 read(fd, buf, ...);
 close(fd);
@@ -323,8 +325,11 @@ close(fd);
 fd = open(H,WRONLY|TRUNC);
 write(fd, buf, ...);
 close(fd);
-\end{verbatim}
-      \caption{{\em bash race.}} \label{racepro:fig:bash}
+\end{lstlisting}
+\end{rbox}
+\vspace{-1.5em}
+      \caption{{\bf bash Race.}}
+      \label{racepro:fig:bash}
 \end{minipage}
 \end{figure}
 
@@ -395,8 +400,8 @@ history file may be corrupted.
 
 \begin{figure}[]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/racepro/flow}
-  \caption{{\em \racepro Workflow.} Thin solid lines represent recorded
+  \includegraphics[width=0.9\linewidth]{figures/racepro/flow}
+  \caption{{\bf \racepro Workflow.} Thin solid lines represent recorded
     executions; thick solid lines represent replayed executions.  Dashed
     arrows represent potentially buggy execution branches. The dotted
     thick arrow represents the branch \racepro selects to
@@ -405,8 +410,8 @@ history file may be corrupted.
 
 \begin{figure}[]
   \centering
-  \includegraphics[width=0.8\linewidth]{figures/racepro/arch}
-  \caption{{\em \racepro Architecture.} Components are shaded. The recorder
+  \includegraphics[width=0.9\linewidth]{figures/racepro/arch}
+  \caption{{\bf \racepro Architecture.} Components are shaded. The recorder
     and the replayer run in kernel-space, and the explorer and the
     checkers run in user-space.  Recorded executions and modified
     executions are stored in files.} \label{racepro:fig:arch}
@@ -509,9 +514,9 @@ processes but cannot be modified explicitly by processes.
 
 \begin{table}[t]
 \centering
-\begin{tabular}{cl}
-{\bf Object} & {\bf Description} \\
-\hline
+\begin{tabular}{ll}
+  \toprule
+{\bf Object} & {\bf Description} \\ \midrule
 inode       & file, directory, socket, pipe, tty, pty, device \\
 file        & file handle of an open file \\
 file-table  & process file table \\
@@ -520,8 +525,9 @@ cred        & process credentials and capabilities, \eg, user ID \\
 global      & system-wide properties (\eg, hostname, mounts) \\
 pid         & process ID (access to process and \code{/proc}) \\
 ppid        & parent process ID (synchronize \code{exit/getppid}) \\
+  \bottomrule
 \end{tabular}
-\caption{{\em Shared kernel objects tracked.}} \label{racepro:tab:resources}
+\caption{{\bf Shared Kernel Objects Tracked.}} \label{racepro:tab:resources}
 \end{table}
 
 The recorder only tracks kernel objects whose state is visible
@@ -666,9 +672,10 @@ impossible races.  However, such cases will be filtered later by
 \begin{figure}[]
 \centering
 \includegraphics[width=\linewidth]{figures/racepro/psgrep}
-\caption{{\em The Happens-before graph and respective vector-clocks
-  (in brackets) for ps\,|\,grep\,X.} $P_{i=1,2,3}$ represent the processes
-  involved. The \code{read} of process $P_2$ and the \code{execve} of
+\caption{{\bf The Happens-Before Graph for \code{ps | grep X}.}
+  $P_{i=1,2,3}$ represent the processes involved.
+  $[i,j,k]$ represent vector-clocks.
+  The \code{read} of process $P_2$ and the \code{execve} of
   $P_3$ form a load-store race~(\S\ref{racepro:sec:load-store}), and so do the
   second \code{fork} of $P_1$ and the \code{getdents} (read directory entries) of $P_2$. The first
   \code{wait} of $P_1$ and the \code{exit}s of $P_2$ and $P_3$ form a
@@ -766,48 +773,41 @@ call does a \emph{load} from the same location.
 
 \begin{table}
 \centering
+\small
 \begin{tabular}{ccl}
-  {\bf Syscall}  & {\bf Micro-Op} & \multicolumn{1}{c}{\bf Kernel Object} \\
-  \hline
-                &  \emph{store}   & file-table  \\
-                &  \emph{load}    & inodes of path components  \\
-  \code{open}      &  \emph{store}   & inode of directory, if O\_CREAT  \\
-                &  \emph{load}    & inode of file, if no O\_CREAT \\
-                &  \emph{store}   & data of file (range), if O\_TRUNC  \\
-  \hline
-                &  \emph{load}    & process file-table  \\
-  \code{write}     &  \emph{store}   & file handle of file   \\
-                &  \emph{store}   & inode of file   \\
-                &  \emph{store}   & data of file (range)   \\
-  \hline
-                &  \emph{load}    & process file-table  \\
-                &  \emph{store}   & file handle of file   \\
-  \code{read}      &  \emph{load}    & inode of file, if regular file   \\
-                &  \emph{store}   & inode of file, if a stream   \\
-                &  \emph{load}    & data of file (range)   \\
-  \hline
-                &  \emph{load}    & process file-table  \\
-  \code{getdents}  &  \emph{store}   & file handle of directory   \\
-                &  \emph{load}    & inode of directory   \\
-                &  \emph{load}    & data of directory (range)   \\
-  \hline
-                &  \emph{load}    & inodes of path components   \\
-  \code{execve}    &  \emph{store}   & data of \code{/proc/self/status}   \\
-                &  \emph{store}   & data of \code{/proc/self/cmdline}   \\
-  \hline
-                &  \emph{load}    & process memory map  \\
-  \code{clone}     &  \emph{store}   & data of \code{/proc} directory  \\
-  \hline
-  \code{exit}      &  \emph{store}   & 'pid' of self \\
-                &  \emph{store}   & 'ppid' of re-parented children \\
-  \hline
-  \code{wait}      &  \emph{store}   & data of \code{/proc} directory \\
-                &  \emph{load}    & 'pid' of reaped child  \\
-  \hline
-  \code{getppid}   &  \emph{load}    & 'ppid' of self \\
-  \hline
+  \toprule
+  {\bf Syscall}                    & {\bf Micro-Op} & {\bf Kernel Object}               \\ \midrule
+  \multirow{5}{*}{\code{open}}     & \emph{store}   & file-table                        \\
+                                   & \emph{load}    & inodes of path components         \\
+                                   & \emph{store}   & inode of directory, if O\_CREAT   \\
+                                   & \emph{load}    & inode of file, if no O\_CREAT     \\
+                                   & \emph{store}   & data of file (range), if O\_TRUNC \\ \midrule
+  \multirow{4}{*}{\code{write}}    & \emph{load}    & process file-table                \\
+                                   & \emph{store}   & file handle of file               \\
+                                   & \emph{store}   & inode of file                     \\
+                                   & \emph{store}   & data of file (range)              \\ \midrule
+  \multirow{5}{*}{\code{read}}     & \emph{load}    & process file-table                \\
+                                   & \emph{store}   & file handle of file               \\
+                                   & \emph{load}    & inode of file, if regular file    \\
+                                   & \emph{store}   & inode of file, if a stream        \\
+                                   & \emph{load}    & data of file (range)              \\ \midrule
+  \multirow{4}{*}{\code{getdents}} & \emph{load}    & process file-table                \\
+                                   & \emph{store}   & file handle of directory          \\
+                                   & \emph{load}    & inode of directory                \\
+                                   & \emph{load}    & data of directory (range)         \\ \midrule
+  \multirow{3}{*}{\code{execve}}   & \emph{load}    & inodes of path components         \\
+                                   & \emph{store}   & data of \code{/proc/self/status}  \\
+                                   & \emph{store}   & data of \code{/proc/self/cmdline} \\ \midrule
+  \multirow{2}{*}{\code{clone}}    & \emph{load}    & process memory map                \\
+                                   & \emph{store}   & data of \code{/proc} directory    \\ \midrule
+  \multirow{2}{*}{\code{exit}}     & \emph{store}   & 'pid' of self                     \\
+                                   & \emph{store}   & 'ppid' of re-parented children    \\ \midrule
+  \multirow{2}{*}{\code{wait}}     & \emph{store}   & data of \code{/proc} directory    \\
+                                   & \emph{load}    & 'pid' of reaped child             \\ \midrule
+  \multirow{1}{*}{\code{getppid}}  & \emph{load}    & 'ppid' of self                    \\
+  \bottomrule
 \end{tabular}
-\caption{{\em Micro-operations of common system calls.}}
+\caption{{\bf Micro-Operations of Common System Calls.}}
 \label{racepro:tab:syscall-effects}
 \end{table}
 
@@ -1004,11 +1004,11 @@ $S_1$ and $S_2$.
         \centering
         \begin{tabular}{ccc}
                   & {\bf P1}      & {\bf P2}     \\ \hline
-                  & ...           &              \\
+                  & $\cdots$      &              \\
           $S_1$:  & write(P, 10); &              \\
-          $S_2$:  & write(P, 10); & ...          \\
-          $S_3$:  & ...           & read(P, 20); \\
-                  &               & ...          \\
+          $S_2$:  & write(P, 10); & $\cdots$     \\
+          $S_3$:  & $\cdots$      & read(P, 20); \\
+                  &               & $\cdots$     \\
         \end{tabular}
       \end{rbox}
       \vspace{-2.2em}
@@ -1020,18 +1020,18 @@ $S_1$ and $S_2$.
         \centering
         \begin{tabular}{ccc}
                    & {\bf P1}      & {\bf P2}     \\ \hline
-                   & ...           &              \\
-          $S_1$:   & write(P, 10); & ...          \\
+                   & $\cdots$      &              \\
+          $S_1$:   & write(P, 10); & $\cdots$     \\
           $S_2$:   &               & read(P, 20); \\
-          $S_3$:   & write(P, 10); & ...          \\
-                   & ...           &              \\
+          $S_3$:   & write(P, 10); & $\cdots$     \\
+                   & $\cdots$      &              \\
         \end{tabular}
       \end{rbox}
       \vspace{-2.2em}
       \center{(b)}
     \end{minipage}
   \end{minipage}
-  \caption{Wait-wakeups races in streams.}
+  \caption{{\bf Wait-Wakeups Races in Streams.}}
   \label{racepro:fig:streams}
 \end{figure}
 
@@ -1256,17 +1256,18 @@ process transition to live execution.
       \centering
       \begin{tabular}{lccc}
                & {\bf P1}    & {\bf P2}    & {\bf P3}    \\ \hline
-               & ...         &             &             \\
+               & $\cdots$    &             &             \\
         $S_1$: & syscall(R); &             &             \\
-        $S_2$: & syscall(R); &             & ...         \\
-        $S_3$: & ...         & ...         & syscall(R); \\
-        $S_4$: &             & syscall(R); & ...         \\
+        $S_2$: & syscall(R); &             & $\cdots$    \\
+        $S_3$: & $\cdots$    & $\cdots$    & syscall(R); \\
+        $S_4$: &             & syscall(R); & $\cdots$    \\
         $S_5$: &             & syscall(R); &             \\
-               &             & ...         &             \\
+               &             & $\cdots$    &             \\
       \end{tabular}
     \end{rbox}
   \end{minipage}
-  \caption{Replay divergence due to reordering.} \label{racepro:fig:reorder}
+  \caption{{\bf Replay Divergence Due to Reordering.}}
+  \label{racepro:fig:reorder}
 \end{figure}
 
 \racepro works best when a go-live execution requests no inputs from users or
@@ -1357,12 +1358,12 @@ relatively unlikely to occur.
         \centering
         \begin{tabular}{ccc}
                  & {\bf P1}  & {\bf P2}                                \\ \hline
-                 & ...       &                                         \\
-          $S_1$: & creat(F); & ...                                     \\
-          $S_2$: & ...       & \multicolumn{1}{l}{ r = unlink(F); }    \\
+                 & $\cdots$  &                                         \\
+          $S_1$: & creat(F); & $\cdots$                                \\
+          $S_2$: & $\cdots$  & \multicolumn{1}{l}{ r = unlink(F); }    \\
                  &           & \multicolumn{1}{l}{ {\bf if} (r == 0) } \\
           $S_3$: &           & \multicolumn{1}{l}{ ~~~~~~creat(F); }   \\
-                 &           & ...                                     \\
+                 &           & $\cdots$                                \\
         \end{tabular}
       \end{rbox}
       \vspace{-2.2em}
@@ -1374,46 +1375,46 @@ relatively unlikely to occur.
         \centering
         \begin{tabular}{ccc}
                  & {\bf P1}     & {\bf P2}                                  \\ \hline
-                 & ...          &                                           \\
-          $S_1$: & write(F, x); & ...                                       \\
-          $S_2$: & ...          & \multicolumn{1}{l}{ read(F, b); }         \\
+                 & $\cdots$     &                                           \\
+          $S_1$: & write(F, x); & $\cdots$                                  \\
+          $S_2$: & $\cdots$     & \multicolumn{1}{l}{ read(F, b); }         \\
                  &              & \multicolumn{1}{l}{ {\bf if} (b == `x') } \\
           $S_3$: &              & \multicolumn{1}{l}{ ~~~~~~write(F, y); }  \\
-                 &              & ...                                       \\
+                 &              & $\cdots$                                  \\
         \end{tabular}
       \end{rbox}
       \vspace{-2.2em}
       \center{(b)}
     \end{minipage}
   \end{minipage}
-  \caption{Replay divergence examples.}
+  \caption{{\bf Replay Divergence Examples.}}
   \label{racepro:fig:diverge}
 \end{figure}
 
 \begin{table}[t]
+\small
 \centering
-\setlength{\tabcolsep}{3pt}
-
-\begin{tabular}{c|p{12cm}}
-{\bf Bug ID} & {\bf Description} \\ \hline
+% \setlength{\tabcolsep}{3pt}
+\begin{tabular}{cp{12cm}}
+  \toprule
+{\bf Bug ID} & {\bf Description} \\ \midrule
 debian-294579    & concurrent \code{adduser} processes read and write \code{/etc/passwd} without synchronization, corrupting this file           \\
 debian-438076    & \code{mv} unlinks the target file before calling atomic \code{rename}, violating the atomicity requirement on \code{mv}       \\
 debian-399930    & \code{logrotate} creates a new file then sets it writable, but deamons may observe it without write permissions               \\
 redhat-54127     & \code{ps | grep} race causes a wrong version of \code{licq 7.3} to be started                                                 \\
 launchpad-596064 & \code{upstart} does not wait until \code{smbd} creates a directory before spawning \code{nmbd}, which requires that directory \\
 launchpad-10809  & \code{bash} updates the history file without synchronization, corrupting this file                                            \\
-\hline
+\midrule
 new-1 & \code{tcsh 6.17} updates the history file without synchronization, even when ``savehist merge'' is set                    \\
 new-2 & \code{updatedb} removes old database before renaming the new one, so \code{locate} finds nothing (\code{findutils 4.4.2}) \\
 new-3 & concurrent \code{updatedb} processes may cause the database to be empty                                                   \\
 new-4 & incorrect dependencies in Makefile of \code{abr2gbr 1.0.3} may causes compilation failure                                 \\
-
+\bottomrule
 \end{tabular}
-\caption{{\em Bugs found by \racepro.}  Bugs are identified by
-  ``distribution - bug ID''. New bugs  are identified as ``new - bug
-  number''}. \label{racepro:tab:bugs}
+\caption{{\bf Bugs Found by \racepro.}  Bugs are identified by ``distribution -
+bug ID''. New bugs  are identified as ``new - bug number''}.
+  \label{racepro:tab:bugs}
 \end{table}
-% \end{sidewaystable}
 
 Replay divergence is reportedly a serious problem for a previous race
 classifier~\cite{pinsel:pldi07}, where it can occur for two
@@ -1524,17 +1525,14 @@ Python 2.6.6, Cython 0.14, Networkx 1.1-2, and UnionFs-Fuse 0.23.
 
 % \begin{sidewaystable}
 \begin{table}[t]
+  \small
 \centering
-\setlength{\tabcolsep}{3pt}
 
 \begin{tabular}{c|ccc|cccc}
-{\bf } &
-  \multicolumn{3}{|c}{\bf Statistics} &
-  \multicolumn{4}{|c}{\bf Number of Races} \\
-  {\bf Name} & {\bf Processes} & {\bf Syscalls} & {\bf Resources} & 
-  {\bf Detected} & {\bf Diverged} & {\bf Benign} & {\bf Harmful} \\
-\hline
-
+  \toprule
+{\bf } & \multicolumn{3}{|c}{\bf Statistics} & \multicolumn{4}{|c}{\bf Number of Races} \\
+  {\bf Name} & {\bf Processes} & {\bf Syscalls} & {\bf Resources} & {\bf Detected} & {\bf Diverged} & {\bf Benign} & {\bf Harmful} \\
+\midrule
 debian-294579    &  19  &  5275  &  658   &  4232  &  3019  &  1171 &  42  \\
 debian-438076    &  21  &  1688  &  213   &  50    &  0     &  46   &  4   \\
 debian-399930    &  10  &  1536  &  279   &  17    &  0     &  13   &  4   \\
@@ -1545,15 +1543,16 @@ new-1            &  12  &  2569  &  201   &  137   &  90    &  33   &  14  \\
 new-2            &  47  &  2621  &  467   &  82    &  13    &  27   &  42  \\
 new-3            &  30  &  4361  &  2981  &  17    &  0     &  13   &  4   \\
 new-4            &  19  &  4672  &  716   &  8     &  0     &  7    &  1   \\
+\bottomrule
 \end{tabular}
 
-\caption{{\em Bug detection statistics.}  {\bf Processes} is the
-  number of processes, {\bf Syscalls} the number of system calls
-  occured, and {\bf Resources} the number of distinct shared resources
-  tracked in the recorded executions. For races, {\bf Detected} is the
-  number of races detected by \racepro, {\bf Diverged} the races for which
-  the replay diverged (\ie, false positive), {\bf Benign} the benign
-  races, and {\bf Harmful} harmful races that led to failures.} \label{racepro:tab:bug-stat}
+\caption{{\bf Bug Detection Statistics.}  {\em Processes} is the
+  number of processes, {\em Syscalls} the number of system calls
+  occured, and {\em Resources} the number of distinct shared resources
+  tracked in the recorded executions. For races, {\em Detected} is the
+  number of races detected by \racepro, {\em Diverged} the races for which
+  the replay diverged (\ie, false positive), {\em Benign} the benign
+  races, and {\em Harmful} harmful races that led to failures.} \label{racepro:tab:bug-stat}
 
 % \end{sidewaystable}
 \end{table}
@@ -1682,10 +1681,10 @@ the affected file.
 \centering
 % \setlength{\tabcolsep}{3pt}
 \begin{tabular}{c|cccc}
-  & 
-  \multicolumn{4}{|c}{\bf Execution Times [seconds/race]} \\
+  \toprule
+  & \multicolumn{4}{c}{\bf Execution Times [seconds/race]} \\
   {\bf Name} & {\bf Record} & {\bf Replay} & {\bf Generate} & {\bf Validate} \\
-\hline
+\midrule
 debian-294579    &  2.47  &  2.43  &  3.42  &  2.92  \\
 debian-438076    &  3.76  &  0.75  &  0.84  &  2.87  \\
 debian-399930    &  0.59  &  0.57  &  0.75  &  0.84  \\
@@ -1696,10 +1695,11 @@ new-1            &  0.56  &  0.54  &  1.52  &  0.76  \\
 new-2            &  0.89  &  0.88  &  1.44  &  1.16  \\
 new-3            &  2.63  &  2.61  &  2.34  &  2.98  \\
 new-4            &  1.01  &  0.98  &  4.81  &  1.35  \\
+\bottomrule
 \end{tabular}
-\caption{{\em \racepro execution times.}  {\bf Record} and {\bf Replay} are the
-times to record and replay the executions, respectively. {\bf Generate} is the
-average time to generate an execution branch and {\bf Validate} the average time
+\caption{{\bf \racepro Execution Times.}  {\em Record} and {\em Replay} are the
+times to record and replay the executions, respectively. {\em Generate} is the
+average time to generate an execution branch and {\em Validate} the average time
 to validate a race.} \label{racepro:tab:bug-execution-times}
 \end{table}
 

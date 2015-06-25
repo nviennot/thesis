@@ -50,12 +50,13 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{listings}
-\usepackage{color}
+\usepackage{xcolor}
 
 \definecolor{grey}{rgb}{0.5,0.5,0.5}
 \newcommand{\specialKeyword}[1]{\underline{{#1}}}
 \lstset{
-  frame=single,
+  showstringspaces=false,
+  frame=none,
   columns=fullflexible,
   basewidth={0.7em, 0.7em},
   % basicstyle=\small,
@@ -63,7 +64,16 @@
   commentstyle=\color{grey},
   frameround=tttt,
   escapeinside=\`\`,
-  framesep=0pt, %leave this in so that the code listings aren't way in the margins. the box still goes a little bit out but i forget how to fix that. but it should def be fixed prior to submission!
+  aboveskip=0pt,
+  belowskip=0pt,
+  framesep=0pt,
+  framerule=0pt,
+  xleftmargin=0pt,
+  xrightmargin=0pt,
+  framexleftmargin=0pt,
+  framexrightmargin=0pt,
+  framextopmargin=0pt,
+  framexbottommargin=0pt,
   language=ruby,
   morekeywords={ *, include, field, after\_create, before\_create, before\_save,
                  after\_update, before\_filter, has\_many, has\_one, belongs\_to,
@@ -76,8 +86,8 @@
 \newcommand{\headingi}[1]{{\vspace{0pt}\em{#1}}} % inside section
 \newcommand{\headinggi}[1]{{\em{#1}}} % at beginning of section -- no extra space
 
-\def\F{Fig.}
+\def\F{Figure~}
 
 \usepackage[framemethod=tikz]{mdframed}
-\newmdenv[innerlinewidth=0.2pt, roundcorner=2pt,innerleftmargin=6pt,
-innerrightmargin=6pt,innertopmargin=6pt,innerbottommargin=6pt]{rbox}
+\newmdenv[innerlinewidth=0.4pt, roundcorner=4pt,innerleftmargin=6pt,
+innerrightmargin=6pt,innertopmargin=0pt,innerbottommargin=0pt]{rbox}

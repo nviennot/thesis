@@ -209,38 +209,23 @@ the process exits, or when \scribe{} explicitly tells the monitor to
 stop the recording.  
 
 \begin{table}[]
-\setlength{\tabcolsep}{3pt}
 \small
-\begin{center}
-% \begin{tabular}{|c|l|l|l|}
-\begin{tabular}{|c|l|l|}
-  \hline
-  % {\bf Event}             & {\bf Description}                & {\bf Payload}                                                & {\bf Details}                       \\ \hline
-  % {\em hw\_inst}          & hardware instruction trap        & op-code and data, e.g. \code{RDTSC} and 64-bit counter value & \S\ref{scribe:sec:arch}       \\ \hline
-  % {\em syscall\_ret}      & system call return               & system call return value                                     & \S\ref{scribe:sec:syscalls}   \\ \hline
-  % {\em copy\_data}        & data transfer to/from user space & size and contents of data transfer                           & \S\ref{scribe:sec:syscalls}   \\ \hline
-  % {\em page\_public}      & make page public (not owned)     & page address                                                 & \S\ref{scribe:sec:memory}     \\ \hline
-  % {\em page\_share\_read} & make page shared read-only       & page address, page sequence number                           & \S\ref{scribe:sec:memory}     \\ \hline
-  % {\em page\_own\_write}  & make page owned read/write       & page address, page sequence number                           & \S\ref{scribe:sec:memory}     \\ \hline
-  % {\em rendezvous}        & resource synchronization         & resource sequence number                                     & \S\ref{scribe:sec:rendezvous} \\ \hline
-  % {\em signal\_receive}   & process received signal          & signal number, whether or not in system call, signal data    & \S\ref{scribe:sec:sync}       \\ \hline
-  % {\em async\_reset}      & force a sync point               & process user space signature at forced sync point            & \S\ref{scribe:sec:sync}       \\ \hline
-
-  {\bf Event}             & {\bf Description}                & {\bf Payload}                                                 \\ \hline
-  {\em hw\_inst}          & hardware instruction trap        & op-code and data, e.g. \code{RDTSC} and 64-bit counter value  \\ \hline
-  {\em syscall\_ret}      & system call return               & system call return value                                      \\ \hline
-  {\em copy\_data}        & data transfer to/from user space & size and contents of data transfer                            \\ \hline
-  {\em page\_public}      & make page public (not owned)     & page address                                                  \\ \hline
-  {\em page\_share\_read} & make page shared read-only       & page address, page sequence number                            \\ \hline
-  {\em page\_own\_write}  & make page owned read/write       & page address, page sequence number                            \\ \hline
-  {\em rendezvous}        & resource synchronization         & resource sequence number                                      \\ \hline
-  {\em signal\_receive}   & process received signal          & signal number, whether or not in system call, signal data     \\ \hline
-  {\em async\_reset}      & force a sync point               & process user space signature at forced sync point             \\ \hline
+\centering
+\begin{tabular}{cll}
+  \toprule
+  {\bf Event}             & {\bf Description}                & {\bf Payload}                                                 \\ \midrule
+  {\em hw\_inst}          & hardware instruction trap        & op-code and data, e.g. \code{RDTSC} and counter value  \\
+  {\em syscall\_ret}      & system call return               & system call return value                                      \\
+  {\em copy\_data}        & data transfer to/from user space & size and contents of data transfer                            \\
+  {\em page\_public}      & make page public (not owned)     & page address                                                  \\
+  {\em page\_share\_read} & make page shared read-only       & page address, page sequence number                            \\
+  {\em page\_own\_write}  & make page owned read/write       & page address, page sequence number                            \\
+  {\em rendezvous}        & resource synchronization         & resource sequence number                                      \\
+  {\em signal\_receive}   & process received signal          & signal number and info, whether or not in system call     \\
+  {\em async\_reset}      & force a sync point               & process user space signature at forced sync point             \\
+  \bottomrule
 \end{tabular}
-\end{center}
-\vspace{-1em}
-% \captionsetup{justification=centering}
-\caption{\scribe{} record-replay events}
+\caption{{\bf \scribe Record-Replay Events.}}
 \label{scribe:tab:events}
 \end{table}
 
@@ -393,18 +378,17 @@ Figure~\ref{scribe:fig:recplay} shows the replay of the \code{gettimeofday}
 system call from an event log.
 
 \begin{figure}[t]
-  \small
-  \begin{center}
+  \centering
   \begin{tabular}{lll}
 
-    \hline	
+    \toprule
 
     {\bf Record (action) \hfill $\rightarrow$ }
       & {\bf Event log \hfill $\rightarrow$ }
         & {\bf Replay (action)}
             \\
 
-    \hline	
+    \midrule
 
     ret = gettimeofday(K, NULL)
       &
@@ -425,13 +409,10 @@ system call from an event log.
       &
         & return(ret)
             \\
-
-    \hline	
-
+    \bottomrule
   \end{tabular}
-  \end{center}
 
-  \caption{Record-replay of \code{gettimeofday}:
+  \caption{{\bf Record-Replay of \code{gettimeofday}.}
     { 
       To record, \scribe{} invokes the system call with an in-kernel
       buffer (K), logs the return value and input data, copies the
@@ -611,10 +592,10 @@ owned page tracks its writer (owner).
 
 \begin{figure}[t]
   \small
-  \begin{center}
+  \centering
   \begin{tabular}{lll|l}
 
-    \hline	
+    \toprule
 
     {\bf Record (action) \hfill $\rightarrow$ }
       & {\bf Event log \hfill $\rightarrow$ }
@@ -622,7 +603,7 @@ owned page tracks its writer (owner).
           & {\bf User-space}
             \\
 
-    \hline	
+    \midrule	
 
     copy in: u$\rightarrow$K (size)
       &
@@ -690,12 +671,11 @@ owned page tracks its writer (owner).
           &
             \\
 
-    \hline	
+    \bottomrule	
 
   \end{tabular}
-  \end{center}
 
-  \caption{Rendezvous points:
+  \caption{{\bf Rendezvous Points.}
     {
       Process $A$ must pass a rendezvous point before it can invoke
       the system call in both record and replay. Process $B$ must do
@@ -883,23 +863,21 @@ properly coordinated, and that their order is preserved between record
 and replay.
 
 \begin{table}[]
-\begin{center}
-\begin{tabular}{|l|l|}
-  \hline
-  {\bf System call category}     & {\bf Rendezvous resource} \\ \hline
-  actions on globals             & global (pseudo)           \\ \hline
-  actions on open file objects   & {\tt inode} of the file   \\ \hline
-  actions on IPC objects         & IPC objects               \\ \hline
-  read/write shared mapped files & memory page               \\ \hline
-  actions on pathnames           & filesystem mount point    \\ \hline
-  create file descriptors        & file descriptors table    \\ \hline
-  modify memory layout           & memory descriptor         \\ \hline
-  actions on process properties  & process descriptor        \\ \hline
+\centering
+\begin{tabular}{ll}
+  \toprule
+  {\bf System call category}     & {\bf Rendezvous resource} \\ \midrule
+  actions on globals             & global (pseudo)           \\
+  actions on open file objects   & {\tt inode} of the file   \\
+  actions on IPC objects         & IPC objects               \\
+  read/write shared mapped files & memory page               \\
+  actions on pathnames           & filesystem mount point    \\
+  create file descriptors        & file descriptors table    \\
+  modify memory layout           & memory descriptor         \\
+  actions on process properties  & process descriptor        \\
+  \bottomrule
 \end{tabular}
-\end{center}
-% \captionsetup{justification=centering}
-\vspace{-1em}
-\caption{List of rendezvous points categories.}
+\caption{{\bf List of Rendezvous Points Categories.}}
 \label{scribe:tab:rendezvous}
 \end{table}
 
@@ -970,10 +948,10 @@ descriptor, and for the inode resource.
 
 \begin{figure}[t]
   \small
-  \begin{center}
+  \centering
   \begin{tabular}{llll|l}
 
-    \hline	
+    \toprule
 
     & {\bf Record (action) \hfill $\rightarrow$ }
       & {\bf Event log \hfill $\rightarrow$ }
@@ -981,7 +959,7 @@ descriptor, and for the inode resource.
           & {\bf User-space}
             \\
 
-    \hline	
+    \midrule
 
     (a)
     & (do nothing)
@@ -1008,7 +986,7 @@ descriptor, and for the inode resource.
           & {\em (B) sync point}
             \\
 
-    \hline	
+    \midrule
 
     (b)
     & (A) (stall)
@@ -1041,13 +1019,11 @@ descriptor, and for the inode resource.
           &
             \\
 
-    \hline	
+    \bottomrule	
 
   \end{tabular}
-  \end{center}
 
-\vspace{-1em}
-  \caption{Asynchronous events record-replay:
+  \caption{{\bf Asynchronous Events Record-Replay.}
     { 
       (a) The sender of a signal always skips the call and notifies
       the receiver instead; The receiver handles and logs the signal
@@ -1294,56 +1270,53 @@ page ownership transfer can then be handled and its location with
 respect to the new sync point is precisely known.
 
 \begin{table}[t]
-\begin{center}
-\small
-\begin{tabular}{|l|l|}   \hline
-\bf{Name}  & \bf{Description}                           \\ \hline
-apache-p   & Apache 2.0.54, 8 processes, {\tt prefork}  \\ \hline
-apache-t   & Apache 2.0.54, 50 threads, {\tt worker}    \\ \hline
-mysql      & MySQL 5.0.60 database server               \\ \hline
-ssh-s      & OpenSSH 5.1p1 (server)                     \\ \hline
-ssh-c      & OpenSSH 5.1p1 (client)                     \\ \hline
-make       & parallel compilation of Linux kernel       \\ \hline
-untar      & untar of Linux 2.6.11.12 source tree       \\ \hline
-urandom    & reading from {\tt /dev/urandom}            \\ \hline
-editor     & vim 7.1 text editor                        \\ \hline
-firefox    & Firefox 3.0.6 web browser in VNC           \\ \hline
-acroread   & Adobe Acrobat Reader 8.1.3 in VNC          \\ \hline
-mplayer    & Mplayer 1.0rc2 movie player in VNC         \\ \hline
-openoffice & OpenOffice 3.0.1 office suite in VNC       \\ \hline
+\centering
+\begin{tabular}{ll}
+  \toprule
+\bf{Name}  & \bf{Description}                           \\ \midrule
+apache-p   & Apache 2.0.54, 8 processes, {\tt prefork}  \\
+apache-t   & Apache 2.0.54, 50 threads, {\tt worker}    \\
+mysql      & MySQL 5.0.60 database server               \\
+ssh-s      & OpenSSH 5.1p1 (server)                     \\
+ssh-c      & OpenSSH 5.1p1 (client)                     \\
+make       & parallel compilation of Linux kernel       \\
+untar      & untar of Linux 2.6.11.12 source tree       \\
+urandom    & reading from {\tt /dev/urandom}            \\
+editor     & vim 7.1 text editor                        \\
+firefox    & Firefox 3.0.6 web browser in VNC           \\
+acroread   & Adobe Acrobat Reader 8.1.3 in VNC          \\
+mplayer    & Mplayer 1.0rc2 movie player in VNC         \\
+openoffice & OpenOffice 3.0.1 office suite in VNC       \\
+  \bottomrule
 \end{tabular}
-% \captionsetup{justification=centering}
-\caption{Application scenarios}
+\caption{{\bf Application Scenarios.}}
 \label{scribe:tab:scenarios1}
-\end{center}
 \end{table}
-% \end{sidewaystable}
 
 \begin{table}[t]
-\begin{center}
 \small
-\begin{tabular}{|l|l|c|}   \hline
-\bf{Name}  & {\bf Benchmark}                                                           & {\bf Time} \\ \hline
-apache-p   & {\tt httperf 0.8} (rate=1500, num-calls=20)                               & 189\secs   \\ \hline
-apache-t   & {\tt httperf 0.8} (rate=1500, num-calls=20)                               & 187\secs   \\ \hline
-mysql      & {\tt sql-bench}                                                           & 184\secs   \\ \hline
-ssh-s      & 50 SSH sessions (10 concurrent), each emulates user typing 5K text file   & 53\secs    \\ \hline
-ssh-c      & 50 SSH sessions (10 concurrent), each emulates user typing 5K text file   & 53\secs    \\ \hline
-make       & {\tt make -j10} of the Linux kernel                                       & 101\secs   \\ \hline
-untar      & {\tt gunzip linux-2.6.11.12.tar.gz | tar xf -}                            & 2.8\secs   \\ \hline
-urandom    & {\tt dd=/dev/random bs=1k count=10000 | lzma > /dev/null}                 & 2.6\secs   \\ \hline
-editor     & {\tt vim -S vi.script} to append 'hello world' 1000000 times              & 12.4\secs  \\ \hline
-firefox    & {\tt SunSpider 0.9} JavaScript benchmark                                  & 120\secs   \\ \hline
-acroread   & open 190 KB PDF, close and exit                                           & 2.8\secs   \\ \hline
-mplayer    & play 10 MB 1280x720 HDTV video at 24 frames/s                             & 30.8\secs  \\ \hline
-openoffice & {\tt Jungletest r27 (2009-03-08)} open document, export, close, and exit  & 4.9\secs   \\ \hline
+\centering
+\begin{tabular}{llc}
+  \toprule
+\bf{Name}  & {\bf Benchmark}                                                           & {\bf Time} \\ \midrule
+apache-p   & {\tt httperf 0.8} (rate=1500, num-calls=20)                               & 189\secs   \\
+apache-t   & {\tt httperf 0.8} (rate=1500, num-calls=20)                               & 187\secs   \\
+mysql      & {\tt sql-bench}                                                           & 184\secs   \\
+ssh-s      & 50 SSH sessions (10 concurrent), each emulates user typing 5K text file   & 53\secs    \\
+ssh-c      & 50 SSH sessions (10 concurrent), each emulates user typing 5K text file   & 53\secs    \\
+make       & {\tt make -j10} of the Linux kernel                                       & 101\secs   \\
+untar      & {\tt gunzip linux-2.6.11.12.tar.gz | tar xf -}                            & 2.8\secs   \\
+urandom    & {\tt dd=/dev/random bs=1k count=10000 | lzma > /dev/null}                 & 2.6\secs   \\
+editor     & {\tt vim -S vi.script} to append 'hello world' 1000000 times              & 12.4\secs  \\
+firefox    & {\tt SunSpider 0.9} JavaScript benchmark                                  & 120\secs   \\
+acroread   & open 190 KB PDF, close and exit                                           & 2.8\secs   \\
+mplayer    & play 10 MB 1280x720 HDTV video at 24 frames/s                             & 30.8\secs  \\
+openoffice & {\tt Jungletest r27 (2009-03-08)} open document, export, close, and exit  & 4.9\secs   \\
+  \bottomrule
 \end{tabular}
-% \captionsetup{justification=centering}
-\caption{Application scenarios}
+\caption{{\bf Application Workloads.}}
 \label{scribe:tab:scenarios2}
-\end{center}
 \end{table}
-% \end{sidewaystable}
 
 During replay, the key issue is knowing when the process should
 consume the {\it async\_reset} event. Other approaches suggested the
@@ -1407,7 +1380,7 @@ applications on the blade which lacks a monitor, we used VNC
   \centering
   \includegraphics[width=\linewidth]{figures/scribe/overhead}
   \vspace{-5em}
-  \caption{Recording runtime overhead}
+  \caption{{\bf Recording Runtime Overhead.}}
   \label{scribe:fig:overhead}
 \end{figure}
 
@@ -1415,7 +1388,7 @@ applications on the blade which lacks a monitor, we used VNC
     \centering
     \includegraphics[width=\linewidth]{figures/scribe/storage}
   \vspace{-5em}
-    \caption{Recording storage growth}
+  \caption{{\bf Recording Storage Growth.}}
     \label{scribe:fig:storage}
 \end{figure}
 
@@ -1423,7 +1396,7 @@ applications on the blade which lacks a monitor, we used VNC
     \centering
     \includegraphics[width=\linewidth]{figures/scribe/totals}
   \vspace{-5em}
-    \caption{No. of processes and threads}
+  \caption{{\bf Number of Processes and Threads.}}
     \label{scribe:fig:totals}
 \end{figure}
 
@@ -1431,7 +1404,7 @@ applications on the blade which lacks a monitor, we used VNC
     \centering
     \includegraphics[width=\linewidth]{figures/scribe/syncpts2}
   \vspace{-5em}
-    \caption{Sync points interval and length}
+  \caption{{\bf Sync Points Interval and Length.}}
     \label{scribe:fig:syncpts}
 \end{figure}
 
@@ -1439,7 +1412,7 @@ applications on the blade which lacks a monitor, we used VNC
     \centering
     \includegraphics[width=\linewidth]{figures/scribe/stats}
   \vspace{-5em}
-    \caption{Count of signals and memory}
+  \caption{{\bf Count of Signals and Memory.}}
     \label{scribe:fig:stats}
 \end{figure}
 
@@ -1447,7 +1420,7 @@ applications on the blade which lacks a monitor, we used VNC
     \centering
     \includegraphics[width=\linewidth]{figures/scribe/delays2}
   \vspace{-5em}
-    \caption{Delay of signals and memory}
+  \caption{{\bf Delay of Signals and Memory.}}
     \label{scribe:fig:delays}
 \end{figure}
 

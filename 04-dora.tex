@@ -229,27 +229,30 @@ approximation algorithm.
 
 \begin{figure}
 \centering
-\begin{minipage}{.8\textwidth}
-\begin{minipage}{.5\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt,language=C]
+\centering
+\begin{minipage}{.4\textwidth}
+  \begin{rbox}
+\begin{lstlisting}[language=C]
 int main() {
-  printf("d\n", time(NULL));
-  return 0;
+ printf("d\n", time(NULL));
+ return 0;
 }
 \end{lstlisting}
+  \end{rbox}
 \end{minipage}
-\hspace{0.4in}
-\begin{minipage}{.5\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt,language=C]
+\hspace{1em}
+\begin{minipage}{.4\textwidth}
+  \begin{rbox}
+\begin{lstlisting}[language=C]
 int main() {
-  FILE *out = fopen("output", "w");
-  fprintf(out, "d\n", time(NULL));
-  return 0;
+ FILE *out = fopen("output", "w");
+ fprintf(out, "d\n", time(NULL));
+ return 0;
 }
 \end{lstlisting}
+  \end{rbox}
 \end{minipage}
-\end{minipage}
-\caption{{Original program (left), modified program (right).}}
+\caption{{\bf Program Modification Example.} Original program (left), modified program (right).}
 \label{dora:fig:code-example}
 \end{figure}
 
@@ -304,8 +307,9 @@ several system calls and information about their arguments.
 
 \begin{figure}
 \centering
-\begin{minipage}{.56\textwidth}
+\begin{minipage}{.58\textwidth}
 \small
+\begin{rbox}
 \begin{lstlisting}[framexleftmargin=5pt,language=C,basicstyle=\ttfamily]
 // 83 initialization events
 --- cut ---
@@ -317,8 +321,9 @@ mmap(0, 1000, 3, 34, -1, 0) = 0xb76ea000
 write(1, 0xb76ea000, 11) = 11
 exit(0) = 0
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
-\caption{Recorded log file of original execution}
+\caption{{\bf Recorded Log File of Original Execution.} The first 83 events are omitted. }
 \label{dora:fig:example-orig-log}
 \end{figure}
 
@@ -827,9 +832,10 @@ events, such as {\tt execve()} and bootstrapping code from the C library.
 
 \begin{figure}
 \centering
-\begin{minipage}{.6\textwidth}
+\begin{minipage}{.62\textwidth}
 \small
-\begin{lstlisting}[framexleftmargin=5pt,language=C,basicstyle=\ttfamily]
+\begin{rbox}
+\begin{lstlisting}[language=C,basicstyle=\ttfamily]
   munmap(0xb76e1000, 968e) = 0
   rdtsc = 000057ed322904cf
 + brk(NULL) = 0x9870000
@@ -843,8 +849,9 @@ events, such as {\tt execve()} and bootstrapping code from the C library.
 - write(1, 0xb76ea000, 11) = 11
   exit(0) = 0
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
-\caption{Mutable replay of modified program}
+\caption{{\bf Mutable Replay of Modified Program.}}
 \label{dora:fig:diff}
 \end{figure}
 
@@ -1033,37 +1040,41 @@ patches often attempt to fix an edge case in an application.
 % \begin{sidewaystable}
 \begin{table}
 \centering
-\begin{tabular}{|l|l|} \hline
-{\bf Name}     & {\bf Description}             \\ \hline
-		apache-log & Apache 2.4.2 web server       \\ \hline
-		apache-sec & Apache 2.2.19 web server      \\ \hline
-		exim       & Exim 4.69 mail server         \\ \hline
-		mysql      & MySQL 5.0.67 database server  \\ \hline
-		nginx      & Nginx 0.8.14 web server       \\ \hline
-		proftpd    & ProFTPD 1.3.0 ftp server      \\ \hline
-		redis      & Redis 2.4.11 key-value store  \\ \hline
-		squid      & Squid 3.1.7 http proxy server \\ \hline
-		wget       & wget 1.11.4 http client       \\ \hline
+\begin{tabular}{ll}
+  \toprule
+{\bf Name}     & {\bf Description}             \\ \midrule
+		apache-log & Apache 2.4.2 web server       \\
+		apache-sec & Apache 2.2.19 web server      \\
+		exim       & Exim 4.69 mail server         \\
+		mysql      & MySQL 5.0.67 database server  \\
+		nginx      & Nginx 0.8.14 web server       \\
+		proftpd    & ProFTPD 1.3.0 ftp server      \\
+		redis      & Redis 2.4.11 key-value store  \\
+		squid      & Squid 3.1.7 http proxy server \\
+		wget       & wget 1.11.4 http client       \\
+  \bottomrule
 \end{tabular}
-\caption{Applications}
+\caption{{\bf Application Descriptions.}}
 \label{dora:tab:applications}
 \end{table}
 
 \begin{table}
 \centering
-\begin{tabular}{|l|l|l|} \hline
-{\bf Name}     & {\bf Problem/Exploit Workload}        & {\bf Production Workload}             \\ \hline
-		apache-log & Log format change (Apache Bug 53131)  & {\tt httperf 0.8} with 100KB web page \\ \hline
-		apache-sec & DoS attack (CVE 2011-3192)            & {\tt httperf 0.8} with 100KB web page \\ \hline
-		exim       & Privilege escalation (CVE 2010-4344)  & Send 1000 1KB e-mail messages         \\ \hline
-		mysql      & Unauthorized access (CVE 2008-2079)   & {\tt sql-bench}                       \\ \hline
-		nginx      & Crash server (CVE 2009-2629)          & {\tt httperf 0.8} with 100KB web page \\ \hline
-		proftpd    & Crash server (CVE 2006-5815)          & 100 clients fetch 10MB file           \\ \hline
-		redis      & Request with insufficient logging     & {\tt redis-benchmark} with 50 clients \\ \hline
-		squid      & DoS attack (CVE 2010-3072)            & {\tt ab 2.3} with cached facebook.com \\ \hline
-		wget       & Create arbitrary file (CVE 2010-2252) & 100 requests to http://www.cnn.com    \\ \hline
+\begin{tabular}{lll}
+  \toprule
+{\bf Name}     & {\bf Problem/Exploit Workload}        & {\bf Production Workload}             \\ \midrule
+		apache-log & Log format change (Apache Bug 53131)  & {\tt httperf 0.8} with 100KB web page \\
+		apache-sec & DoS attack (CVE 2011-3192)            & {\tt httperf 0.8} with 100KB web page \\
+		exim       & Privilege escalation (CVE 2010-4344)  & Send 1000 1KB e-mail messages         \\
+		mysql      & Unauthorized access (CVE 2008-2079)   & {\tt sql-bench}                       \\
+		nginx      & Crash server (CVE 2009-2629)          & {\tt httperf 0.8} with 100KB web page \\
+		proftpd    & Crash server (CVE 2006-5815)          & 100 clients fetch 10MB file           \\
+		redis      & Request with insufficient logging     & {\tt redis-benchmark} with 50 clients \\
+		squid      & DoS attack (CVE 2010-3072)            & {\tt ab 2.3} with cached facebook.com \\
+		wget       & Create arbitrary file (CVE 2010-2252) & 100 requests to http://www.cnn.com    \\
+  \bottomrule
 \end{tabular}
-\caption{Application workloads}
+\caption{{\bf Application Workloads.}}
 \label{dora:tab:workloads}
 \end{table}
 
@@ -1108,37 +1119,41 @@ overhead for the production workloads.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{|l|l|}   \hline
-{\bf Name}     & {\bf Debugging Change}                          \\ \hline
-		apache-log & Modify log format in configuration file         \\ \hline
-		apache-sec & Add print statements for debugging              \\ \hline
-		exim       & Recompile with debugging options enabled        \\ \hline
-		mysql      & Add conditional print statements for debugging  \\ \hline
-		nginx      & Change the config file to enable debug messages \\ \hline
-		proftpd    & Recompile with debugging options enabled        \\ \hline
-		redis      & Log erroneous client requests                   \\ \hline
-		squid      & Save parsed requests to file                    \\ \hline
-		wget       & Change language from Italian to Japanese        \\ \hline
+\begin{tabular}{ll}
+  \toprule
+{\bf Name}     & {\bf Debugging Change}                          \\ \midrule
+		apache-log & Modify log format in configuration file         \\
+		apache-sec & Add print statements for debugging              \\
+		exim       & Recompile with debugging options enabled        \\
+		mysql      & Add conditional print statements for debugging  \\
+		nginx      & Change the config file to enable debug messages \\
+		proftpd    & Recompile with debugging options enabled        \\
+		redis      & Log erroneous client requests                   \\
+		squid      & Save parsed requests to file                    \\
+		wget       & Change language from Italian to Japanese        \\
+  \bottomrule
 \end{tabular}
-\caption{Debugging scenario}
+\caption{{\bf Debugging Scenarios.}}
 \label{dora:tab:debugging-scenario}
 \end{table}
 
 \begin{table}
 \centering
-\begin{tabular}{|l|l|}   \hline
-{\bf Name}     & {\bf Replay Mutations}                                                           \\ \hline
-		apache-log & Add 1 {\tt fstat()}, 1 {\tt mmap()}, and 3 {\tt write()} per request             \\ \hline
-		apache-sec & Add 1 {\tt fstat()}, 1 {\tt mmap()} and then 2 {\tt write()} per request         \\ \hline
-		exim       & None                                                                             \\ \hline
-		mysql      & Add 1 {\tt fstat()}, 1 {\tt mmap()}, 1 memory event, 12 {\tt write()}            \\ \hline
-		nginx      & Add 508 {\tt write()}, delete 1064 syscalls                                      \\ \hline
-		proftpd    & Add 1 {\tt close()}                                                              \\ \hline
-		redis      & Add 1 {\tt open()}, at least 3 {\tt write()} and 1 {\tt close()} per request     \\ \hline
-		squid      & Add 1 {\tt open()}, at least 10 {\tt write()} and 1 {\tt close()} per request    \\ \hline
-		wget       & Replace 17 {\tt write()}, 24 {\tt mmap()}, 2 {\tt open()}, and delete 5 syscalls \\ \hline
+\begin{tabular}{ll}
+  \toprule
+{\bf Name}     & {\bf Replay Mutations}                                                           \\ \midrule
+		apache-log & Add 1 {\tt fstat()}, 1 {\tt mmap()}, and 3 {\tt write()} per request             \\
+		apache-sec & Add 1 {\tt fstat()}, 1 {\tt mmap()} and then 2 {\tt write()} per request         \\
+		exim       & None                                                                             \\
+		mysql      & Add 1 {\tt fstat()}, 1 {\tt mmap()}, 1 memory event, 12 {\tt write()}            \\
+		nginx      & Add 508 {\tt write()}, delete 1064 syscalls                                      \\
+		proftpd    & Add 1 {\tt close()}                                                              \\
+		redis      & Add 1 {\tt open()}, at least 3 {\tt write()} and 1 {\tt close()} per request     \\
+		squid      & Add 1 {\tt open()}, at least 10 {\tt write()} and 1 {\tt close()} per request    \\
+		wget       & Replace 17 {\tt write()}, 24 {\tt mmap()}, 2 {\tt open()}, and delete 5 syscalls \\
+  \bottomrule
 \end{tabular}
-\caption{Application modifications for debugging}
+\caption{{\bf Application Modifications for Debugging.}}
 \label{dora:tab:debugging-mod}
 \end{table}
 
@@ -1290,27 +1305,22 @@ system calls.
 \subsection{Patch Validation}
 \label{dora:sec:validation}
 
-
-% \begin{sidewaystable}
 \begin{table}[t]
-% \begin{center}
-  \begin{tabular}{|l|l|p{10cm}|}   \hline
-{\bf Name}     & {\bf Patch LOC +/-} & {\bf Replay Mutations}                                                                           \\ \hline
-		apache-log & 39+, 39-            & Add 1 {\tt write()} per truncated log entry                                                      \\ \hline
-		apache-sec & 292+, 154-          & Add 1 {\tt write()} and replace 1 {\tt writev()} per request                                     \\ \hline
-		exim       & 7+, 0-              & Delete 18 syscalls, add 29 syscalls                                                              \\ \hline
-		mysql      & 170+, 60-           & Add 29 {\tt lstat()}, delete 79 syscalls, add 1 {\tt write()}, delete 15 and add 8 memory events \\ \hline
-    nginx      & 9+, 5-              & Delete 1 {\tt write()} and replace 1 {\tt writev()} per request, then go live on crash           \\ \hline
-		proftpd    & 17+, 3-             & Delete 694 syscalls, add 38 syscalls, delete a {\tt SIGSEGV}                                     \\ \hline
-		squid      & 38+, 33-            & Delete a {\tt SIGSEGV}, 1 {\tt close()}, 1 {\tt stat()}, 1 {\tt write()}, then go live           \\ \hline
-		wget       & 43+, 12-            & Replace 9 syscalls among {\tt stat()}, {\tt write()}, {\tt open()}, {\tt utime()}                \\ \hline
+  \begin{tabular}{llp{10cm}}   \toprule
+{\bf Name}     & {\bf Patch LOC +/-} & {\bf Replay Mutations}                                                                           \\ \midrule
+		apache-log & 39+, 39-            & Add 1 {\tt write()} per truncated log entry                                                      \\
+		apache-sec & 292+, 154-          & Add 1 {\tt write()} and replace 1 {\tt writev()} per request                                     \\
+		exim       & 7+, 0-              & Delete 18 syscalls, add 29 syscalls                                                              \\
+		mysql      & 170+, 60-           & Add 29 {\tt lstat()}, delete 79 syscalls, add 1 {\tt write()}, delete 15 and add 8 memory events \\
+    nginx      & 9+, 5-              & Delete 1 {\tt write()} and replace 1 {\tt writev()} per request, then go live on crash           \\
+		proftpd    & 17+, 3-             & Delete 694 syscalls, add 38 syscalls, delete a {\tt SIGSEGV}                                     \\
+		squid      & 38+, 33-            & Delete a {\tt SIGSEGV}, 1 {\tt close()}, 1 {\tt stat()}, 1 {\tt write()}, then go live           \\
+		wget       & 43+, 12-            & Replace 9 syscalls among {\tt stat()}, {\tt write()}, {\tt open()}, {\tt utime()}                \\
+    \bottomrule
 \end{tabular}
-% \end{center}
-% \renewcommand\thetable{5}
-\caption{Application patches tested against exploits}
+\caption{{\bf Application Patches Tested Against Exploits.}}
 \label{dora:tab:exploits}
 \end{table}
-% \end{sidewaystable}
 
 For each bug exhibited by the workloads listed in the second column of
 Table~\ref{dora:tab:workloads}, we replayed the
@@ -1359,20 +1369,17 @@ crashes, allowing subsequent requests to be replayed without going live.
 \label{dora:sec:upgrades}
 
 \begin{table}[t]
-\begin{center}
-\small
-\begin{tabular}{|l|l|l|}   \hline
- {\bf Name}         & apache-upgrade      & redis-upgrade         \\ \hline
-{\bf Start Version} & Apache 2.2.19       & Redis 2.4.1           \\ \hline
-{\bf Upgrades}      & 3 (2.2.20 - 2.2.22) & 12 (2.4.2 - 2.4.13)   \\ \hline
-{\bf Commits}       & 277                 & 137                   \\ \hline
-{\bf LOC}           & 5179+, 388-         & 2942+, 1154-          \\ \hline
-{\bf Workload}      & {\tt httperf 0.8}   & {\tt redis-benchmark} \\ \hline
+\centering
+\begin{tabular}{lll}   \toprule
+ {\bf Name}         & apache-upgrade      & redis-upgrade         \\ \midrule
+{\bf Start Version} & Apache 2.2.19       & Redis 2.4.1           \\
+{\bf Upgrades}      & 3 (2.2.20 - 2.2.22) & 12 (2.4.2 - 2.4.13)   \\
+{\bf Commits}       & 277                 & 137                   \\
+{\bf LOC}           & 5179+, 388-         & 2942+, 1154-          \\
+{\bf Workload}      & {\tt httperf 0.8}   & {\tt redis-benchmark} \\
+    \bottomrule
 \end{tabular}
-\end{center}
-% \renewcommand\thetable{1}
-\vspace{-1em}
-\caption{Application upgrades}
+\caption{{\bf Application Upgrades}}
 \label{dora:tab:upgrades}
 \end{table}
 
@@ -1413,6 +1420,26 @@ system calls.
 \subsection{Performance}
 \label{dora:sec:performance}
 
+\begin{table}[t]
+  \centering
+\begin{tabular}{llll}   \toprule
+  {\bf Name}   & {\bf Recording } & {\bf Storage } & {\bf Replay } \\
+               & {\bf Overhead}   & {\bf Growth}   & {\bf Speedup} \\ \midrule
+		apache-log & 9.3\%            & 31 KB/s        & 3.8x          \\
+		apache-sec & 4.8\%            & 18 KB/s        & 1.9x          \\
+		exim       & 4.3\%            & 30 KB/s        & 7.2x          \\
+		mysql      & 4.7\%            & 9.6 KB/s       & 1.1x          \\
+		nginx      & 9.7\%            & 15 KB/s        & 2.2x          \\
+		redis      & 2.6\%            & 91 KB/s        & 1.3x          \\
+		proftpd    & 4.1\%            & 22 KB/s        & 2.6x          \\
+		squid      & 8.2\%            & 124 KB/s       & 1.2x          \\
+		wget       & 2.2\%            & 19 KB/s        & 11x           \\
+\bottomrule
+\end{tabular}
+\caption{{\bf Mutable Replay Performance}}
+\label{dora:tab:performance}
+\end{table}
+
 To quantify the performance costs of using {\dora}, we measured the
 runtime overhead of recording and replaying the production workloads 
 listed in the second column of Table~\ref{dora:tab:workloads}.
@@ -1423,28 +1450,6 @@ speedup when replaying the recording with the patched application.
 Unless otherwise noted, default configuration options were used for
 all applications.  The standard deviations for all measurements were
 negligible.
-
-\begin{table}[t]
-\begin{center}
-\begin{tabular}{|l|l|l|l|}   \hline
-  {\bf Name}   & {\bf Recording } & {\bf Storage } & {\bf Replay } \\
-               & {\bf Overhead}   & {\bf Growth}   & {\bf Speedup} \\ \hline
-		apache-log & 9.3\%            & 31 KB/s        & 3.8x          \\ \hline
-		apache-sec & 4.8\%            & 18 KB/s        & 1.9x          \\ \hline
-		exim       & 4.3\%            & 30 KB/s        & 7.2x          \\ \hline
-		mysql      & 4.7\%            & 9.6 KB/s       & 1.1x          \\ \hline
-		nginx      & 9.7\%            & 15 KB/s        & 2.2x          \\ \hline
-		redis      & 2.6\%            & 91 KB/s        & 1.3x          \\ \hline
-		proftpd    & 4.1\%            & 22 KB/s        & 2.6x          \\ \hline
-		squid      & 8.2\%            & 124 KB/s       & 1.2x          \\ \hline
-		wget       & 2.2\%            & 19 KB/s        & 11x           \\ \hline
-\end{tabular}
-\end{center}
-% \renewcommand\thetable{4}
-\vspace{-1em}
-\caption{Mutable replay performance}
-\label{dora:tab:performance}
-\end{table}
 
 The recording overhead in all cases was less than
 10\% even for CPU-bound workloads designed to stress application

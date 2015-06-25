@@ -121,7 +121,7 @@ cross-DB translation layer among Web services.
  Graph & Neo4j & Social network modeling\\
  \bottomrule
  \end{tabular}}
-\caption{DB types and vendors supported by \synapse.}
+ \caption{{\bf DB Types and Vendors Supported by \synapse.}}
 \label{synapse:tab:supported-orms}
 \end{table}
 
@@ -164,6 +164,24 @@ Finally, \S\ref{synapse:sec:conclusion} presents some concluding remarks.
 \section{Background}
 \label{synapse:sec:motivation}
 
+\begin{table}[t]
+ \centering
+ \begin{tabular}{l l}
+\toprule {\bf Abstraction} & {\bf Description}                             \\ \midrule
+Publisher                  & Service publishing attributes of a model.     \\
+Subscriber                 & Service subscribing to attributes of a model. \\
+Decorator                  & Service subscribing and publishing a model.   \\
+Ephemeral                  & DB-less publisher.                            \\
+Observer                   & DB-less subscriber.                           \\
+Virtual attribute          & Deterministic functions (can be published).   \\
+\bottomrule
+ \end{tabular}
+ \caption{{\bf \synapse Abstractions.}}
+ \label{synapse:tab:abstractions}
+\end{table}
+
+
+
 MVC (Model View Controller) is a widely-used Web application architecture supported by many frameworks including Struts (Java), Django (Python), Rails (Ruby),
 Symfony (PHP), Enterprise Java Beans (Java), and ASP.NET MVC (.NET).
 For example, GitHub, Twitter, and YellowPages are built with Rails,
@@ -201,16 +219,8 @@ controllers typically operate within the context of a
 basis. 
 
 \begin{table}[t]
- \centering {
+ \centering
  \begin{tabular}{l l}
-\toprule {\bf Abstraction} & {\bf Description}                             \\ \midrule
-Publisher                  & Service publishing attributes of a model.     \\
-Subscriber                 & Service subscribing to attributes of a model. \\
-Decorator                  & Service subscribing and publishing a model.   \\
-Ephemeral                  & DB-less publisher.                            \\
-Observer                   & DB-less subscriber.                           \\
-Virtual attribute          & Deterministic functions (can be published).   \\
-\bottomrule
  \toprule {\bf API}                          & {\bf Description}                           \\ \midrule
  {\tt {publish}},            & Annotations to denote which attributes to   \\
  {\tt {subscribe}}           & publish or subscribe.                       \\ \midrule
@@ -223,9 +233,7 @@ Virtual attribute          & Deterministic functions (can be published).   \\
  {\tt {bootstrap?}}          & Predicate method denoting bootstrap mode.   \\
  \bottomrule
  \end{tabular}
- }
- \caption{\synapse Abstractions and API.}
- 
+ \caption{{\bf \synapse API.}}
  \label{synapse:tab:api}
 \end{table}
 
@@ -242,7 +250,8 @@ propagation layer.
 
 Using the \synapse API shown in Table~\ref{synapse:tab:api}, developers make
 simple modifications to their existing model definitions to share their data
-across services. At a high
+across services using \synapse Abstractions shown in Table~\ref{synapse:tab:abstractions}.
+At a high
 level, an application that uses \synapse consists of one or more publishers,
 and one or more subscribers. Publishers are services that make attributes of
 their data models available to subscribers, which maintain their own local,
@@ -271,7 +280,8 @@ built for other frameworks.
 \centering
 \begin{minipage}{.8\textwidth}
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+\begin{rbox}
+\begin{lstlisting}
 # Publisher side (Pub1).
 class User
  `\specialKeyword{publish}` do
@@ -279,10 +289,12 @@ class User
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \hspace{1.2in}
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Subscriber side (Sub1).
 class User
  `\specialKeyword{subscribe}` from: :Pub1 do
@@ -290,9 +302,10 @@ class User
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \end{minipage}
-\caption{{Publisher (left), subscriber (right).}}
+\caption{{\bf API Example.} Publisher (left), subscriber (right).}
 \label{synapse:fig:pub-sub}
 \end{figure}
 
@@ -317,7 +330,8 @@ and {\tt delivery\_mode}, discussed in
 \begin{figure}
 \centering
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Notification Subscriber
 class User
  `\specialKeyword{subscribe}` from: :PubApp do
@@ -331,8 +345,9 @@ class User
  end
 end
 \end{lstlisting}
+  \end{rbox}
 \end{minipage}
-\caption{Callback example.}
+\caption{{\bf Callback Example.}}
 \label{synapse:fig:welcome-email}
 \end{figure}
 
@@ -374,7 +389,8 @@ and {\tt delivery\_mode}, discussed in \S\ref{synapse:sec:semantics}.
 \centering
 \begin{minipage}{.8\textwidth}
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Decorator side (Dec2).
 class User
  `\specialKeyword{subscribe}` from: :Pub1 do
@@ -385,10 +401,12 @@ class User
  end
 end
 \end{lstlisting}
+  \end{rbox}
 \end{minipage}
 \hspace{1.2in}
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Subscriber side (Sub2).
 class User
  `\specialKeyword{subscribe}` from: :Pub1 do
@@ -399,9 +417,10 @@ class User
  end
 end
 \end{lstlisting}
+  \end{rbox}
 \end{minipage}
 \end{minipage}
-\caption{Decorator example.}
+\caption{{\bf Decorator Example.}}
 \label{synapse:fig:deco}
 \end{figure}
 
@@ -470,7 +489,7 @@ Log format                 & Binary              & JSON                         
   \bottomrule
   \end{tabular}
  }
- \caption{{\bf Similarities between \scribe and \synapse }
+ \caption{{\bf Similarities Between \scribe and \synapse.}
  Each row depicts the equivalent entity with \scribe and \synapse.}
  \label{synapse:tab:similarities}
 \end{table}
@@ -614,7 +633,8 @@ Our experience suggests that \synapse's abstractions facilitate these translatio
 \begin{minipage}{\textwidth}
 \centering
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Publisher 1 (Pub1).
 # Runs on MongoDB.
 class User
@@ -624,10 +644,12 @@ class User
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \hspace{3em}
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Subscriber 1a (Sub1a).
 # Runs on any SQL DB.
 class User < ActiveRecord::Base
@@ -636,6 +658,7 @@ class User < ActiveRecord::Base
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \end{minipage}
 
@@ -645,7 +668,8 @@ end
 \begin{minipage}{\textwidth}
 \centering
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Subscriber 1b (Sub1b).
 # Runs on Elasticsearch.
 class User < Stretcher::Model
@@ -654,10 +678,12 @@ class User < Stretcher::Model
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \hspace{3em}
 \begin{minipage}{.4\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Subscriber 1c (Sub1c).
 # Runs on MongoDB.
 class User
@@ -667,6 +693,7 @@ class User
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \end{minipage}
 
@@ -704,7 +731,8 @@ faced between other pairs than those we illustrate.
 \begin{figure}
 \centering
 \begin{minipage}{.45\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Publisher 2 (Pub2).
 # Runs on any SQL DB.
 class User < ActiveRecord::Base
@@ -721,10 +749,12 @@ class Friendship < ActiveRecord::Base
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \hspace{2em}
 \begin{minipage}{.45\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Subscriber 2 (Sub2).
 # Runs on Neo4j.
 class User  # persisted model
@@ -750,6 +780,7 @@ class Friendship  # not persisted
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 
 \caption{{\bf Example 2: SQL/Neo4j.}
@@ -791,7 +822,8 @@ leverage Neo4j's full power.
 \begin{figure}
 \centering
 \begin{minipage}{.45\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Publisher 3 (Pub3).
 # Runs on MongoDB.
 class User
@@ -801,7 +833,9 @@ class User
  end
 end
 \end{lstlisting}
-\begin{lstlisting}[framexleftmargin=5pt]
+\end{rbox}
+  \begin{rbox}
+\begin{lstlisting}
 # Subscriber 3a (Sub3a).
 # Runs on any SQL DB.
 # Searching for users based on
@@ -813,10 +847,12 @@ class User < ActiveRecord::Base
  serialize :interests
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \hspace{2em}
 \begin{minipage}{.45\textwidth}
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Subscriber 3b (Sub3b).
 # Runs on any SQL DB.
 # Supports searching for users by interest.
@@ -837,6 +873,7 @@ class Interest < ActiveRecord::Base
  end
 end
 \end{lstlisting}
+\end{rbox}
 \end{minipage}
 \caption{{\bf Example 3: MongoDB/SQL.}
 Shows one publisher running on MongoDB (Pub3) and two SQL subscribers
@@ -926,8 +963,29 @@ message to the broker.
 
 \begin{figure}[t]
  \centering
- \includegraphics[width=.45\linewidth,clip=true,trim=5in 0.4in 0 0]{figures/synapse/architecture-less-detail.pdf}
- \caption{{Published message format (JSON).}}
+ \begin{minipage}{.65\textwidth}
+  \begin{rbox}
+
+    \small
+\begin{lstlisting}[basicstyle=\ttfamily]
+{
+  app: "pub3",
+  operations: [ {
+   operation: "update",
+   type: ["User"],
+   id: 100,
+   attributes: {
+    interests: ["cats", "dogs"]
+   }
+  } ],
+  dependencies: { "pub3/users/id/100": 42 },
+  published_at: "10/11/14 07:59:00",
+  generation: 1
+}
+  \end{lstlisting}
+  \end{rbox}
+ \end{minipage}
+ \caption{{\bf Published Message Format (JSON).}}
  \label{synapse:fig:json}
 \end{figure}
 
@@ -1067,13 +1125,13 @@ following the subscriber algorithm.
 
 \begin{figure}
 \centering
-\begin{minipage}{.32\textwidth}
+\begin{minipage}{.34\textwidth}
   \footnotesize
-\begin{lstlisting}[framexleftmargin=5pt]
-# Users are issuing requests
+  \begin{rbox}
+\begin{lstlisting}
+# Users issue requests
 # against the application.
-# '-' separates different
-# controller executions.
+# '-' separates controller executions.
 current_user = User.find(1)
 Post.create(
  author: current_user,
@@ -1094,16 +1152,17 @@ Comment.create(post: post,
 current_user = User.find(1)
 post = Post.find(1)
 post.update(body: "hello")
-        (a)
+          (a)
 \end{lstlisting}
-\hspace{1em}
-\vspace{1.7em}
-\includegraphics[width=4cm]{figures/synapse/dep-graph.pdf}
+  \end{rbox}
+\hspace{2.7em}
+\includegraphics[width=3.5cm]{figures/synapse/dep-graph.pdf}
 \end{minipage}
 \hspace{3em}
 \begin{minipage}{0.45\textwidth}
   \footnotesize
-\begin{lstlisting}[framexleftmargin=5pt]
+  \begin{rbox}
+\begin{lstlisting}
 # Assume "post/id/1" hashes to "p1",
 # "user/id/2" hashes to "u2", etc.
 W1: write(...,
@@ -1118,24 +1177,23 @@ W2: write(...,
 # u2.ops = 1, u2.version = 1
 # c1.ops = 1, c1.version = 1
 # p1.ops = 2, p1.version = 1
-M2: {..., dependencies:
-     ["u2": 0, "c1": 0, "p1": 1]}
+M2: {..., dependencies: ["u2": 0, "c1": 0, "p1": 1]}
 W3: write(...,
  read_deps:  ["post/id/1"],
  write_deps: ["user/id/1", "comment/id/2"])
 # u1.ops = 2, u1.version = 2
 # c2.ops = 1, c2.version = 1
 # p1.ops = 3, p1.version = 1
-M3: {..., dependencies:
-     ["u1": 1, "c2": 0, "p1": 1]}
+M3: {..., dependencies: ["u1": 1, "c2": 0, "p1": 1]}
 W4: write(...,
  read_deps:  [],
  write_deps: ["user/id/1", "post/id/1"])
 # u1.ops = 3, u1.version = 3
 # p1.ops = 4, p1.version = 4
 M4: {..., dependencies: ["u1": 2, "p1": 3]}
-            (b)
+              (b)
 \end{lstlisting}
+  \end{rbox}
 \end{minipage}
 
 \caption{{\bf Dependencies and Message Generation.}
@@ -1361,7 +1419,7 @@ Synchronization of these DBs then became a challenge.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{figures/synapse/eco-crowdtap.pdf}
-  \caption{\textbf{\crowdtap's services.} Arrows show \synapse connections.}
+  \caption{{\bf \crowdtap's Services.} Arrows show \synapse connections.}
   \label{synapse:fig:crowdtap-ecosystem}
 \end{figure}
 
@@ -1404,7 +1462,7 @@ requirements, hence selects a weak consistency mode.
 \begin{figure}[t]
 \centering
    \includegraphics[width=2.4in]{figures/synapse/eco-social.pdf}
-   \caption{\bf{Social Product Recommender.} Arrows show \synapse connections.}
+   \caption{{\bf Social Product Recommender.} Arrows show \synapse connections.}
    \label{synapse:fig:social-ecosystem}
 \end{figure}
 
@@ -1429,6 +1487,20 @@ desired, although our prototype uses a very simple keyword-based matching
 between the users' interests and product descriptions. Such code need not be
 concerned with where the user's interests come from as they
 automatically exist as part of the data model (thanks to \synapse).
+
+
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{figures/synapse/diaspora1.pdf}
+  \caption{{\bf Execution Sample.}
+     \ding{172} A user posts on Diaspora. The mailer \ding{173} and semantic
+     analyzer \ding{174} receive the post in parallel. Diaspora \ding{175} and Spree
+     \ding{176} each receive the decorated model with in parallel.}
+  \label{synapse:fig:diaspora1}
+\end{figure}
+
 
 \subsection{Splitting a monolithic app into services with \synapse}
 \label{synapse:sec:apps:gitlab}
@@ -1465,6 +1537,20 @@ application.
 \label{synapse:sec:evaluation}
 
 
+
+\subsection{Sample Executions}
+\label{synapse:sec:evaluation:sample-runs}
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{figures/synapse/diaspora2.pdf}
+  \caption{{\bf Execution with Subscriber Disconnection.}
+    \ding{172} and \ding{174} User 1 posts. \ding{173} and \ding{175} User 2 posts.
+    Mailer comes online and processes the each users first request \ding{176}, then
+  each user's second request \ding{177} in parallel.}
+  \label{synapse:fig:diaspora2}
+% \end{sidewaysfigure}
+\end{figure}
+
 We leverage both our deployment and the applications we built to answer three
 core evaluation questions about \synapse: (Q1) How expensive is it
 at the publisher? (Q2) How well does it scale? (Q3) How do its various
@@ -1478,10 +1564,6 @@ that stress the system in ways that production workload cannot.  Unless
 otherwise noted, our evaluation focuses on the causal delivery mode for both publishers and subscribers, which is
 the default setting in our prototype.  After providing some sample executions,
 we next discuss each evaluation question in turn.
-
-
-\subsection{Sample Executions}
-\label{synapse:sec:evaluation:sample-runs}
 
 To build intuition into how \synapse behaves and the kinds of overheads it
 brings, we show two sample executions of our open-source ecosystem
@@ -1501,30 +1583,6 @@ two users in parallel, but processes each user's posts in serial order, thereby
 enforcing causality.
 
 
-\begin{figure}
-% \begin{sidewaysfigure}
-  \centering
-  \includegraphics[width=\linewidth]{figures/synapse/diaspora1.pdf}
-  \caption{{\bf Execution Sample:}
-     \ding{172} a user posts on Diaspora. The mailer \ding{173} and semantic
-     analyzer \ding{174} receive the post in parallel. Diaspora \ding{175} and Spree
-     \ding{176} each receive the decorated model with in parallel.}
-  \label{synapse:fig:diaspora1}
-\end{figure}
-
-  % \vspace{4em}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=\linewidth]{figures/synapse/diaspora2.pdf}
-  \caption{{\bf Execution with Subscriber Disconnection:}
-    \ding{172} and \ding{174} User 1 posts. \ding{173} and \ding{175} User 2 posts.
-    Mailer comes online and processes the each users first request \ding{176}, then
-  each user's second request \ding{177} in parallel.}
-  \label{synapse:fig:diaspora2}
-% \end{sidewaysfigure}
-\end{figure}
-
 \subsection{Application Overheads (Q1)}
 \label{synapse:sec:evaluation:overhead}
 
@@ -1543,12 +1601,12 @@ enforcing causality.
      \multicolumn{9}{l}{ {\bf Overhead across all 55 controllers:}
     mean=8\%}
       \end{tabular}
-      \caption{\crowdtap dependencies and overheads, sampled from production data.
+      \caption{{\bf \crowdtap Dependencies and Overheads.}
           For each of the five most frequently invoked controllers in \crowdtap,
           shows the percent of calls to it, average number of published
           messages, average number of dependencies between messages,
           the average controller execution time, and the average overhead from
-        \synapse.}
+        \synapse. Data sampled from production data.}
      \label{synapse:tab:crowdtap-overheads}
 \end{table}
 
@@ -1597,8 +1655,8 @@ performance under stress, a topic that we discuss next.
 \begin{figure}[t]
  \centering
  \includegraphics[width=0.8\linewidth]{figures/synapse/overhead-hist.pdf}
- \caption{\synapse overhead (gray parts) for 3 controllers in 3 different
- applications. Labels give the total controller times.}
+ \caption{{\bf \synapse Overhead.} Shown for 3 controllers in 3 different
+ applications. Gray bars depict overhead. Labels give the total controller times.}
  \label{synapse:fig:app-overheads}
 \end{figure}
 
@@ -1610,7 +1668,7 @@ performance under stress, a topic that we discuss next.
 \begin{figure}[]
   \centering
   \includegraphics[width=\linewidth]{figures/synapse/overheadvsdeps.pdf}
-  \caption{Publisher overhead on different DBs.}
+  \caption{{\bf Publisher Overhead on Different DBs.} Each line represents a different DB.}
   \label{synapse:fig:overhead}
 \end{figure}
 
@@ -1618,7 +1676,7 @@ performance under stress, a topic that we discuss next.
 \begin{figure}[]
   \centering
   \includegraphics[width=\linewidth]{figures/synapse/db-throughput-vs-workers.pdf}
-  \caption{Throughput vs number of workers end to end benchmark.
+  \caption{{\bf Throughput vs Number of Workers.} End to end benchmark.
       Each line represents a different DB setup.
     The slowest end in each pair is annotated with a (*) symbol.}
     \label{synapse:fig:dbs-throughput}
@@ -1628,7 +1686,7 @@ performance under stress, a topic that we discuss next.
 \begin{figure}[]
   \centering
   \includegraphics[width=\linewidth]{figures/synapse/throughputvsworkerssaturate.pdf}
-  \caption{Throughput vs number of workers with subscribers running a 100ms callback.
+  \caption{{\bf Delivery performance.} Subscribers are running a 100ms callback on each message.
   Each line represents a different delivery mode.}
   \label{synapse:fig:parallel-throughput}
 \end{figure}
