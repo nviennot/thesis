@@ -1,5 +1,4 @@
-\chapter{Transparent, Lightweight Application Execution Replay \\
-on Commodity Multiprocessor Operating Systems}
+\chapter{\scribe: Kernel Level Application Execution Record-Replay}
 \label{ch:scribe}
 
 \section{Introduction}
@@ -158,7 +157,7 @@ This chapter is organized as follows.
 \S\ref{scribe:sec:sync} describes signal delivery and the recording of asynchronous events.
 \S\ref{scribe:sec:results} presents experimental results.
 \S\ref{scribe:sec:related} discusses related work.
-Finally, \S\ref{scribe:sec:conclusion} presents some concluding remarks.
+Finally, \S\ref{scribe:sec:conclusion} presents a summary and concluding remarks of this chapter.
 
 \section{Architecture Overview}
 \label{scribe:sec:arch}
@@ -1376,6 +1375,44 @@ applications on the blade which lacks a monitor, we used VNC
 (TightVNC Server 1.3.9) to provide a virtual desktop. 
 
 
+We measured the performance of \scribe{} using the benchmark workloads
+listed in Table~\ref{scribe:tab:scenarios2}.
+Applications were all run with
+their default configurations.  Workloads were selected to
+stress the system to provide a conservative measure of performance.
+For example, {\tt firefox} runs the widely used SunSpider benchmark
+designed to measure real-world web browser JavaScript performance.  
+We also included benchmarks that emulate multiple interactive users
+such as {\tt ssh-s} and {\tt ssh-c}, which open multiple concurrent
+SSH sessions, each having an emulated user input text into a vi editor
+at world-record typing speed~\cite{typist} to create a 5 KB file, then
+exiting. We focus on quantifying the performance overhead and storage
+requirements of running applications with \scribe{} in terms of the
+cost of continuously recording the execution, and speedup of replayed
+execution versus recorded execution. Previous work shows that the
+overhead of the virtual execution environment is
+small~\cite{zap-systor10,zap02}.
+
+Figure~\ref{scribe:fig:overhead} shows the performance overhead of recording
+the application workloads.  Performance is measured as completion time
+in all cases except for {\tt apache-p} and {\tt apache-t} which report
+performance in completed requests per second. No frames were dropped
+during logging of {\tt mplayer} playback.  Results are shown
+normalized to native execution without recording.  Recording overhead
+was under 2.5\% for server applications and under 7\% for all desktop
+applications except for {\tt openoffice}, which was 15\%.  For all desktop
+applications, there was no user noticeable degradation in interactive
+performance.
+
+Figure~\ref{scribe:fig:overhead} also shows the performance of replaying the
+applications workloads. Performance is measured as completion time,
+normalized to execution with recording. Replaying speedup relative to
+recording was at least 1 in all cases, and reached as much as a factor
+of 70 for {\tt ssh-c}. The results demonstrate that \scribe{} can
+replay applications at least as fast as it records, as expected. This
+is useful for fault-tolerant systems to guarantee that replay on the
+backup does not slow down execution on the primary.
+
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{figures/scribe/overhead}
@@ -1424,43 +1461,6 @@ applications on the blade which lacks a monitor, we used VNC
     \label{scribe:fig:delays}
 \end{figure}
 
-We measured the performance of \scribe{} using the benchmark workloads
-listed in Table~\ref{scribe:tab:scenarios2}.
-Applications were all run with
-their default configurations.  Workloads were selected to
-stress the system to provide a conservative measure of performance.
-For example, {\tt firefox} runs the widely used SunSpider benchmark
-designed to measure real-world web browser JavaScript performance.  
-We also included benchmarks that emulate multiple interactive users
-such as {\tt ssh-s} and {\tt ssh-c}, which open multiple concurrent
-SSH sessions, each having an emulated user input text into a vi editor
-at world-record typing speed~\cite{typist} to create a 5 KB file, then
-exiting. We focus on quantifying the performance overhead and storage
-requirements of running applications with \scribe{} in terms of the
-cost of continuously recording the execution, and speedup of replayed
-execution versus recorded execution. Previous work shows that the
-overhead of the virtual execution environment is
-small~\cite{zap-systor10,zap02}.
-
-Figure~\ref{scribe:fig:overhead} shows the performance overhead of recording
-the application workloads.  Performance is measured as completion time
-in all cases except for {\tt apache-p} and {\tt apache-t} which report
-performance in completed requests per second. No frames were dropped
-during logging of {\tt mplayer} playback.  Results are shown
-normalized to native execution without recording.  Recording overhead
-was under 2.5\% for server applications and under 7\% for all desktop
-applications except for {\tt openoffice}, which was 15\%.  For all desktop
-applications, there was no user noticeable degradation in interactive
-performance.
-
-Figure~\ref{scribe:fig:overhead} also shows the performance of replaying the
-applications workloads. Performance is measured as completion time,
-normalized to execution with recording. Replaying speedup relative to
-recording was at least 1 in all cases, and reached as much as a factor
-of 70 for {\tt ssh-c}. The results demonstrate that \scribe{} can
-replay applications at least as fast as it records, as expected. This
-is useful for fault-tolerant systems to guarantee that replay on the
-backup does not slow down execution on the primary.
 
 Two factors contribute to replay speedup: omitted in-kernel work due
 to system calls partially or entirely skipped (e.g. network output),
@@ -1729,7 +1729,7 @@ activities that result in kernel-level sharing.  While SMP-ReVirt can
 provide whole system replay, \scribe{} can provide much more efficient
 application replay.   
 
-\section{Conclusion}
+\section{Summary}
 \label{scribe:sec:conclusion}
 
 \scribe is the first operating system mechanism to provide transparent,

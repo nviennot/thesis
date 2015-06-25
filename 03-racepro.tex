@@ -1,4 +1,4 @@
-\chapter{Pervasive Detection of Process Races in Deployed Systems}
+\chapter{\racepro: Detection of Process Races in Deployed Systems}
 \label{ch:racepro}
 
 \section{Introduction} \label{racepro:sec:intro}
@@ -147,8 +147,8 @@ study of process races and several process race examples.
 micro-operations and the race detection algorithm.
 \S\ref{racepro:sec:validate} describes how replay and go-live are used to
 determine harmful races.  \S\ref{racepro:sec:eval} presents experimental
-results. \S\ref{racepro:sec:related} discusses related work.  Finally, 
-\S\ref{racepro:sec:conclusion} presents some concluding remarks.
+results. \S\ref{racepro:sec:related} discusses related work.
+Finally, \S\ref{racepro:sec:conclusion} presents a summary and concluding remarks of this chapter.
 
 \begin{table}[t]
 \centering
@@ -1881,7 +1881,7 @@ runs deterministically in Determinator.  dOS makes legacy multithreaded
 programs deterministic even in the presence of races on memory and other
 shared resources.  None of these systems aim to detect process races.
 
-\section{Conclusion} \label{racepro:sec:conclusion}
+\section{Summary} \label{racepro:sec:conclusion}
 
 We presented the first study of real process races, and the first
 system, \racepro, for effectively detecting process races beyond TOCTOU
