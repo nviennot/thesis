@@ -221,12 +221,12 @@ did not include them in Table~\ref{racepro:tab:data}.
   \includegraphics[width=.45\linewidth]{figures/racepro/race-packages}
   \hfill
   \includegraphics[width=.45\linewidth]{figures/racepro/race-processes}
-\caption{{\bf Process Races Breakdown.} X axis shows the race effect, the number of software
-  packages, processes, or programming languages involved.  Y axis shows
-  the percentage of process races that involve the specific effect, or number of
-  packages, processes, or languages.  To avoid inflating the number of
-  processes, we count a run of a shell script as one process.  (Each external
-  command in a script causes a \code{fork}.)} \label{racepro:fig:breakdown}
+\caption{{\bf Process Races Breakdown.}
+  X axis shows the race effect, programming languages, the number of software packages, or processes involved.
+  Y axis shows the percentage of process races that involve the specific effect, languages, packages, or processes.
+  To avoid inflating the number of processes, we count a run of a shell script
+  as one process.  (Each external command in a script causes a \code{fork}.)}
+\label{racepro:fig:breakdown}
 \end{figure}
 
 \para{Process races are dangerous.}  Compared to thread races that
