@@ -214,19 +214,16 @@ not contain enough information for us to understand the cause, so we
 did not include them in Table~\ref{racepro:tab:data}.
 
 \begin{figure}[t]
-  \includegraphics[width=0.45\linewidth,angle=270]{figures/racepro/race-effects}
-  \caption{{\bf Process Races Breakdown by Effects.}}
-  \label{racepro:fig:effects}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=.45\linewidth]{figures/racepro/race-packages}
-\includegraphics[width=.45\linewidth]{figures/racepro/race-processes}
-\includegraphics[width=.45\linewidth]{figures/racepro/race-languages}
-\caption{{\bf Process Races Breakdown.} X axis shows the number of software
+  \includegraphics[width=0.54\linewidth,valign=t]{figures/racepro/race-effects2.pdf}
+  \vspace{-2em}
+  \hfill
+  \includegraphics[width=.45\linewidth,valign=t]{figures/racepro/race-languages}
+  \includegraphics[width=.45\linewidth]{figures/racepro/race-packages}
+  \hfill
+  \includegraphics[width=.45\linewidth]{figures/racepro/race-processes}
+\caption{{\bf Process Races Breakdown.} X axis shows the race effect, the number of software
   packages, processes, or programming languages involved.  Y axis shows
-  the percentage of process races that involve the specific number of
+  the percentage of process races that involve the specific effect, or number of
   packages, processes, or languages.  To avoid inflating the number of
   processes, we count a run of a shell script as one process.  (Each external
   command in a script causes a \code{fork}.)} \label{racepro:fig:breakdown}
@@ -237,7 +234,7 @@ typically corrupt volatile application memory, process races
 are arguably more dangerous because they often corrupt persistent and system resources.
 Indeed, the sampled process races caused security breaches, files and databases to
 become corrupted, programs to read garbage, and processes to get stuck
-in infinite loops. Figure~\ref{racepro:fig:effects} summarizes the effects of
+in infinite loops. The top right graph in Figure~\ref{racepro:fig:breakdown} summarizes the effects of
 all process races from Table~\ref{racepro:tab:data}.
 
 \para{Process races are heterogeneous.}  The sampled process races
@@ -671,7 +668,8 @@ impossible races.  However, such cases will be filtered later by
 
 \begin{figure}[]
 \centering
-\includegraphics[width=\linewidth]{figures/racepro/psgrep}
+\hspace*{-1.4em}
+\includegraphics[width=1.05\linewidth]{figures/racepro/psgrep}
 \caption{{\bf The Happens-Before Graph for \code{ps | grep X}.}
   $P_{i=1,2,3}$ represent the processes involved.
   $[i,j,k]$ represent vector-clocks.
