@@ -168,7 +168,7 @@ the connection was redirected through 302 status codes, or if the stream was
 encrypted through SSL.
 This hybrid approach can be done in many ways as user-space application often
 have deep call stacks spawning multiple libraries. For example, in Ruby, a call
-to \code{Net::HTTP.get(URI('www.google.com'))} invokes a few libraries written
+to \code{Net::HTTP.get(URI("www.google.com"))} invokes a few libraries written
 in Ruby, invoking the Ruby runtime, then libresolv, libnss, zlib, openssl, which
 in turn rely on libc to finally invoke around 50 system calls.
 Using a hybrid approach is versatile as one could instrument a specific set of APIs

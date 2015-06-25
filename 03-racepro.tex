@@ -997,40 +997,42 @@ abstract memory location.  For each matching wakeup system call $S_3$,
 $S_1$ and $S_2$. 
 
 \begin{figure}[t]
-\begin{minipage}[b]{.40\linewidth}
-\begin{footnotesize}
-\begin{verbatim}
-       P1             P2
------------------------------
-      ...
-S1: write(P,10);
-S2: write(P,10);      ...
-S3:   ...          read(P,20)
-                      ...
-\end{verbatim}
-\end{footnotesize}
-\vspace{-5mm}
-\center{\scriptsize \bf (a)}
-\end{minipage}
-\hskip 1cm
-\begin{minipage}[b]{.45\linewidth}
-\begin{footnotesize}
-\begin{verbatim}
-       P1             P2
------------------------------
-      ...
-S1: write(P,10);
-S2:                read(P,20)
-S3: write(P,10);     ...
-      ...
-\end{verbatim}
-\end{footnotesize}
-\vspace{-5mm}
-\center{\scriptsize \bf (b)}
-\end{minipage}
-\vspace{-1mm}
-\caption{{\em Wait-wakeups races in streams.}} \label{racepro:fig:streams}
-\vspace{-1mm}
+  \begin{minipage}{\linewidth}
+    \centering
+    \begin{minipage}{.42\linewidth}
+      \begin{rbox}
+        \centering
+        \begin{tabular}{ccc}
+                  & {\bf P1}      & {\bf P2}     \\ \hline
+                  & ...           &              \\
+          $S_1$:  & write(P, 10); &              \\
+          $S_2$:  & write(P, 10); & ...          \\
+          $S_3$:  & ...           & read(P, 20); \\
+                  &               & ...          \\
+        \end{tabular}
+      \end{rbox}
+      \vspace{-2.2em}
+      \center{(a)}
+    \end{minipage}
+    \hspace{3em}
+    \begin{minipage}{.42\linewidth}
+      \begin{rbox}
+        \centering
+        \begin{tabular}{ccc}
+                   & {\bf P1}      & {\bf P2}     \\ \hline
+                   & ...           &              \\
+          $S_1$:   & write(P, 10); & ...          \\
+          $S_2$:   &               & read(P, 20); \\
+          $S_3$:   & write(P, 10); & ...          \\
+                   & ...           &              \\
+        \end{tabular}
+      \end{rbox}
+      \vspace{-2.2em}
+      \center{(b)}
+    \end{minipage}
+  \end{minipage}
+  \caption{Wait-wakeups races in streams.}
+  \label{racepro:fig:streams}
 \end{figure}
 
 The relative order of the wakeup system calls may matter if their
@@ -1248,23 +1250,23 @@ done as is so that the pipe exists and has suitable state should the
 process transition to live execution. 
 
 \begin{figure}[t]
-\centering
-\begin{minipage}{.65\linewidth}
-\begin{footnotesize}
-\begin{verbatim}
-       P1             P2             P3
----------------------------------------------
-        ...
-S1:  syscall(R);
-S2:  syscall(R);                     ...
-S3:     ...           ...        syscall(R);
-S4:                syscall(R)        ...
-S5:                syscall(R)
-                      ...
-\end{verbatim}
-\end{footnotesize}
-\end{minipage}
-\caption{\em Replay divergence due to reordering.} \label{racepro:fig:reorder}
+  \centering
+  \begin{minipage}{.55\linewidth}
+    \begin{rbox}
+      \centering
+      \begin{tabular}{lccc}
+               & {\bf P1}    & {\bf P2}    & {\bf P3}    \\ \hline
+               & ...         &             &             \\
+        $S_1$: & syscall(R); &             &             \\
+        $S_2$: & syscall(R); &             & ...         \\
+        $S_3$: & ...         & ...         & syscall(R); \\
+        $S_4$: &             & syscall(R); & ...         \\
+        $S_5$: &             & syscall(R); &             \\
+               &             & ...         &             \\
+      \end{tabular}
+    \end{rbox}
+  \end{minipage}
+  \caption{Replay divergence due to reordering.} \label{racepro:fig:reorder}
 \end{figure}
 
 \racepro works best when a go-live execution requests no inputs from users or
@@ -1348,40 +1350,46 @@ between threads of the same process.  We believe that such races are
 relatively unlikely to occur.
 
 \begin{figure}[t]
-\begin{minipage}{\linewidth}
-  \begin{minipage}{.6\linewidth}
-\begin{footnotesize}
-\begin{verbatim}
-       P1             P2
------------------------------
-      ...
-S1: creat(F);        ...
-S2:   ...        r = unlink(F);
-                 if (r == 0)
-S3:                  creat(F);
-                     ...
-\end{verbatim}
-\end{footnotesize}
+  \begin{minipage}{\linewidth}
+    \centering
+    \begin{minipage}{.42\linewidth}
+      \begin{rbox}
+        \centering
+        \begin{tabular}{ccc}
+                 & {\bf P1}  & {\bf P2}                                \\ \hline
+                 & ...       &                                         \\
+          $S_1$: & creat(F); & ...                                     \\
+          $S_2$: & ...       & \multicolumn{1}{l}{ r = unlink(F); }    \\
+                 &           & \multicolumn{1}{l}{ {\bf if} (r == 0) } \\
+          $S_3$: &           & \multicolumn{1}{l}{ ~~~~~~creat(F); }   \\
+                 &           & ...                                     \\
+        \end{tabular}
+      \end{rbox}
+      \vspace{-2.2em}
+      \center{(a)}
+    \end{minipage}
+    \hspace{3em}
+    \begin{minipage}{.42\linewidth}
+      \begin{rbox}
+        \centering
+        \begin{tabular}{ccc}
+                 & {\bf P1}     & {\bf P2}                                  \\ \hline
+                 & ...          &                                           \\
+          $S_1$: & write(F, x); & ...                                       \\
+          $S_2$: & ...          & \multicolumn{1}{l}{ read(F, b); }         \\
+                 &              & \multicolumn{1}{l}{ {\bf if} (b == `x') } \\
+          $S_3$: &              & \multicolumn{1}{l}{ ~~~~~~write(F, y); }  \\
+                 &              & ...                                       \\
+        \end{tabular}
+      \end{rbox}
+      \vspace{-2.2em}
+      \center{(b)}
+    \end{minipage}
   \end{minipage}
-  \begin{minipage}{.39\linewidth}
-\begin{footnotesize}
-\begin{verbatim}
-       P1             P2
------------------------------
-      ...
-S1: write(F,x);       ...
-S2:   ...         read(F,b);
-                  if (b == 'x')
-S3:                 write(F,y);
-                      ...
-\end{verbatim}
-\end{footnotesize}
-  \end{minipage}
-  \caption{{\em Replay divergence examples.}} \label{racepro:fig:diverge}
-\end{minipage}
+  \caption{Replay divergence examples.}
+  \label{racepro:fig:diverge}
 \end{figure}
 
-% \begin{sidewaystable}
 \begin{table}[t]
 \centering
 \setlength{\tabcolsep}{3pt}
