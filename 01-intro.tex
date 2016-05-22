@@ -9,21 +9,21 @@ many potential uses, including diagnosing and debugging applications by
 capturing and reproducing hard to find bugs, dynamic application analysis by
 performing costly instrumentation on replicas that replay application behavior
 recorded on production systems, intrusion analysis by capturing intrusions
-involving non-deterministic effects, and fault-tolerance by streaming
+involving nondeterministic effects, and fault-tolerance by streaming
 a live recording of a primary server execution to its replicas.
 
 Implementing deterministic execution record-replay can be challenging for a
-variety of reasons. First, all sources of non-determinism must be captured and recorded.
-Sources of non-determinism can be categorized in 1) data related non-determinism
-and 2) timing related non-determinism. Data related non-determinism is the easiest
+variety of reasons. First, all sources of nondeterminism must be captured and recorded.
+Sources of nondeterminism can be categorized in 1) data related nondeterminism
+and 2) timing related nondeterminism. Data related nondeterminism is the easiest
 to capture. It includes recording all external inputs such as incoming network
-packets, or user keystrokes. Timing related non-determinism is harder to capture,
+packets, or user keystrokes. Timing related nondeterminism is harder to capture,
 especially when the recorded application runs on multiple CPUs simultaneously.
 Application threads or processes access data and resources in an undefined
 order, resulting in many different possible schedules. Another example is the
 delivery of POSIX signals which can occur at an arbitrary point in time in the
 application execution timeline. It is sufficient to record all sources of
-non-determinism, both data and timing sources, to replay an application
+nondeterminism, both data and timing sources, to replay an application
 execution deterministically. However, doing so with good performance is crucial
 since recording is done in deployed systems.
 
@@ -53,8 +53,8 @@ We later introduce two new lightweight OS mechanisms to solve this problem.
 
 Application state record-replay mechanisms, a subset of application execution
 record-replay mechanisms, are useful as well.  In distributed
-databases, data replication provide fault tolerance and load balancing
-features. Data replication often hide record-replay mechanisms.
+databases, data replication provides fault tolerance and load balancing
+features. Data replication often hides record-replay mechanisms.
 Today, most large scale web applications rely on many different databases as
 each database provides a specific feature-set. Unfortunately, the data replication
 engines of these databases are not compatible with each other, and offer very
@@ -80,8 +80,8 @@ overhead of maintaining an exact execution ordering.
 Another difficult problem to achieve deterministic replay is to replay
 asynchronous interactions that can occur at arbitrary times during the
 execution. For example, POSIX signal delivery may occur at any point in the
-application instruction flow. Previous work have developed complex techniques
-of instrumenting applications with the use of hardware counter to precisely
+application instruction flow. Previous works have developed complex techniques
+of instrumenting applications with the use of hardware counters to precisely
 locate where a signal was delivered in the instruction flow.
 \scribe takes a different approach by delaying these asynchronous events
 during the recording to a point where it is much easier to replay
@@ -92,7 +92,7 @@ a deterministic page fault. In other words,
 Sync points allow \scribe to convert asynchronous interactions that can occur at
 arbitrary times into synchronous events that are much easier to record and
 replay. In our evaluation, we show that the introduced delay is imperceptible
-in application as sync points occur very frequently.
+in an application as sync points occur very frequently.
 
 With multi-threaded applications, replaying accesses to shared memory is
 difficult. The order in which each thread accesses a shared memory location must
@@ -101,12 +101,12 @@ of binary instrumentation, \scribe leverages the MMU to monitor memory accesses
 through page faults. \scribe implements a concurrent read, exclusive write
 (CREW) protocol on shared pages. To do so, instead of having all threads share a
 common page table, threads access memory through a per-thread page table, which
-\scribe use to record access order with rendezvous points and sync points.
+\scribe uses to record access order with rendezvous points and sync points.
 At a given point in time, a page may be accessed by only a single thread, the
-owner. When another thread tries to access that same page, a fault occur,
+owner. When another thread tries to access that same page, a fault occurs,
 and an ownership relinquish request is issued to the current owner, which is
-processed at its next sync point. This lightweight mechanism allow low
-overhead of recording shared memory interaction.
+processed at its next sync point. This lightweight mechanism allows low
+overhead of recording shared memory interactions.
 
 Our results show for the first time that (1) sync points are an effective,
 lightweight mechanism for handling nondeterminism due to signals and shared
@@ -141,14 +141,14 @@ executions. Arguably worse than thread races, they may occur only under
 specific software, hardware, and user configurations at specific sites.  It is
 hopeless to rely on a few software vendors and beta testing sites to create all
 possible configurations and executions for checking.  The third challenge is
-algorithmic: what race detection algorithm can be used for detecting process
+algorithmic: what race detection algorithm can be used for detecting process races?
 Existing algorithms assume well-defined load and store instructions and thread
 synchronization primitives. However, the effects of system calls are often
 under-specified and process synchronization primitives are very different from
 those used in shared memory.
 
 \racepro addresses these challenges with four ideas.  First, it checks deployed
-systems \emph{in-vivo}.  While a deployed system is running, \racepro records
+systems in vivo.  While a deployed system is running, \racepro records
 the execution without doing any checking.  \racepro then systematically checks
 this recorded execution for races \emph{offline}.  By checking deployed systems,
 \racepro mitigates the coverage challenge because all user machines together can
@@ -157,16 +157,16 @@ checking.  By decoupling recording and checking, \racepro reduces its
 performance overhead on the deployed systems.
 Second, \racepro uses the application transparent \scribe engine to record
 deployed applications, mitigating the scope challenge, as no application source
-code or modifications of the checked applications are required, mitigating the
-scope challenge. Third, to detect process races in a recorded execution,
+code or modifications of the checked applications are required.
+Third, to detect process races in a recorded execution,
 \racepro models each system call by what we call \emph{load and store
 micro-operations} to shared kernel objects.  \racepro leverages \scribe's
 rendezvous points to facilitate the modeling of these two operations with low
-overhead.  Because these two operations are well-understood by existing race
+overhead.  Because these two operations are well understood by existing race
 detection algorithms, \racepro can leverage these algorithms, mitigating the
 algorithmic challenge.  Fourth, to reduce false positives and negatives,
-\racepro uses \emph{replay and go-live} to validate detected races.  A race
-detected based on the micro-operations may be either \emph{benign} or
+\racepro uses \emph{replay and go-live} to validate detected races.  A
+detected race based on the micro-operations may be either \emph{benign} or
 \emph{harmful}, depending on whether it leads to a \emph{failure}, such as a
 segmentation fault or a program abort.  \racepro considers a change in the order
 of the system calls involved in a race to be an \emph{execution branch}.  To
@@ -201,7 +201,7 @@ function, and provide a generic one that works well in most cases.
 execution to a log similar to the \scribe engine, (2) a replayer that can replay
 a modified version of the application using the log, and (3) an explorer that
 uses the replayer to find the execution of the modified program that best
-corresponds to the log file. The recorder logs not only non-deterministic
+corresponds to the log file. The recorder logs not only nondeterministic
 interactions but also deterministic information such as system call arguments,
 to allow the replayer to identify when a replay diverges from the original
 execution early.
@@ -237,11 +237,11 @@ services, each implementing a specific feature, using a specific database.
 For example, the recommendation feature of an e-commerce store can be
 implemented in a separate service powered by a graph DB, while the store
 frontend runs on a traditional SQL DB. These services share a common subset
-of the data, for example the recommendation feature would share the product
+of the data; for example, the recommendation feature would share the product
 and user data with the store frontend.
 Application state modifications consist of database primitive changes, such as a
 node insertion in a graph DB, or a row update in a SQL DB. 
-Designing a system that allow this common data subset to be synchronized across
+Designing a system that allows this common data subset to be synchronized across
 all the different DBs is challenging for four reasons. First, it should be
 compatible with a vast number of DBs, whose layouts and engines may be
 completely different. Second, it should be easy to use: orchestrating the data
@@ -250,7 +250,7 @@ Third, it should provide good consistency guarantees at scale, and fourth
 the replication mechanism should be failure tolerant. Specifically, network partitions
 should not result in having half of the DBs missing some data.
 
-\synapse fulfill these requirements with a key insight. Unlike previous work,
+\synapse fulfills these requirements with a key insight. Unlike previous work,
 instead of operating at the DB level to perform replication, \synapse operates
 at the application level. Typically, web applications are structured following
 the model-view-controller (MVC) pattern. Data is accessed following an object-oriented
@@ -271,7 +271,7 @@ Despite this simple API, developers can describe complex eco-systems
 of services. \synapse provides causal consistency delivery semantics by
 transparently intercepting and ordering all read and write queries to the DB in
 a similar fashion to \scribe's rendezvous points. Finally \synapse provides
-a fault-tolerant replication mechanism by implementing two phase commits all
+a fault-tolerant replication mechanism by implementing two-phase commits all
 the way from the source DB to the destination DB.
 
 We have implemented \synapse for Ruby-on-Rails. We present some experimental

@@ -5,10 +5,10 @@
 
 We presented four different record-replay systems to achieve different goals.
 We introduced \scribe, an OS-level deterministic execution record-replay system
-to capture and reproduce hard to find bugs; \racepro, a process race detection
+to capture and reproduce hard to find bugs; \racepro, a process-race detection
 system to improve software correctness in deployed systems; \dora, a mutable
-replay system to reproduce non-deterministic bugs with retroactive debugging;
-and \synapse, a application-state replication system for distributed
+replay system to reproduce nondeterministic bugs with retroactive debugging;
+and \synapse, an application-state replication system for distributed
 applications to facilitate the use of heterogeneous databases in
 service-oriented architectures.
 
@@ -42,7 +42,7 @@ system, \racepro, for effectively detecting process races beyond TOCTOU
 and signal races.   Our study has shown that process races are
 numerous, elusive, and a real threat.  To address this problem, \racepro
 automatically detects process races, checking deployed
-systems \emph{in-vivo} by recording live executions and then checking
+systems in vivo by recording live executions and then checking
 them later.  It thus increases checking coverage beyond the
 configurations or executions covered by software vendors or beta
 testing sites.  First, \racepro records executions of multiple processes
@@ -108,10 +108,10 @@ record-replay to improve software reliability, and an application state
 record-replay system allowing services to cleanly share data among a web
 application in a service-oriented architecture. Our findings showcase numerous
 use cases of record-replay, ranging from (1) debugging applications by capturing
-hard to find bugs and reproducing them with recompiled and reconfigured version
+hard-to-find bugs and reproducing them with recompiled and reconfigured version
 of applications to greatly facilitate debugging, (2) dynamic application
 analysis by performing costly instrumentation on replicas that replay
-application behavior recorded on production systems, such as process race
+application behavior recorded on production systems, such as process-race
 detection, and (3) heterogeneous database replication.
 
 \section{Future Work}
@@ -136,8 +136,8 @@ application is modified in a way to acquire and release pages ownership in
 specific hot code paths. In addition, the application would have to store
 unrelated objects on different pages to avoid false sharing effects.
 This method is tolerant to application bugs as the kernel would still serialize
-all memory accesses even in when hints given by the applications are incorrect.
-The second method is to offload all object accesses serialization to the application.
+all memory accesses even when hints given by the applications are incorrect.
+The second method is to offload the serialization of all object accesses to the application
 Since the application should already have serialization primitives to protect
 multiple writers accessing the same object, this mechanism is analogous to
 \scribe's rendezvous points, but operating with the application objects as
@@ -157,16 +157,16 @@ recording engine of certain tasks. As discussed earlier, using user-space
 rendezvous points is beneficial for performance, but would also allow
 better application semantics extraction for use cases such as \racepro or \dora.
 Other tasks can be offloaded, such as the interaction tracking of the runtime
-environment with the kernel. For example, certain user-space API could cooperate
-with scribe to disable kernel-level recording of certain system calls, while performing
+environment with the kernel. For example, certain user-space APIs could cooperate
+with \scribe to disable kernel-level recording of certain system calls, while performing
 its own recording. For example, when performing an HTTP request, only the request
 headers and body could be recorded, as opposed to recording the low-level
 interaction with the underlying sockets. In this case, achieving deterministic
-replay is still guaranteed while the recorded log no longer need to contain the
+replay is still guaranteed while the recorded log no longer needs to contain the
 information of doing DNS lookups, whether a keep-alive connection was used, if
 the connection was redirected through 302 status codes, or if the stream was
 encrypted through SSL.
-This hybrid approach can be done in many ways as user-space application often
+This hybrid approach can be done in many ways as user-space applications often
 have deep call stacks spawning multiple libraries. For example, in Ruby, a call
 to \code{Net::HTTP.get(URI("www.google.com"))} invokes a few libraries written
 in Ruby, invoking the Ruby runtime, then libresolv, libnss, zlib, openssl, which
@@ -176,17 +176,17 @@ while retaining the original \scribe behavior for other unrelated APIs. This way
 deterministic recording guarantees can still be preserved, even when a high-level
 application uses a non-instrumented C extension.
 Tools that leverage record-replay mechanisms such as \dora and \racepro can
-benefit hugely from these higher level of recording abstractions as the
+benefit hugely from these higher-level of recording abstractions as the
 recorded log contains a more precise representation of application semantics.
 
 \racepro benefits directly from this hybrid approach. Since \racepro's race
 detection engine feeds directly from recorded object accesses via rendezvous points,
-using user-space rendezvous points would allow racepro to not only detect process
+using user-space rendezvous points would allow \racepro to detect not only process
 races, but also application races. It would be able to do so much faster
-as the recorded log would be smaller and contain a lot less rendezvous points.
+as the recorded log would be smaller and contain a lot fewer rendezvous points.
 
 \dora is currently limited as it explores program execution
-by removing and adding system calls. Leveraging application semantics allow
+by removing and adding system calls. Leveraging application semantics allows
 much better exploration. For example, consider a recorded application that
 performs two HTTP GET requests that are sharing the same socket through HTTP
 pipelining. When operating at the kernel-level, \dora is not be able to
@@ -195,27 +195,28 @@ protocol to discard the appropriate data from the received buffer on the
 corresponding socket, which may be infeasible when using SSL connections.
 On the other hand, when recording at the HTTP API level, \dora would be able to
 just simply discard that one GET request from the recording to find the optimal
-replay. By using a hybrid recording approach, not only \dora would be able to
-find better mutable replays, but it would do so much quicker as there are
+replay. By using a hybrid recording approach, \dora not only would be able to
+find better mutable replays, but would do so much quicker as there are
 less nodes to explore in the execution graph.
 
 Additionally, both \racepro and \dora would benefit from a in-memory cloning
-mechanism applied to entire process container, with copy-on-write optimizations.
+mechanism applied to an entire process container, with copy-on-write optimizations.
 Indeed, both engines replay many executions that are identical from their start
 up to a certain point. A lot of CPU is wasted replaying many times the same
 execution up to that point. For example, when \racepro explores a race after
 that point, it has to replay an entire execution up to that point, and then to
-the race to be analyzed. Having a checkpoints to replay from during the original
+the race to be analyzed. Having checkpoints to replay from during the original
 execution would greatly improve performance as the majority of the CPU is wasted
 replaying the beginning of the execution. Similarly, \dora replays entire
 executions, while it would be much more efficient to replay from the point of
-divergence. Implementing an in-memory cloning mechanism represent a substantial
-amount of work as many kernel object would have to implement a copy-on-write
+divergence. Implementing an in-memory cloning mechanism entails a substantial
+amount of work as many kernel objects would have to implement a copy-on-write
 mechanism.
 
-Earlier, we introduced \synapse to record-replay application state in a
-distributed environment by interposing on database layer.  While \synapse
-records all application state modifications, it does not record enough
+Earlier, we introduced \synapse which does application state record-replay in a
+distributed environment.
+While \synapse records all application state modifications by
+interposing on the database layer, it does not record enough
 information to deterministically replay an execution. For example, \synapse does
 not record any of the incoming HTTP requests made to the application.  Together
 with a hybrid record-replay implementation of \scribe, a useful distributed
@@ -234,24 +235,24 @@ sends application state modifications from publishers to subscribers through a
 message broker. The new hybrid system could publish additional messages
 interleaved with the existing state modifications messages, providing necessary
 information to do deterministic record-replay. For example, messages would include
-received HTTP requests, or API calls responses from third-party services such as
-payment gateways. Recording data based non-determinism is easy considering that
-these data accesses are typically made through well defined and simple API
-(unlike a UNIX kernel API). However, recording time based non-determinism is hard.
+received HTTP requests, or API call responses from third-party services such as
+payment gateways. Recording data based nondeterminism is easy considering that
+these data accesses are typically made through well-defined and simple APIs
+(unlike a UNIX kernel API). However, recording time based nondeterminism is hard.
 Thankfully, the underlying mechanism of the causal delivery mechanism of \synapse
 is a mechanism similar to \scribe's rendezvous points allowing record-replay.
-The hybrid record-replay system can record both data and time based source
-of non-determinism in an efficient manner, send the recorded log to the message
+The hybrid record-replay system can record both data- and time-based sources
+of nondeterminism in an efficient manner, send the recorded log to the message
 broker alongside with regular \synapse messages, and let subscriber services
 implement useful tools atop of record-replay.
 
-Being able to subscribe to message streams from publishers that allow
-deterministic record-replay allow, in addition to all the traditional \synapse
+Being able to subscribe to message streams from publishers that contain enough
+information to perform deterministic record-replay allows, in addition to all the traditional \synapse
 use cases, a set of new possibilities. A subscriber service can be deployed to
 perform race detection in the background with a similar engine to \racepro.
 Race detection can be very useful to save money. For example, \crowdtap suffered
 from a bug in an open-source application they used for their e-commerce store
-which allow users to redeem their points for Amazon gift cards.  The application
+which allows users to redeem their points for Amazon gift cards.  The application
 was decrementing the inventory item quantity by reading the quantity and writing
 it back in a read-committed transaction (the default in most SQL databases) as
 opposed to a serializable transaction. The race manifested in giving away
@@ -259,8 +260,8 @@ thousands of Amazon gift cards in excess. Having a subscriber service that
 detects races in the background could be valuable to improve software
 reliability.
 Further, a subscriber akin to \dora can be deployed to implement mutable replay.
-This can be useful to reproduce and debug eluding bugs. Adding logging after the
-fact can be very useful. At \crowdtap, a bug resulted in throwing away acquired
+This can be useful to reproduce and debug elusive bugs. Adding logging after-the-fact
+can be very useful. At \crowdtap, a bug resulted in throwing away acquired
 gift cards due to a faulty retry loop in the gift card acquisition process.
 The bug was discovered when the accounting team confronted their Amazon bills
 with the numbers of given gift cards. Sadly, the developer implemented this
@@ -270,7 +271,7 @@ modification allowing logging of gift cards.
 To summarize, useful services can be implemented on top of deterministic
 record-replay mechanisms for distributed web applications. We discussed race detection
 and mutable replay, but other use cases could be envisioned, like performing
-after the fact metric extraction, or performance analysis.
+after-the-fact metric extraction, or performance analysis.
 Further, these added-value services could be implemented by third-party
 companies which would consume the message stream from the existing \synapse
 message broker of the application.
@@ -284,7 +285,7 @@ of the client application and the backend application, a developer could replay
 a user session entirely from the frontend interactions down to the database,
 including possible recorded races. This would provide the ability to reproduce
 user behavior on the frontend, introspect interactions with other users through
-backend services, and provide an accurate time machine for after the fact auditing
+backend services, and provide an accurate time machine for after-the-fact auditing
 and code modifications.
 
 To conclude, we only scratched the surface of what we can do with record-replay

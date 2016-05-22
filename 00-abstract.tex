@@ -1,13 +1,13 @@
-Deterministic application record and replay is the ability to record
-application execution and deterministically replay it at a later time.
+Application record and replay is the ability to record application execution and
+replay it at a later time.
 Record-replay is similar to an application execution time machine.
-Record-replay has many potential uses, including diagnosing
+Record-replay has many use cases, including diagnosing
 and debugging applications by capturing and reproducing hard to find
-bugs. Recording an application execution with acceptable performance can be
-challenging. For example, the recording much be done in such way that all thread
+bugs or replicating stat. Recording an application execution with acceptable performance can be
+challenging. For example, the recording must be done in such way that all thread
 interactions in the application can be faithfully reproduced when replaying.
 
-In this thesis, we explore four record-replay systems enabling various use cases.
+We explore four record-replay systems enabling various use cases.
 We first present \scribe, an OS-level deterministic record-replay mechanism.
 \scribe introduces two new lightweight OS mechanisms, rendezvous point and sync
 points, to efficiently record nondeterministic interactions such as related

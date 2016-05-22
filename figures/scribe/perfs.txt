@@ -17,7 +17,7 @@ applications that we want are the following:
 
 0) total time of benchmark
 1) overhead (performance)
-2) storage (total, compressed, non-det data, memory events)
+2) storage (total, compressed, nondet data, memory events)
 3) total number of tasks, and of processes (avg, max)
 
 (don't know how we can benchmark the last two)

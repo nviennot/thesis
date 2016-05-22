@@ -74,7 +74,7 @@ where races that do not exist are mistakenly identified and, even
 worse, false negatives where harmful races are not detected. 
 
 \racepro addresses these challenges with four ideas.  First, it checks
-deployed systems \emph{in-vivo}.  While a deployed system is running, \racepro
+deployed systems \emph{in vivo}.  While a deployed system is running, \racepro
 records the execution without doing any checking.  \racepro then
 systematically checks this recorded execution for races \emph{offline},
 when the deployed system is idle or by replicating the execution to a
@@ -456,7 +456,7 @@ multiprocessors~\cite{scribe:sigmetrics10}.  This approach provides four key
 benefits for detecting process races.  First, \racepro's recorder can 
 record the execution of multiple processes and threads with low overhead
 on a deployed system so that the replayer can later deterministically
-replay that execution.  This makes \racepro's \emph{in-vivo} checking approach
+replay that execution.  This makes \racepro's \emph{in vivo} checking approach
 possible by minimizing the performance impact of recording deployed
 systems.  Second, \racepro's record-replay is application-transparent; it
 does not require changing, relinking, or recompiling applications or
@@ -1843,7 +1843,7 @@ kernel.  However, \toctou races often refer to specific types of races that
 allow an attacker to access unauthorized files bypassing permission
 checks.  In contrast, \racepro focuses on general process races and resources
 not only files.  Nonetheless, \racepro can be used to detect \toctou races
-\emph{in-vivo}, which we leave for future work.
+\emph{in vivo}, which we leave for future work.
 
 \para{Checking deployed systems.}  Several tools can also check deployed
 systems.  CrystalBall~\cite{crystalball:nsdi09} detects and avoids errors
@@ -1851,7 +1851,7 @@ in a deployed distributed system using an efficient global state
 collection and exploration technique.  Porting CrystalBall to detect
 process races is difficult because it works only with programs written in
 a special language, and it does checking while the deployed system is
-running, relying on network delay to hide the checking overhead.  In-vivo
+running, relying on network delay to hide the checking overhead.  in vivo
 testing~\cite{in-vivo-testing} uses live program states, but it focuses on
 unit testing and lacks concurrency support.
 
@@ -1888,7 +1888,7 @@ system, \racepro, for effectively detecting process races beyond TOCTOU
 and signal races.   Our study has shown that process races are
 numerous, elusive, and a real threat.  To address this problem, \racepro
 automatically detects process races, checking deployed
-systems \emph{in-vivo} by recording live executions and then checking
+systems \emph{in vivo} by recording live executions and then checking
 them later.  It thus increases checking coverage beyond the
 configurations or executions covered by software vendors or beta
 testing sites. \racepro builds on \scribe, our transparent, low overhead
