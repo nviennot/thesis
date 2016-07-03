@@ -1,81 +1,65 @@
 \chapter{Introduction}
 \label{ch:intro}
 
-Deterministic application record and replay is the ability to record application
-execution and deterministically replay it at a later time. 
-Record-replay is similar to an application execution time machine, allowing
-one to make an execution go backward in time. Record-replay has
-many potential uses, including diagnosing and debugging applications by
-capturing and reproducing hard to find bugs, dynamic application analysis by
-performing costly instrumentation on replicas that replay application behavior
-recorded on production systems, intrusion analysis by capturing intrusions
-involving nondeterministic effects, and fault-tolerance by streaming
-a live recording of a primary server execution to its replicas.
+Application record and replay is the ability to record application execution and
+replay it at a later time, possibly on a different host. Record-replay has many
+use cases including diagnosing and debugging applications by capturing and
+reproducing hard to find bugs, providing fault tolerance and scaling
+capabilities to applications by replaying application state on a replica.
+The desired semantics of record-replay systems varies depending on the use case.
+For example, when debugging a rarely occurring multi-threaded related bug,
+a record-replay system that guarantees an identical reenactment of the original
+execution is useful. By recording application execution in production
+environment, a developer can capture a rare occurrence of a bug, and replay it
+in his development environment, exactly as it happened, repeatedly, to analyze
+the problem root cause. Record-replay systems that guarantee a faithful replay
+are called deterministic. While deterministic replay is certainly useful,
+there are cases where performing a faithful replay is undesirable, for example
+when performing intrusive instrumentation. A developer may want to inject faults
+into a replayed execution to observe how the application behaves upon failures, or
+enable full logging capabilities of the application by changing a configuration
+file. Here, a record-replay system tolerant to application changes would be useful.
+Other record-replay use cases include database replication. For example,
+recording a primary database execution and replaying it live on an other
+replica provides fault tolerance. Upon primary failure, the replica is
+promoted to primary, and traffic redirected. Deterministic replay alone can
+provide fault tolerance, but cannot provide any scaling capabilities.
+If the replica was able to serve read-only queries while being replayed,
+it could offload some traffic from the primary. Deterministic replay does
+not allow any deviation from the original execution, and thus is not suitable
+for such scaling case. This dissertation shows that record-replay is useful
+beyond deterministic replay. We show four record-replay systems. We start
+by providing a deterministic record-replay system, and gradually relax the
+replay faithfulness guarantee throughout the other systems to open the range of
+use cases.
 
+First, we present \scribe (\S\ref{ch:scribe}), a multiprocessor deterministic
+record-replay system. To support a wide range of application, \scribe is
+implemented at the operating system (OS) level, and is transparent to applications.
 Implementing deterministic execution record-replay can be challenging for a
-variety of reasons. First, all sources of nondeterminism must be captured and recorded.
-Sources of nondeterminism can be categorized in 1) data related nondeterminism
-and 2) timing related nondeterminism. Data related nondeterminism is the easiest
-to capture. It includes recording all external inputs such as incoming network
-packets, or user keystrokes. Timing related nondeterminism is harder to capture,
-especially when the recorded application runs on multiple CPUs simultaneously.
-Application threads or processes access data and resources in an undefined
-order, resulting in many different possible schedules. Another example is the
-delivery of POSIX signals which can occur at an arbitrary point in time in the
-application execution timeline. It is sufficient to record all sources of
-nondeterminism, both data and timing sources, to replay an application
-execution deterministically. However, doing so with good performance is crucial
-since recording is done in deployed systems.
+variety of reasons. First, all sources of nondeterminism must be captured and
+recorded.  Sources of nondeterminism can be categorized in 1) data related
+nondeterminism and 2) timing related nondeterminism. Data related nondeterminism
+is the easiest to capture. It includes recording all external inputs such as
+incoming network packets, or user keystrokes. Timing related nondeterminism is
+harder to capture, especially when the recorded application runs on multiple
+CPUs simultaneously.  Application threads or processes access data and resources
+in an undefined order, resulting in many different possible schedules. It is
+sufficient to record all sources of nondeterminism, both data and timing
+sources, to replay an application execution deterministically.  However, doing
+so with good performance is crucial since recording is done in deployed systems.
 
-Many approaches have tried to provide transparent (i.e., which does not require
-application changes) record-replay functionality, but have suffered from
-fundamental limitations that make them unusable in many cases.  First, most
-approaches only support replaying the recorded application execution, and do not
-allow the replayed instance to {\em go live} to continue normal execution.
-Allowing a replay to go live is necessary for most scenarios, including
-any form of debugging that requires debugging past the end of a recorded execution,
-or fault-tolerance which requires the replayed instance to be able to go live
-when the primary fails, or time-travel execution in which an application can go
-back in time and go live from any point in its recorded execution.
-
-Transparent application execution record-replay mechanisms can be implemented at different levels:
-hardware, VM, kernel, and userspace. Previous approaches that require
-specialized hardware are not suitable for any deployments on the cloud.
-Mechanisms implemented at the VM level suffer from performance issues
-due to unnecessary kernel recording overhead.  Userspace record-replay systems
-are not suitable for generic multi-processor support as they lack the ability to
-instrument memory accesses efficiently. A good candidate for
-a multi-processor, hardware agnostic, transparent, record-replay system is the
-kernel level. However, implementing a record-replay system at the kernel level
-is challenging. Delivering asynchronous events, for example signals or
-scheduling decisions, can be very difficult to perform with perfect precision.
-We later introduce two new lightweight OS mechanisms to solve this problem.
-
-Application state record-replay mechanisms, a subset of application execution
-record-replay mechanisms, are useful as well.  In distributed
-databases, data replication provides fault tolerance and load balancing
-features. Data replication often hides record-replay mechanisms.
-Today, most large scale web applications rely on many different databases as
-each database provides a specific feature-set. Unfortunately, the data replication
-engines of these databases are not compatible with each other, and offer very
-different consistency semantics. Because the same data often need to be
-replicated across all these database, it is desirable to provide a
-record-replay system compatible with many databases.
-
-First, we present \scribe (\S\ref{ch:scribe}), an OS-level record-replay
-mechanism. The main challenge when implementing such deterministic record-replay
-system is to keep the recording overhead low. To incur minimal record overhead,
-\scribe introduces two new lightweight OS mechanisms, rendezvous and sync
-points, to efficiently record nondeterministic interactions such as related
-system calls, signals, and shared memory accesses. For example, when
-two concurrent processes access the same file, the original order in which
-each access took place must be preserved when replaying.
-Instead of recording the kernel scheduling decisions, \scribe piggy backs on
-existing kernel synchronization primitives such as inode mutexes or file
-descriptor locks, and records in which order these locks are taken by the kernel.
-We call these rendezvous points, and they make a partial ordering of execution
-based on system call dependencies sufficient for replay, avoiding the recording
-overhead of maintaining an exact execution ordering.
+To incur minimal record overhead, \scribe introduces two new lightweight OS
+mechanisms, rendezvous and sync points, to efficiently record nondeterministic
+interactions such as related system calls, signals, and shared memory accesses.
+For example, when two concurrent processes access the same file, the original
+order in which each access took place must be preserved when replaying.  Instead
+of recording the kernel scheduling decisions, \scribe piggy backs on existing
+kernel synchronization primitives such as inode mutexes or file descriptor
+locks, and records in which order these locks are taken by the kernel.  We call
+these rendezvous points, and they make a partial ordering of execution based on
+system call dependencies sufficient for replay, avoiding the recording overhead
+of maintaining an exact execution ordering.
 
 Another difficult problem to achieve deterministic replay is to replay
 asynchronous interactions that can occur at arbitrary times during the
@@ -175,15 +159,26 @@ execution until the \emph{reordered} system calls then resumes live execution.
 It then runs a set of built-in or user-provided checkers on the live execution
 to detect failures, and emits a bug report only when a real failure is detected.
 
-Our experimental results show that \racepro can be used in production
-environments with only modest recording overhead.  Furthermore, we show that
-\racepro can detect real bugs due to process races in widespread Linux
-deployed systems, including several previously unknown bugs in shells,
-databases, and makefiles.
+This constitutes a departure from deterministic replay. First, \racepro
+replays a modified version of the original execution that includes reordered system calls.
+Second, after the reordered system calls are replayed, \racepro switches from a
+controlled execution to a live execution. This can be challenging as the live
+execution may use OS resources referenced during the controlled execution (e.g.
+file descriptors), making the replay mechanism more complex than \scribe's.
+Despite difficulties, our experimental results show that \racepro can detect
+real bugs due to process races in widespread Linux deployed systems, including
+several previously unknown bugs in shells, databases, and makefiles.
+We found the practicality of \racepro limited as we obtained
+best results only with user-provided race checkers as the built-in ones
+were too rudimentary. An ideal build-in checker would attempt replaying the rest
+of the original execution past the reordered system calls and measure how much
+the replayed execution diverged from the original. Replying a modified execution
+in the general case requires a much more evolved replayer, leading us to \dora.
 
-Third, we present \dora (\S\ref{ch:dora}), a mutable record-replay system which
+Third, we present \dora (\S\ref{ch:dora}), a record-replay system which
 allows a recorded execution of an application to be replayed with a modified
-version of the application. This feature, not available in previous
+version of the application in the general case. We call this feature {\em mutable}
+replay.  This feature, not available in previous
 record-replay systems, enables powerful new functionality. In particular, \dora
 can help reproduce, diagnose, and fix software bugs by replaying a version of a
 recorded application that is recompiled with debugging information, reconfigured
@@ -250,20 +245,27 @@ Third, it should provide good consistency guarantees at scale, and fourth
 the replication mechanism should be failure tolerant. Specifically, network partitions
 should not result in having half of the DBs missing some data.
 
-\synapse fulfills these requirements with a key insight. Unlike previous work,
-instead of operating at the DB level to perform replication, \synapse operates
-at the application level. Typically, web applications are structured following
+Using \dora to record the source DB transparently and replying its execution on
+the destination DB would not work due to large differences between the two DB systems
+as \dora would fail at matching a stream of system calls.
+Instead, \synapse operates at the application level.
+On a high level, \synapse records application state modifications at the source
+application, and replay these modifications at the destination application,
+making \synapse a mutable replay engine for web applications.
+Typically, web applications are structured following
 the model-view-controller (MVC) pattern. Data is accessed following an object-oriented
 abstraction with {\em Models}, such as a \code{User} class with attributes such
-as \code{email} and \code{name}. Models are implemented on top of Object/Relational Mappers (ORMs).
+as \code{email} and \code{name}. Models are implemented on top of
+Object/Relational Mappers (ORMs).
 The ORM does the heavy lifting of interacting with the DB so developers
 do not have to write DB queries. Over the years, many ORMs have been developed,
 each one targeting a different DB. Thankfully, all these ORMs expose a similar API
 to developers to interact with the DB. For example, invoking
 \code{User.create()} would create a new user, regardless of the combination
 ORM/DB.  \synapse interposes on these ORMs to monitor accesses to data objects.
-This allow Synapse to replicate data from
-one DB to another without developer intervention and with little DB-specific code.
+This allow \synapse to replicate data from
+one DB to another, effectively replicating application state,
+without developer intervention and with little DB-specific code.
 Further, \synapse provides an easy-to-use API to describe data flows. Developers simply
 annotate their models with \synapse's \code{publish} and \code{subscribe}
 keywords to connect data models together.
