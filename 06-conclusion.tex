@@ -8,9 +8,11 @@ We introduced \scribe, an OS-level deterministic execution record-replay system
 to capture and reproduce hard to find bugs; \racepro, a process-race detection
 system to improve software correctness in deployed systems; \dora, a mutable
 replay system to reproduce nondeterministic bugs with retroactive debugging;
-and \synapse, an application-state replication system for distributed
+and \synapse, a replication system for distributed
 applications to facilitate the use of heterogeneous databases in
 service-oriented architectures.
+Throughout each system we presented, we expended the degree of replay
+faithfulness, opening the range of use cases.
 
 First, we presented \scribe{}, the first operating system mechanism to provide
 transparent, deterministic execution record and replay of multi-threaded and
@@ -38,7 +40,7 @@ and MySQL, and for desktop applications including Firefox, Acrobat, OpenOffice,
 parallel kernel compilation, and movie playback.
 
 Second, we have presented the first study of real process races, and the first
-system, \racepro, for effectively detecting process races beyond TOCTOU
+system, \racepro, for effectively detecting process races beyond \toctou
 and signal races.   Our study has shown that process races are
 numerous, elusive, and a real threat.  To address this problem, \racepro
 automatically detects process races, checking deployed
@@ -54,11 +56,20 @@ detected race, it modifies the original recorded execution to
 reproduce the race by changing the order of system calls involved in
 the races.  It replays the modified recording up to the race, allows
 it to resume live execution, and checks for failures to determine if
-the race is harmful.  We have implemented \racepro, shown that it has
+the race is harmful.
+\racepro heavily relies on record-replay mechanisms to perform its tasks.
+Its engine extends \scribe's and adds functionality to go beyond simple
+deterministic record-replay. This allow \racepro to modify the end of
+a recorded log file to reorder certain system calls.
+We have implemented \racepro, shown that it has
 low recording overhead so that it can be used with minimal impact on
 deployed systems, and used it with real applications to effectively
 detect \nracepro process races, including several previously unknown
 bugs in shells, databases, and makefiles.
+While \racepro's engine supports minimal modifications at the end
+of a recorded log file, it must go live once these modifications are
+executed during the replay due to divergance issues. We explored
+how to alleviate these issues with \dora.
 
 Third, we introduced the concept of mutable replay, and the first transparent
 mutable record-replay system with \dora, allowing a recorded execution of an
@@ -73,6 +84,11 @@ mechanisms to record and replay without imposing unnecessary timing and ordering
 constraints.  \dora introduces an explorer that directs the replay mechanism to
 identify a mutable replay of the modified application that minimizes differences
 with the original unmodified application execution.
+\dora's feature set is a superset of \scribe's. When the replayed application
+has not been modified, \dora behaves similarly to \scribe. Thus, mutable replay
+supports at least all use cases deterministic replay offers.
+To implement mutable replay, \dora extends \racepro's record-replay engine
+that paved the way to enable modifications in the recorded execution.
 Our experimental results on a Linux prototype demonstrate that mutable
 replay is feasible across a wide range of real-world applications and
 application changes which can reach thousands of lines of code, even
@@ -87,15 +103,22 @@ results demonstrate that mutable replay has the potential to enable
 new techniques for debugging and patch testing and validation, which
 can lead to substantial improvements in software reliability and developer
 productivity.
+Until this point, we only explored record-replay mechanisms for applications
+implemented on a POSIX interface. These mechanisms have limited support for
+distributed applications such as web applications.
 
 Lastly, we presented \synapse, an heterogeneous database replication system
 specifically designed for web applications in a service-oriented architecture.
 These applications run on top of their own databases,
 whose layouts, and engines can be completely different, and incorporate
-read-only views of each others' shared data.  Synapse synchronizes these views
+read-only views of each others' shared data. \synapse synchronizes these views
 in real-time using a new scalable, consistent replication mechanism that
 leverages the high-level data models in popular MVC-based Web applications to
 replicate data across heterogeneous databases.
+This replication is performed with record-replay techniques similar to
+the ones introduced with our OS-level record-replay engines.
+Execution is partially ordered by DB object access sequence numbers,
+similar to how our OS-level record-replay engines order OS resources accesses.
 \synapse leverages models and ORMs to perform data integration
 at data object level, which provides a level of compatibility between both SQL
 and NoSQL DBs. It leverages controllers to support application-specific
@@ -104,15 +127,27 @@ consistency semantics without sacrificing scalability.  We have implemented
 scalability, and deployed it in production for a company.
 
 We have shown four systems implementing transparent application execution
-record-replay to improve software reliability, and an application state
-record-replay system allowing services to cleanly share data among a web
-application in a service-oriented architecture. Our findings showcase numerous
-use cases of record-replay, ranging from (1) debugging applications by capturing
-hard-to-find bugs and reproducing them with recompiled and reconfigured version
-of applications to greatly facilitate debugging, (2) dynamic application
+record-replay to achieve various use cases. These four systems are presented
+in an order where the replay differs from the original execution.
+With \scribe, we explored an implementation of deterministic record-replay where
+the replayed execution is guaranteed to be the same as the original.
+With \racepro, we showed how to apply minor changes at the end of a
+recorded execution and replay such changes before going live.
+With \dora, we introduced mutable replay which allow a modified version
+of the same application to be replayed.
+With \synapse, we achieved heterogeneous database replication with
+record-replay mechanisms implemented in web frameworks.
+Our findings showcase numerous
+use cases of record-replay, ranging from (1) transparent fault tolerance
+by recording a primary and replaying on replicas, (2) dynamic application
 analysis by performing costly instrumentation on replicas that replay
 application behavior recorded on production systems, such as process-race
-detection, and (3) heterogeneous database replication.
+detection, (3) debugging applications by capturing hard-to-find bugs and
+reproducing them with recompiled and reconfigured version of applications to
+greatly facilitate debugging, and (4) heterogeneous database replication.
+We gradually relaxed the faithfulness of the replay throughout our systems.
+
+Record-replay is useful beyond deterministic replay.
 
 \section{Future Work}
 
@@ -213,7 +248,7 @@ divergence. Implementing an in-memory cloning mechanism entails a substantial
 amount of work as many kernel objects would have to implement a copy-on-write
 mechanism.
 
-Earlier, we introduced \synapse which does application state record-replay in a
+Earlier, we introduced \synapse which does record-replay in a
 distributed environment.
 While \synapse records all application state modifications by
 interposing on the database layer, it does not record enough
@@ -287,6 +322,22 @@ including possible recorded races. This would provide the ability to reproduce
 user behavior on the frontend, introspect interactions with other users through
 backend services, and provide an accurate time machine for after-the-fact auditing
 and code modifications.
+
+In our experience, the success of mutable replay heavily depends
+on the quality of the semantics extracted from the recorded execution.
+The ability to distil core application state changes depends
+on the abstraction level at which data is recorded. For example, recovering
+meaningful application state changes by looking at a hardware level recording
+would be near impossible. On the other hand, if the application is written in a
+way where state changes is explicitly described, usually in the form of
+immutable domain logic events (e.g. \code{event(UserSignUp, params)}),
+mutable replay becomes trivial to perform. An incarnation of this design pattern
+is event sourcing~\cite{event-sourcing}. In the context of Web applications,
+Event~Store~\cite{event-store} is an example of database with native support for
+such design pattern. Redux~\cite{redux} is an example of application state
+container for frontend applications. The latter is particularly interesting
+as it already provides mutable replay features allowing hot code reloading and
+time travel capabilities~\cite{redux-hot-reloading}.
 
 To conclude, we only scratched the surface of what we can do with record-replay
 mechanisms. Applications are increasingly built with high level abstractions, on

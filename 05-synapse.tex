@@ -1,4 +1,4 @@
-\chapter{\synapse: Application State Record-Replay for Web Applications}
+\chapter{\synapse: Distributed Record-Replay for Database Systems}
 \label{ch:synapse}
 
 \section{Introduction}
@@ -8,16 +8,21 @@ So far, we have explored the usefulness of execution record-replay mechanisms
 with the introduction the \scribe, \racepro, and \dora
 systems. These systems prime use case is to improve software robustness by
 facilitating debugging and detecting previously unknown bugs.
-Systems that provides fault-tolerance are typically built on top of application
-state record-replay mechanisms as opposed to execution record-replay mechanisms.
+Systems that provides fault-tolerance are typically built on top of
+record-replay mechanisms.
 Resilient distributed databases replicate data on
 different machines. Aside from fault-tolerance, running replicas provide other
 benefits such as horizontal scalability for load balancing. Databases (DBs) that
-implement data replication protocols often hide an underlying record-replay
-mechanism. Data replication can be seen as recording state modification on a
-primary and replayed on a replica. For example, many distributed databases such
+implement data replication protocols often run an underlying record-replay
+mechanism.
+However, using deterministic record-replay is not desirable as these replicas
+would not be able to serve any traffic, as any new incoming queries would be a
+divergence from the primary execution.
+Data replication can be seen as recording execution of a primary DB and
+replaying execution on a replica DB.
+For example, many distributed databases such
 as MongoDB, RethinkDB or Elasticsearch provide a log based replication mechanism,
-an application state record-replay mechanism.  The target audience of these
+which is a form of record-replay.  The target audience of these
 distributed databases are typically Web applications.
 
 Web applications are increasingly built using a service-oriented
@@ -468,8 +473,7 @@ that are not in the DB schema.  We call these programmer-provided attributes
 {\em virtual attributes}. Virtual attributes are valuable for schema mappings,
 as shown in \S\ref{synapse:sec:examples}.
 
-
-\subsection{Application State Record-Replay}
+\subsection{Comparison with \scribe}
 \label{synapse:sec:record-replay}
 
 \begin{table}[t]
@@ -494,8 +498,8 @@ Log format                 & Binary              & JSON                         
  \label{synapse:tab:similarities}
 \end{table}
 
-\synapse is an application state record-replay system and share many
-similarities with application execution record-replay systems.
+\synapse is a distributed record-replay system and share many
+similarities with traditional OS-level record-replay systems.
 Under \synapse architecture, the publisher application {\em records} operations that
 change its state, which is entirely contained in its DB.  At a later
 point in time, the subscriber {\em replays} these recorded operations mutating
@@ -504,7 +508,7 @@ subscriber app running the same code as the publisher app that subscribes to all
 models, the subscriber is a perfect replica of the publisher. This replica
 can be used for fault-tolerance purposes, a typical use case of record-replay systems.
 
-\synapse shares many similarities with the execution record-replay system \scribe.
+\synapse shares many similarities with the deterministic record-replay system \scribe.
 Due to its go live feature, \scribe must maintain a consistent and valid OS
 kernel state at any point in time during replay because the application
 execution may continue uncontrolled at any point in time.
@@ -512,7 +516,24 @@ From this perspective, \scribe (resp. \synapse) records and replays the state of
 the OS (resp. DB).
 Table~\ref{synapse:tab:similarities} summarizes the similarities between the
 two record-replay systems. The important takeaway is that both systems use a
-causal engine to execute state mutation operations.
+similar causal engine to record and replay state mutation operations interleavings.
+Due to different semantics needs, \synapse causal replay engine has the ability
+to replicate the recorded ordering with different levels of faithfulness
+as explained in \S\ref{synapse:sec:semantics}.
+Despite their similarities, the two systems are not compatible in the features
+they provide.
+
+Could \scribe, or even \dora which provides a superset of \scribe
+functionalities, be sufficient to implement a heterogeneous DB replication
+engine? The answer is no for two mains reasons. Replaying a recorded execution at
+the OS-level of a DB on a different DB would be impractical, even with advanced
+mutable replay techniques. Given enough differences between the two DBs,
+resolving replay divergences is impractical. Additionally, one of
+\synapse's key insight is the use of ORM as data translation layer. Mutable
+replay offers no solution to address this data translation problem.
+Further, our OS-level record-replay engine do not provide any
+support for distributed applications, a requirement for multi-node DB support.
+
 
 \subsection{\synapse Delivery Semantics}
 \label{synapse:sec:semantics}

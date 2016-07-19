@@ -1,4 +1,4 @@
-\chapter{\scribe: Kernel Level Application Execution Record-Replay}
+\chapter{\scribe: Transparent Deterministic Record-Replay}
 \label{ch:scribe}
 
 \section{Introduction}
@@ -23,24 +23,17 @@ only works for simple debugging uses.  It does not work for most
 scenarios, including any form of debugging that requires the 
 replayed instance to go live, such as debugging past the end of a
 recorded execution, fault-tolerance which requires the replayed
-instance to be able to go live when the primary fails, or time-travel
-execution in which an application can go back in time and go live
-from any point in its recorded execution.  
+instance to be able to go live when the primary fails.
 
 Second, previous approaches either require application changes or rely
-on specialized hardware that is not available.  Approaches requiring
+on specialized hardware that is not always available.  Approaches requiring
 application changes impose a recurring development cost on each
 application to provide record-replay, and do not work for unmodified
 applications.  Approaches requiring specialized hardware rely on
 either hardware architectures that exist in simulation only, or assume
-the availability of accurate instruction or branch counters to track
-the precise timing of asynchronous events.  Such counters are not
-available on many CPUs, and even when available, often do not have the
-required level of accuracy because they were designed for performance
-work where occasional missed counts in various corner cases were not
-problematic.  For example, most Intel CPU revisions do not have
-accurate enough branch or instruction counters, posing an enormous
-problem for record-replay~\cite{andytucker}.   
+the availability of certain performance counters to track
+the precise timing of asynchronous events. Such performance counters may not be
+available on all hardware platform (e.g. ARM).
 
 Third, previous application transparent approaches either do not
 support multiprocessor systems at all, or require using a virtual
@@ -1101,6 +1094,7 @@ However, page faults due to copy-on-write or memory paging do not
 satisfy the second requirement.
 
 \subsection{Signal Delivery}
+\label{scribe:sec:signaldelivery}
 
 During recording, \scribe{} defers the delivery of an asynchronous
 signal until the target process is at a sync point.  This allows
@@ -1162,6 +1156,7 @@ proper kernel state.
   
 
 \subsection{Page Ownership Transfer}
+\label{scribe:sec:pageownership}
 
 Page state transitions are allowed to only take place when \scribe{}
 can conveniently track, and later replay them. We draw the following
@@ -1238,6 +1233,7 @@ Assume that the former thread becomes the owner of the page.  The
 threads are now deadlocked, since the second thread waits for the
 first thread to give up the ownership for the page, and the first
 thread waits for the second one to change the value in the memory.
+This assumption may be incorrect for certain applications.
 
 Although the likelihood of either scenario is not common in real
 applications, \scribe{} also provides a novel but more heavyweight
@@ -1249,11 +1245,9 @@ switches to a different mechanism.
 \scribe{} sends the target process a reserved signal that forces it
 into kernel mode.  By using a reserved signal, we ensure that process
 execution does not depend on it in any way. It then creates a
-signature of the process: a lightweight checkpoint of the current
+signature of the process: a checkpoint of the current
 user space context of just that process, namely its registers and
 writable memory pages.
-
-  
 
 A key observation here is that between sync points, the process is
 guaranteed to not have any interactions
@@ -1267,6 +1261,19 @@ mode can be thought of as resetting the recording, and is logged as a
 effectively create a new sync point.  The original pending signal or
 page ownership transfer can then be handled and its location with
 respect to the new sync point is precisely known.
+
+As an optimization, \scribe can leverage special hardware features when
+available instead of performing heavyweight process signatures.
+On some Intel platforms, certain hardware performance counters can be used to
+count instructions deterministically~\cite{ispass2013-deterministic-counters},
+meaning that the counter values remain identical across replays.
+For example, on the Westmere, SandyBridge, and IvyBridge architectures, the
+retired conditional branch counter is not affected by hardware interrupts or
+non-deterministic page faults that could make an instruction be counted twice.
+By using similar techniques used in Mozilla~rr~\cite{mozilla-rr}, \scribe can
+accurately count the number of instructions executed after a sync point.
+This way, \scribe can precisely mark when an asynchronous event is delivered
+during the recording, and when to replay it.
 
 \begin{table}[t]
 \centering
@@ -1347,7 +1354,6 @@ point is rarely needed in practice for handling asynchronous events.
 
 We have implemented a \scribe{} prototype as a Linux kernel module and
 associated user-level tools.
- 
 To demonstrate the effectiveness of our approach, we evaluated the
 ability and performance of our unoptimized prototype to record-replay
 real applications on commodity multiprocessors and operating systems.
@@ -1381,7 +1387,7 @@ Applications were all run with
 their default configurations.  Workloads were selected to
 stress the system to provide a conservative measure of performance.
 For example, {\tt firefox} runs the widely used SunSpider benchmark
-designed to measure real-world web browser JavaScript performance.  
+designed to measure real-world Web browser JavaScript performance.  
 We also included benchmarks that emulate multiple interactive users
 such as {\tt ssh-s} and {\tt ssh-c}, which open multiple concurrent
 SSH sessions, each having an emulated user input text into a vi editor
@@ -1623,9 +1629,12 @@ application execution.  Almost none of them support replaying
 multiprocessor virtual machines, and the ones that do incur an order
 of magnitude worse overhead for common applications like
 compilation due to kernel-level sharing, such as writing files to the
-same directory~\cite{smp-revirt}.  Application and 
+same directory~\cite{smp-revirt}. Most of application and 
 library mechanisms~\cite{liblog,r2:osdi,kendo,jockey} cannot provide
-transparent record-replay for unmodified applications.  Programming
+transparent record-replay for unmodified applications.
+Only one practical userspace solution exists, Mozilla~rr~\cite{mozilla-rr}.
+While it provides a comprehensive set of features, it does not support
+multiprocessor record-replay.  Programming
 language mechanisms~\cite{dejavu,instant-replay,replay-pldi} do not
 support widely-used applications written in languages that do not
 provide record-replay primitives.  Unlike these approaches, \scribe{}
@@ -1654,7 +1663,6 @@ possible using an operating system approach.
 A key issue for operating system mechanisms is replaying the in-kernel
 side effects of system calls.  This must be done for at least some
 system calls in all replay systems.  
-
 Previous approaches
 do not solve the important problem of nondeterminism arising from
 the order of execution of related system calls.  TFT only replays a
@@ -1743,9 +1751,10 @@ interactions that can occur at arbitrary times into synchronous events that are
 much easier to record and replay.
 Using these two mechanisms, we show that \scribe{} recording overhead is modest
 for various server and desktop applications.
-\scribe can transition an application to running live at any time, and use
-checkpoints to record and replay from any point in time.
-This go-live feature is instrumental for certain record-replay applications. We
-built \racepro, a process race detection system based on the \scribe engine,
+\scribe can transition an application to running live at any time,
+an instrumental for certain record-replay applications such as fault-tolerance,
+or any form of debugging that requires the replayed instance to go live.
+We built \racepro, a process race detection system based on the \scribe engine,
 that leverage this go-live feature when performing race triage. We describe
-\racepro in the next chapter.
+\racepro and its usage of record-replay techniques that goes beyond deterministic
+record-replay in the next chapter.

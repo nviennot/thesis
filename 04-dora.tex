@@ -1,4 +1,4 @@
-\chapter{\dora: Transparent Mutable Replay}
+\chapter{\dora: Transparent Mutable Record-Replay}
 \label{ch:dora}
 
 \section{Introduction}
@@ -81,13 +81,21 @@ This not only speeds up debugging, but also provides a
 way to validate bug fixes for nondeterminstic bugs, which can
 otherwise be much more time consuming and difficult.
 
+We started with \scribe, our deterministic record-replay engine that
+aims to reenact exactly what has happened in the past. We evolved
+this engine with \racepro, to allow reordering system calls
+at the end of a recorded log file. This marked a departure from deterministic
+record-replay, but hasn't addressed divergence problematics.
+With \dora, we further evolves our record-replay engine to enable
+mutable replay capabilities and move further away from deterministic
+record-replay to enable compelling use cases.
+
 {\dora} consists of three components: (1) a recorder that records
 application execution to a log, (2) a replayer that can replay a
 modified version of the application using the log, and (3) an explorer
 that uses the replayer to find the execution of the modified program
 that best corresponds to the log file. The recorder and replayer build
-upon our previous deterministic record-replay engine,
-Scribe~\cite{scribe:sigmetrics10}.
+upon our previously described record-replay engines.
 
 The recorder operates primarily at the interface between applications and the
 operating system (OS) to transparently record an application's nondeterministic
@@ -105,7 +113,7 @@ provides deterministic replay of the unmodified application.  However,
 if the replayed application's behavior diverges from the original's,
 the replayer gathers information for the explorer about the new code
 path the program was trying to execute and waits for instructions on
-how to proceed.  Because it operates at the OS level like the
+how to proceed.  Because it operates at the OS-level like the
 recorder, the replayer has access to sufficient OS semantics to
 understand why a replay diverges from the original execution and can
 leverage these semantics to help the explorer.
@@ -271,10 +279,9 @@ with the cost function described in \S\ref{dora:sec:explorer}.
 \section{Recorder}
 \label{dora:sec:recorder}
 
-{\dora}'s recorder builds upon our Scribe work on lightweight OS-level
-deterministic replay on multiprocessors~\cite{scribe:sigmetrics10}.
-The Scribe engine provides four key benefits for mutable replay. First, operating
-at the OS level avoids tracking low-level hardware nondeterminism that
+{\dora}'s recorder builds upon \racepro (\S\ref{ch:racepro})
+The \racepro record-replay engine provides four key benefits for mutable replay. First, operating
+at the OS-level avoids tracking low-level hardware nondeterminism that
 is unnecessary for application replay and would significantly
 complicate mutable replay.  Second, {\dora} records the execution
 of system calls in a manner that enables system calls and their effects
@@ -283,10 +290,13 @@ on the kernel to be fully executed during replay.  As discussed in
 because there are times when {\dora} must transition processes
 from controlled replay to live execution to enable mutable replay.
 Third, {\dora}'s recorder can record the execution of multiple
-processes and threads with low overhead on production systems. Finally,
+processes and threads with low overhead on production systems. Fourth,
 {\dora}'s recording is transparent to applications.  It does not
 require changing, relinking, or recompiling applications or libraries,
 and it supports programs written in any programming language.
+Finally, \racepro's recorder allows the recording of additional deterministic
+information useful to perform mutable replay, and the modification of a recorded
+execution log file.
 
 The recorder operates on a group of tasks (threads and processes), which we
 refer to as a {\em session}. {\dora} records interactions between the
@@ -328,159 +338,27 @@ exit(0) = 0
 \label{dora:fig:example-orig-log}
 \end{figure}
 
-\subsection{Nondeterministic Interactions}
-To replay an execution deterministically, the timing and ordering of
-nondeterministic interactions between tasks must be recorded.  To
-enable mutable replay, {\dora} must also be resilient to changes in
-the application behavior which add or remove nondeterministic system calls. We
-highlight how key interactions involving system calls, signals, and shared
-memory are handled.
-
-\paragraph{System calls.}
-The ordering of system calls that access shared resources causes nondeterminism
-if at least one call modifies the resource.
-For instance, a \code{write()} and a \code{read()} on the same
-pipe are \emph{related system calls} since they access a shared resource and
-their relative ordering matters.  Preserving the order of related
-system calls during replay ensures that recorded racy behavior is maintained in
-the replay.
-To provide this deterministic behavior, {\dora} operates at the OS level to
-capture concurrency at the same level of granularity as the OS.
-{\dora} leverages
-kernel code that already serializes access to
-shared kernel objects to record and enforce a partial ordering of all related
-system calls.
-This differs from previous approaches~\cite{r2:osdi,srinivasan:flashback} 
-which impose a total ordering of system calls.  Such approaches do
-not scale well for multicore and do not work for mutable
-replay. Application changes are likely to change the number and order
-of system calls, making a total ordering of system calls too
-restrictive for replaying an execution using a modified program.  
-
-Shared objects tracked by {\dora} include inodes, files,
-file-tables, memory maps, process credentials, process states, and
-system-wide properties such as the hostname and mount points.
-To keep track of access ordering, every resource is assigned a
-globally unique identifier and a serial number indicating the order of access.
-For each resource a system call accesses, {\dora} increments its serial
-number and records its identifier and serial number. This allow
-the replayer to deterministically reproduce the access sequence.
-
-\paragraph{Signals.}
-The delivery time of signals is another source of nondeterminism.
-Signals are normally delivered in two steps in the kernel.  First, the sender process sends a
-signal to the target process, which is marked as having a signal
-pending.  Second, the target process detects and handles the pending signal when
-it returns to user space from kernel space.  If the target process
-is executing in user space on another core, an inter-processor interrupt will force it
-into kernel space, where it will detect the pending signal.
-Replaying this behavior can be challenging because it requires
-interrupting the target process at the exact same instruction as
-during its original execution.  Previous
-approaches~\cite{bressoud-tft,bressoud,revirt,smp-revirt}
-have relied on hardware providing a cycle accurate instruction
-counter~\cite{slye96}, but this does not work for CPUs
-without such counters and does not work for mutable replay.
-Application changes are extremely likely to change the number and
-ordering of instructions, rendering the counter values useless.
-
-To address this problem, {\dora} defers signal delivery to
-locations called
-\emph{sync points}.  Sync points are well-defined locations in an
-execution which deterministically cause the process
-to enter kernel space, such as system calls, traps due to division by
-zero, and page faults due to shared memory accesses, as discussed
-below.  By
-only delivering signals at sync points,
-{\dora} effectively converts asynchronous events into
-synchronous ones and does not require special hardware or application
-modifications. This also makes it much easier to replay using an application with
-modified signals.
-Note that this behavior complies with the POSIX
-semantics of signals.
-
-Delaying signal delivery to sync points may introduce some latency in
-the application. However,
-our previous work on Scribe~\cite{scribe:sigmetrics10} shows that
-sync points occur quite frequently in common desktop and server
-applications. Our evaluation showed that deferred signals were delayed by
-less than 100 $\mu$s on average with a maximum delay of less than 1
-ms, so this latency is generally imperceptible.  Furthermore, the vast
-majority of signals were delivered immediately
-because the target process was
-already in a sync point when the signal was sent. This is
-not surprising given that processes often stay in a sync point for a
-prolonged period of time. For example, a process blocking on I/O in a system
-call is in a sync point.
-While a process is in a sync point, signals are delivered
-immediately and need not be deferred.
-
-\paragraph{Shared memory.}
-Shared memory accesses cause nondeterminism arising from the order in
-which threads and processes read and write to the same memory locations.
-Memory is shared either implicitly, as with threads that share an
-entire address space, or explicitly, as with processes that share a common
-memory mapping.  Since processes typically access multiple locations
-on a page during a given time interval because of spatial and temporal
-locality, {\dora} tracks memory accesses at a page granularity
-by managing page ownership with the help of the hardware page protection mechanism.
-Each shared memory page is assigned an owner process or thread for
-some time interval. The owner can exclusively modify that page during
-that interval and treat it like private memory. Thus, {\dora} does not need
-to track every memory access during such
-periods. Transitioning page ownership from one process or thread to
-another is done using a concurrent read, exclusive write (CREW)
-protocol on memory pages with some optimizations~\cite{scribe:sigmetrics10}.
-
-To ensure that ownership transitions occur at precisely the same
-location in the execution during both record and replay, previous
-approaches~\cite{bressoud-tft,bressoud,revirt,smp-revirt}
-have relied on cycle-accurate hardware instruction counters.  An ordering
-this precise is not resilient to application changes, so it does not work for
-mutable replay. To address this problem, {\dora} defers ownership
-transitions until the owner reaches a sync point.  As with system
-calls accessing shared resources, a memory event is logged for the
-thread that accesses shared memory. The event includes a page
-identifier and a per page serial number indicating the order of access; this
-process is similar to the one for system resources.
-
-{\dora} implements this CREW protocol by creating a
-\emph{shadow page table} for each thread, which is a private version
-of the shared page table.   If a thread does not have ownership of a
-page, its shadow page table entry (PTE) access privilege bits are
-cleared.  When a thread tries to access a page owned by another
-thread, it triggers a page fault, notifies the owner, and blocks
-until access is granted.  Note that while the thread is blocked, it
-is in a sync point, so it can immediately release pages to other
-requesting threads, which prevents
-deadlock~\cite{scribe:sigmetrics10}.  Once the page owner reaches a
-sync point in its execution, it transfers the page ownership to the
-thread requesting access, which then returns from its page fault
-handler.
-Recording performance can be negatively impacted for applications that
-exhibit an enormous number of ownership transitions.  Nevertheless,
-{\dora} performs well for a wide range of 
-real-world applications as shown in \S\ref{dora:sec:results}.
-
-\subsection{Additional Information for Mutable Replay}
-
-In traditional replay, all deterministic information need not be
+In deterministic record-replay, all deterministic information need not be
 recorded because it will be regenerated during replay, but in mutable
 replay, the modified application may behave differently even in
 deterministic sections of code.  {\dora}'s recorder stores
-additional deterministic information in the log to help the replayer
-detect differences between the original and replayed
-executions as early as possible.  Since {\dora} provides deterministic replay for
+additional deterministic information in the log to help the replayer detect
+differences between the original and replayed
+executions as early as possible.
+Since {\dora} provides deterministic replay for
 unmodified applications, it does not need to record the additional
 deterministic information in production, but instead records such
 information afterwards by replaying the original
 execution and recording additional deterministic information as
 needed.
 
-As part of this process, {\dora} records all system calls executed, not just those
+Similarly to \racepro that records additional deterministic information
+(\S\ref{racepro:sec:scribe}) to extract execution semantics,
+{\dora} records all system calls executed, not just those
 involved in nondeterministic interactions.  {\dora} records the
-system call number, arguments, and return value for each system
-call. For arguments that are pointers, {\dora} follows the pointer
+system call number, and return value for each system
+call. Unlike \racepro, \dora also records all system call arguments.
+For arguments that are pointers, {\dora} follows the pointer
 chain to record the actual memory contents, which are used during
 replay to see if two system calls are equivalent.  By recording memory
 contents instead of the pointer values, {\dora} is more tolerant of
@@ -512,6 +390,7 @@ the environment in which the program was recorded.
 For example, the recorder stores
 host information in case the modified application requests it with a new
 \code{uname()} or \code{gethostname()} call.
+
 \section{Replayer}
 \label{dora:sec:replayer}
 
@@ -556,11 +435,14 @@ determines how the replayer should resolve the divergence.
 If the explorer determines that the replayer should continue
 replaying the current log, the unexpected event can be treated in
 number of different ways to try to resolve the divergence so that
-later events will match events in the log.  For simplicity, {\dora}
+later events will match events in the log.
+This ability to act on a divergence is an improvement compared to \scribe and
+\racepro where a divergence always resulted in a unrecoverable failure.
+For simplicity, {\dora}
 treats a divergence as one of two possible types of \emph{mutations},
 an \emph{addition} or a \emph{deletion}.  
 
-\subsection{Additions}
+\subsection{Additions} \label{dora:sec:additions}
 An addition is an event added to the program.  For example, a program
 could be modified by adding code that includes a new system call.  A
 new event is most often a system call, but it can also be a new signal
@@ -585,8 +467,11 @@ The
 resulting log can then be later deterministically replayed with the
 same modified program.  Once the process completes the additional
 operation, it returns to regular replay mode; no other process has
-left regular replay mode.  We discuss how this is done in further detail
-for new system calls, signals, and shared memory accesses. 
+left regular replay mode.
+This capability previously not available in \scribe and \racepro
+is instrumental in the way \dora performs mutable replay.
+We discuss how switching from controlled replay to direct mode is done in
+further detail for new system calls, signals, and shared memory accesses. 
 
 \paragraph{System calls.}
 When encountering a new system call, {\dora} executes the
@@ -732,6 +617,7 @@ Since {\dora} faithfully replays kernel actions, the system is always in a state
 it to transition to live execution. Linux namespaces~\cite{namespaces:linux06}
 create a consistent environment for processes before and after they go live.
 Examples of this are demonstrated in \S\ref{dora:sec:results}.
+
 \section{Explorer}
 \label{dora:sec:explorer}
 
@@ -922,6 +808,7 @@ with the kernel API.  The {\tt fopen()} library call internally calls {\tt
 malloc()}, resulting in two new invocations to {\tt brk()}. Thus, even minor
 changes to high-level source code can result in relatively large changes to the
 low-level executable code.
+
 \section{Properties}
 \label{dora:sec:properties}
 
@@ -1487,27 +1374,24 @@ output is deterministically replayed for replay debugging. This is
 quite different from mutable replay, in which the output may
 change due to application changes.
 
-Some record-replay systems can support a form of deterministic replay
+Some record-replay systems can support a form of replay
 that may differ in limited ways from the original recorded
 execution. Crosscut~\cite{crosscut} can reduce the information
 recorded in a log
 so that, for example, sensitive information can be
 purged before
-replay. Our previous work on Scribe~\cite{scribe:sigmetrics10} replays a recorded
-application execution until a specified
-point, and then transitions to
-live execution instead of replaying the rest of the
-log. Our previous work on Racepro~\cite{racepro:sosp11} detects process races due to
+replay.
+Our previous work on \racepro detects process races due to
 dependencies in the ordering of system calls by recording an
 application execution to a log, identifying a pair of system calls
 that may be racy, truncating the log at the occurrence of the pair of
 system calls, inverting their order, and then replaying the truncated
 log with the reordered system calls to detect process
-races.  However, Racepro only supports changes that reorder system calls and
+races.  However, \racepro only supports changes that reorder system calls and
 does not support changes in the middle of replay.
 None of these approaches supports mutable replay,
 but mutable replay could be useful for some of these systems.  For
-example, Racepro could use mutable replay to avoid replay
+example, \racepro could use mutable replay to avoid replay
 divergence and more effectively detect process races.  Another race
 detection tool~\cite{pinsel:pldi07} uses the iDNA~\cite{idna:vee06}
 record-replay framework and would also benefit from mutable replay.
@@ -1573,17 +1457,58 @@ mutable replay must match a known execution log with an
 execution sequence that is not known in advance, so these algorithms cannot be
 directly applied.
 
+\section{Comparison with \scribe and \racepro}
+
+\dora builds atop \racepro's record-replay engine and shares some similarities
+and differences with its recorder, explorer, and replayer.
+\racepro evolves \scribe's recorder to record deterministic information such as
+system call numbers and their return values, unique resource identifiers along
+with sequence numbers in rendezvous points, and signal identifiers to tie signal
+deliveries and their sources (\S\ref{racepro:sec:scribe}). \dora goes further
+in recording additional deterministic information including system calls
+arguments and their associated buffers.  This allows \dora to detect a
+divergence early. Further, \dora records additional timing and
+environmental related information so that new system calls in the modified
+application behave as they would have in the environment in which the program
+was recorded (\S\ref{dora:sec:recorder}).
+
+To modify recorded log files, namely perform addition and deletion of events,
+\dora reuses the high level abstraction introduced in \racepro for generating
+execution branches(\S\ref{racepro:sec:scribe}).
+\dora benefits from the abstraction in the same way \racepro does. 
+The implementation effort of the explorer is reduced, the memory
+requirements are lowered, and performance is improved due to the ability to feed
+the modified event stream directly to the replayer.
+Further, when deleting events, resource sequence numbers must be consolidated,
+which is a feature \racepro needs and is reused with \dora.
+
+\dora's replayer has been improved from \racepro's in its ability to act upon
+divergence, instead of going live immediately. \dora's replayer has the ability
+to switch a task (a process or thread) from controlled replay mode into record
+mode (i.e. direct mode) as discussed in \S\ref{dora:sec:additions}.
+The ability to allow tasks to be replayed while other are being recorded
+simultaneously is a significant departure from the replayer used in \scribe and
+\racepro.
+
+When comparing \dora and \scribe, the two engines perform deterministic
+record-replay when the replayed application is identical to the original
+application.  However, when the replayed application has been modified
+\scribe fails to replay due to divergence, while \dora performs mutable replay.
+\dora's feature set is a superset of \scribe's feature set.
+
 \section{Summary}
 \label{dora:sec:conclusion}
 
 {\dora} introduces the concept of mutable record-replay and is the first
 transparent mutable record-replay system.  It enables, for the first time, a
 recording of an application execution to be replayed using a modified version of
-the application for a large class of application changes.  {\dora} introduces an
+the application for a large class of application changes.
+Mutable record-replay is a superset of deterministic record-replay.
+{\dora} introduces an
 explorer that directs the replay mechanism to identify a mutable replay of the
-modified aplication that minimizes differences with the original unmodified
+modified application that minimizes differences with the original unmodified
 application execution.
-We implemented a \dora prototype based on our previously introduced \scribe engine.
+We implemented a \dora prototype based on our previously introduced \racepro engine.
 Our experimental results demonstrate that
 mutable replay is feasible across a wide range of real-world applications and
 application changes which can reach thousands of lines of code, even without
@@ -1594,5 +1519,4 @@ number of use cases, including race detection systems such as \racepro.
 While we explored mutable replay on applications implemented on a POSIX
 interface, our \dora prototype cannot be directly applied to all types of
 applications, in particular distributed applications. In the next chapter, we
-introduce \synapse, an application state record-replay engine for distributed
-applications.
+introduce \synapse, a record-replay engine for distributed database systems.

@@ -64,7 +64,7 @@ of maintaining an exact execution ordering.
 Another difficult problem to achieve deterministic replay is to replay
 asynchronous interactions that can occur at arbitrary times during the
 execution. For example, POSIX signal delivery may occur at any point in the
-application instruction flow. Previous works have developed complex techniques
+application instruction flow. Previous works have developed techniques
 of instrumenting applications with the use of hardware counters to precisely
 locate where a signal was delivered in the instruction flow.
 \scribe takes a different approach by delaying these asynchronous events
@@ -224,10 +224,10 @@ makes sense given that bug fixes tend to be relatively small and rarely change
 core application semantics.
 
 Lastly, we present \synapse (\S\ref{ch:synapse}), an heterogeneous database (DB)
-replication system specifically designed for web applications. These web
+replication system specifically designed for Web applications. These Web
 applications behave very differently compared to traditional single-host
 applications as they are distributed and have their state contained in
-databases. Typically, web applications are comprised of many different
+databases. Typically, Web applications are comprised of many different
 services, each implementing a specific feature, using a specific database.
 For example, the recommendation feature of an e-commerce store can be
 implemented in a separate service powered by a graph DB, while the store
@@ -251,8 +251,8 @@ as \dora would fail at matching a stream of system calls.
 Instead, \synapse operates at the application level.
 On a high level, \synapse records application state modifications at the source
 application, and replay these modifications at the destination application,
-making \synapse a mutable replay engine for web applications.
-Typically, web applications are structured following
+making \synapse a mutable replay engine for Web applications.
+Typically, Web applications are structured following
 the model-view-controller (MVC) pattern. Data is accessed following an object-oriented
 abstraction with {\em Models}, such as a \code{User} class with attributes such
 as \code{email} and \code{name}. Models are implemented on top of
@@ -278,7 +278,7 @@ the way from the source DB to the destination DB.
 
 We have implemented \synapse for Ruby-on-Rails. We present some experimental
 data showing that \synapse scales well up to 60,000 updates/second for various
-workloads.  We and others have built or modified 14 web applications to share
+workloads.  We and others have built or modified 14 Web applications to share
 data with one another via \synapse. Those built by others have been deployed in
 production by a startup, \crowdtap.  The applications we built extend popular
 open-source applications to integrate them into data-driven ecosystems.
