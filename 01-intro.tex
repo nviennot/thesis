@@ -33,7 +33,7 @@ by providing a deterministic record-replay system, and gradually relax the
 replay faithfulness guarantee throughout the other systems to open the range of
 use cases.
 
-First, we present \scribe (\S\ref{ch:scribe}), a multiprocessor deterministic
+First, we present \scribe, a multiprocessor deterministic
 record-replay system. To support a wide range of application, \scribe is
 implemented at the operating system (OS) level, and is transparent to applications.
 Implementing deterministic execution record-replay can be challenging for a
@@ -107,7 +107,7 @@ applications.  These results show for the first time a new level of transparent
 record and replay performance on commodity multiprocessor systems that was not
 previously possible. 
 
-Second, we present \racepro (\S\ref{ch:racepro}), a process race detection
+Second, we present \racepro, a process race detection
 system to improve software correctness. Process races occur when multiple
 processes access shared operating system resources, such as files, without
 proper synchronization.
@@ -175,7 +175,7 @@ of the original execution past the reordered system calls and measure how much
 the replayed execution diverged from the original. Replying a modified execution
 in the general case requires a much more evolved replayer, leading us to \dora.
 
-Third, we present \dora (\S\ref{ch:dora}), a record-replay system which
+Third, we present \dora, a record-replay system which
 allows a recorded execution of an application to be replayed with a modified
 version of the application in the general case. We call this feature {\em mutable}
 replay.  This feature, not available in previous
@@ -223,7 +223,7 @@ previously unknown bug in Apache using {\dora}. {\dora}'s usefulness in practice
 makes sense given that bug fixes tend to be relatively small and rarely change
 core application semantics.
 
-Lastly, we present \synapse (\S\ref{ch:synapse}), an heterogeneous database (DB)
+Lastly, we present \synapse, an heterogeneous database (DB)
 replication system specifically designed for Web applications. These Web
 applications behave very differently compared to traditional single-host
 applications as they are distributed and have their state contained in
@@ -282,3 +282,114 @@ workloads.  We and others have built or modified 14 Web applications to share
 data with one another via \synapse. Those built by others have been deployed in
 production by a startup, \crowdtap.  The applications we built extend popular
 open-source applications to integrate them into data-driven ecosystems.
+
+The development of \scribe, \racepro, \dora and \synapse led to the following
+novel contributions:
+\begin{enumerate}
+
+\item We introduce \scribe, the first operating system mechanism to provide
+transparent, deterministic execution record and replay of multi-threaded and
+multi-process applications on commodity multiprocessors and operating
+systems.
+
+\item We introduce rendezvous points to record partial ordering of
+execution with low overhead. Rendezvous points piggy back on existing kernel
+synchronization primitives such as inode mutexes or file descriptor locks,
+and records in which order these locks are taken by the kernel.
+
+\item We introduce sync points to convert difficult to record asynchronous
+events into easy to record synchronous events. Asynchronous events that
+occur at arbitrary times are delayed to the next encountered sync point
+such as a system call. We show that this solution is effective, and does
+not require hardware counters.
+
+\item We implement a prototype of \scribe. Our evaluation shows for the first
+time that an operating system mechanism can correctly and transparently record
+and replay multi-process and multi-threaded applications on multiprocessors
+with low overhead.
+
+\item We provide strong empirical evidence that real server and desktop
+applications perform frequent operating system activities which can serve as
+sync points. The introduced delay from using sync points is imperceptible in
+applications as sync points occur very frequently.
+
+\item We present the first study of real process races. We study hundreds of
+real applications across six Linux distributions and show that process races
+are numerous and a real threat to reliability and security.
+
+\item We present \racepro, the first system for automatically detecting
+process races beyond \toctou and signal races. It checks deployed systems in
+vivo by recording live executions which are then used offline for race detection.
+
+\item We show that previously known thread race detection algorithms can be
+reused to detect process races. Using our record-replay system, operating
+system resources can be mapped to memory accesses by modeling system calls
+as micro-operations, on which such algorithms can perform race detection.
+We show how to detect three different types of process races, load-store races,
+wait-wakeups races, and wakeup-waits races.
+
+\item We implement a \racepro prototype and demonstrate the effectiveness of our
+approach by performing process race detection in real applications. We show that
+our system can detect \nracepro real bugs due to process races in widespread
+Linux distributions, including several previously unknown bugs in shells,
+databases, and makefiles.
+
+\item We introduce the concept of mutable replay. That is, we define what can be
+considered a desirable outcome when replaying an application recording on a
+modified version of the application.
+
+\item We introduce \dora, the first transparent mutable record-replay system.
+
+\item We introduces an explorer that directs the replay mechanism to
+identify a mutable replay of the modified application that minimizes differences
+with the original unmodified application execution. We show that a simple
+explorer using a best first search algorithm can be effective to perform
+mutable replay.
+
+\item We provide a few useful properties of \dora. An example of such useful
+property is the following: if all explored mutations are safe, that is, any
+addition that does not change any state which is read by the original
+execution, {\dora} deterministically replays all events in the original
+execution with the modified program.
+
+\item We implement a \dora prototype and show that mutable
+replay is feasible across a wide range of real-world applications and
+application changes which can reach thousands of lines of code, even
+without support for major changes to core application semantics.
+
+\item We show that mutable replay is useful for enabling common debugging
+techniques not possible with previous record-replay systems.  We
+also show that mutable replay enables validation of security patches
+against both exploits and production workloads. This is all
+accomplished without requiring source code modifications and with low
+recording overhead, enabling usage on production systems.
+
+\item We present \synapse, an easy-to-use, strong-semantic, heterogeneous
+database replication system specifically designed for large-scale Web
+applications in a service-oriented architecture.
+These applications run on top of their own databases, whose layouts, and engines
+can be completely different, and incorporate read-only views of each others'
+shared data.
+
+\item We introduce a replication mechanism to synchronizes these heterogeneous
+views in a scalable and consistent manner. \synapse leverages the high-level
+data models in popular MVC-based Web applications to replicate data across
+heterogeneous databases. It also leverages application controllers to support
+application-specific consistency semantics without sacrificing scalability.
+
+\item We implement \synapse for Ruby-on-Rails, show that it provides
+good performance and scalability, release it on GitHub, and deploy it in
+production to run the web services for a company.
+
+\end{enumerate}
+
+This dissertation is organized as follows.
+Chapter \S\ref{ch:scribe} presents \scribe, our deterministic record-replay
+system which serves as a foundation for our two next systems.
+Chapter \S\ref{ch:racepro} presents \racepro that extends \scribe to perform
+process race detection.
+Chapter \S\ref{ch:dora} presents \dora that further extends \scribe to perform
+mutable replay.
+Chapter \S\ref{ch:synapse} presents \synapse, our database replication system.
+Finally, we present some conclusions and directions for future work in Chapter
+\S\ref{ch:conclusion}.
