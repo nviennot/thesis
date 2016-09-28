@@ -182,7 +182,7 @@ $e'$ are a result of the differences between $P$ and $P'$.
 
 The difference between two programs includes not only differences in
 their executables, but can also include changes in input and
-environment, such as environment variables, the file system,
+environment, such as environment variables, configuration files, the file system,
 and host-related information.
 Note that there is
 not always a clear mapping from input in the original program to input
@@ -683,6 +683,14 @@ after the point of divergence. For example, a checkpoint could be taken just
 before divergence occurs. Nodes created because of this divergence could
 replay from the checkpoint instead of from the beginning of
 execution~\cite{dejaview,zap07,zap02}.
+
+As mentioned in \ref{dora:sec:definition}, application modification includes
+not only differences in their source code or executables, but can also include
+changes in input and environment, such as environment variables, configuration files,
+the file system, and host-related information.
+\dora does not handle any of these modifications differently as the explorer
+makes decisions solely based on application behavior changes,
+not based on the root cause of the change.
 
 While any function satisfying the properties specified in
 \S\ref{dora:sec:definition} can be used for $d$, we present a simple
