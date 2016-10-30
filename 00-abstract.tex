@@ -1,4 +1,7 @@
-This dissertation shows that record-replay is useful beyond deterministic replay.
+Record-replay, the process of reenacting an application's past executions
+been shown to be useful.
+This dissertation shows that controlling the emergence of new executions during
+replay enables powerful new use cases.
 
 Application record and replay is the ability to record application execution and
 replay it at a later time. Record-replay has many use cases including diagnosing and
@@ -6,17 +9,21 @@ debugging applications by capturing and reproducing hard to find bugs, providing
 transparent application fault tolerance by maintaining a live replica of a running program,
 and offline instrumentation that would be too costly to run in a production environment.
 Different record-replay systems may offer different levels of replay faithfulness,
-the strongest level being deterministic replay which guarantees an identical
-reenactment of the original execution. However, such deterministic record-replay systems
-can dramatically hinder application performance, rendering them unpractical in
-certain application domains. Further, other use cases are incompatible with
-deterministic record-replay. For example, in a primary-secondary database scenario,
-the secondary database would be unable to serve additional traffic while being
-replicated. No record-replay system fits all use cases.
+the strongest level guaranteeing an identical reenactment of the original execution.
+Such guarantee requires capturing all sources of nondeterminism during the recording
+phase. In the general case, such record-replay systems can dramatically hinder
+application performance, rendering them unpractical in certain application domains.
+Further, various use cases are incompatible with strictly replaying the original execution.
+For example, in a primary-secondary database scenario, the secondary database
+would be unable to serve additional traffic while being replicated.
+No record-replay system fit all use cases.
 
 We explore four record-replay systems with different semantics enabling different use cases.
 We first present \scribe, an OS-level deterministic record-replay mechanism
-that support multi-process applications on multi-core systems. One of the main
+that support multi-process applications on multi-core systems.
+Systems offering faithful replay are typically referred to as deterministic
+since all forms of nondeterminism must be faithfully reproduced.
+One of the main
 challenge is to record the interaction of threads running on different CPU cores
 in an efficient manner.
 \scribe introduces two new lightweight OS mechanisms, rendezvous point and sync
@@ -47,10 +54,10 @@ simple but effective algorithm to search for suitable replays.
 
 Lastly, we present \synapse, a heterogeneous database replication system
 designed for Web applications. Web applications are increasingly built using a
-service-oriented architecture that integrates services using a variety of
+service-oriented architecture that integrates services powered by a variety of
 databases. Often, the same data, needed by multiple services, must be
-replicated across different databases and kept in sync. Unfortunately, the data
-replication engines of these databases are vendor specific and not compatible with
+replicated across different databases and kept in sync. Unfortunately, these
+databases use vendor specific data replication engines which are not compatible with
 each other. To solve this challenge, \synapse operates at the application level
 to access a unified data representation through object relational mappers.
 Additionally, \synapse leverages application semantics to replicate data

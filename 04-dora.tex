@@ -48,7 +48,7 @@ useful for both application developers and system administrators.
 An application developer can use a recording of a bug when developing
 a fix. Replaying the recording on a modified application speeds up
 debugging and provides a novel way of validating
-bug fixes for nondeterminstic bugs, which can otherwise be time
+bug fixes for nondeterministic bugs, which can otherwise be time
 consuming and difficult.
 For example, a developer who writes a patch
 can test it by taking a recorded execution of the exploit on the
@@ -78,17 +78,16 @@ provides fast turnaround time, enabling a bug to be replayed quickly
 and directly tested against application changes that attempt to fix
 the problem.
 This not only speeds up debugging, but also provides a
-way to validate bug fixes for nondeterminstic bugs, which can
+way to validate bug fixes for nondeterministic bugs, which can
 otherwise be much more time consuming and difficult.
 
 We started with \scribe, our deterministic record-replay engine that
 aims to reenact exactly what has happened in the past. We evolved
-this engine with \racepro, to allow reordering system calls
-at the end of a recorded log file. This marked a departure from deterministic
-record-replay, but hasn't addressed divergence problematics.
+this engine with \racepro, to allow reordering of system calls
+at the end of a recorded log file. This marks a departure from faithful
+record-replay, but does not address divergence problematics.
 With \dora, we further evolves our record-replay engine to enable
-mutable replay capabilities and move further away from deterministic
-record-replay to enable compelling use cases.
+mutable replay capabilities, enabling compelling use cases.
 
 {\dora} consists of three components: (1) a recorder that records
 application execution to a log, (2) a replayer that can replay a
@@ -280,7 +279,7 @@ with the cost function described in \S\ref{dora:sec:explorer}.
 \label{dora:sec:recorder}
 
 {\dora}'s recorder builds upon \racepro (\S\ref{ch:racepro})
-The \racepro record-replay engine provides four key benefits for mutable replay. First, operating
+The \racepro record-replay engine provides five key benefits for mutable replay. First, operating
 at the OS-level avoids tracking low-level hardware nondeterminism that
 is unnecessary for application replay and would significantly
 complicate mutable replay.  Second, {\dora} records the execution
@@ -294,9 +293,9 @@ processes and threads with low overhead on production systems. Fourth,
 {\dora}'s recording is transparent to applications.  It does not
 require changing, relinking, or recompiling applications or libraries,
 and it supports programs written in any programming language.
-Finally, \racepro's recorder allows the recording of additional deterministic
-information useful to perform mutable replay, and the modification of a recorded
-execution log file.
+Finally, {\dora}'s recorder can record additional deterministic
+information useful to perform mutable replay, and allow the modification of a
+recorded execution log file.
 
 The recorder operates on a group of tasks (threads and processes), which we
 refer to as a {\em session}. {\dora} records interactions between the
@@ -684,8 +683,8 @@ before divergence occurs. Nodes created because of this divergence could
 replay from the checkpoint instead of from the beginning of
 execution~\cite{dejaview,zap07,zap02}.
 
-As mentioned in \ref{dora:sec:definition}, application modification includes
-not only differences in their source code or executables, but can also include
+As mentioned in \ref{dora:sec:definition}, application modifications include
+not only differences in their source code or executables, but also
 changes in input and environment, such as environment variables, configuration files,
 the file system, and host-related information.
 \dora does not handle any of these modifications differently as the explorer
@@ -1469,21 +1468,21 @@ directly applied.
 
 \dora builds atop \racepro's record-replay engine and shares some similarities
 and differences with its recorder, explorer, and replayer.
-\racepro evolves \scribe's recorder to record deterministic information such as
-system call numbers and their return values, unique resource identifiers along
+\racepro evolves \scribe's recorder to include deterministic information
+in the recorded log file such as
+system call numbers and return values, unique resource identifiers along
 with sequence numbers in rendezvous points, and signal identifiers to tie signal
-deliveries and their sources (\S\ref{racepro:sec:scribe}). \dora goes further
+deliveries to their sources (\S\ref{racepro:sec:scribe}). \dora goes further
 in recording additional deterministic information including system calls
 arguments and their associated buffers.  This allows \dora to detect a
 divergence early. Further, \dora records additional timing and
-environmental related information so that new system calls in the modified
-application behave as they would have in the environment in which the program
+environmental related information allowing new system calls in the modified
+application to behave as they would have in the environment in which the program
 was recorded (\S\ref{dora:sec:recorder}).
 
-To modify recorded log files, namely perform addition and deletion of events,
+To perform additions and deletions of events in recorded log files,
 \dora reuses the high level abstraction introduced in \racepro for generating
 execution branches(\S\ref{racepro:sec:scribe}).
-\dora benefits from the abstraction in the same way \racepro does. 
 The implementation effort of the explorer is reduced, the memory
 requirements are lowered, and performance is improved due to the ability to feed
 the modified event stream directly to the replayer.
@@ -1491,10 +1490,11 @@ Further, when deleting events, resource sequence numbers must be consolidated,
 which is a feature \racepro needs and is reused with \dora.
 
 \dora's replayer has been improved from \racepro's in its ability to act upon
-divergence, instead of going live immediately. \dora's replayer has the ability
-to switch a task (a process or thread) from controlled replay mode into record
+divergence, instead of failing the replay or going live immediately.
+\dora's replayer has the ability
+to switch a process thread from controlled replay mode into record
 mode (i.e. direct mode) as discussed in \S\ref{dora:sec:additions}.
-The ability to allow tasks to be replayed while other are being recorded
+The ability to allow threads to be replayed while other are being recorded
 simultaneously is a significant departure from the replayer used in \scribe and
 \racepro.
 

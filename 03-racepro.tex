@@ -131,10 +131,10 @@ By checking many execution branches,
 reduces false positives. 
 
 \racepro heavily relies on record-replay techniques to perform its tasks.
-However, deterministic record-replay is not sufficient to perform validation of
+However, faithful record-replay is not sufficient to perform validation of
 detected races. \racepro goes beyond replaying an execution verbatim,
 as it relies on the ability to modify the recorded execution and evaluate the
-effect of the modification. Even though reordering system call can be seen as a
+effect of the modification. Even though reordering system calls can be seen as a
 small modification, the effect can be significant. As soon as the modifications
 are executed by the application, \racepro allow the application to go-live.
 This alleviate the need of having a replayer tolerant to divergence from
@@ -1101,7 +1101,7 @@ bug.
 instead replays an execution branch built from the original execution
 in a controlled way. The execution branch is a truncated and modified version of
 the original log file. Replaying such modified log file is a departure from
-traditional deterministic record-replay presented in the previous chapter with
+faithful record-replay presented in the previous chapter with
 \scribe as we no longer aim to reproduce a past execution verbatim.
 Given a detected race which, based
 on its type, involves two or three anchor system calls, \racepro creates an
@@ -1755,8 +1755,7 @@ without human intervention, but efficiently.
 
 Our implementation of \racepro builds atop our deterministic \scribe
 record-replay engine introduced in the previous chapter.  However, because
-\scribe only supports traditional deterministic record-replay (i.e. perfectly
-reenacting a previously recorded execution), enhancements had to be made to
+\scribe only supports faithful record-replay, enhancements had to be made to
 fulfill \racepro's requirements. These enhancements take place at
 different steps in \racepro's workflow. First, the recording step had to be
 modified to include additional deterministic information to permit \racepro
@@ -1765,86 +1764,87 @@ Second, \racepro's explorer must manipulates the recorded log file to finely con
 the ordering of system calls. For this, a library was built to manipulate the
 recording using a general purpose abstraction. Third, we added a barrier
 synchronization primitive in the replayer to allow \racepro to synchronize
-a group of processes together.
+a group of processes.
 
-\scribe made significant efforts to only record non determinism data in order to
-provide the best recording performance. However, additional information must be
-recorded for \racepro to perform its tasks. To calculate the happens-before
-graph and perform race detection, system call semantics must be extracted and
-analyzed from the recording. In addition to what \scribe records, \racepro needs
-additional information in three areas to perform its tasks.
-First, when \scribe recorded application calls a system call,
-neither the system call number, nor the return value are recorded in the log file.
-This information is deterministic and thus provide no benefit for deterministic
-replay. Because \racepro needs to extract system call semantics to perform race
-analysis, such values are recorded in the log file.
-For example, \racepro needs to identify the \code{wait()} calls among all the
-system calls in the recording, and access their return values to identify the
-corresponding PIDs to perform wait-wakeup race detection.
+\scribe makes significant efforts to record just enough information
+to perform faithful replay as to minimize the recording overhead.
+\scribe focuses on capturing sources of nondeterminism and
+ignores deterministic data.
+Such recording is insufficient for \racepro.
+For example, when calculating the happens-before graph, or performing race
+analysis, \racepro needs access to system call semantics, unavailable from
+a \scribe recording. In fact, \racepro requires additional information in
+three areas. First, when the recorded application invokes a system call, \scribe
+does not record the system call number, nor its return value as these values are
+deterministic and thus provide no benefit for deterministic replay.
+\racepro records these values to enable system call semantics extraction.
+For example, when performing wait-wakeup race detection
+(\S\ref{racepro:sec:wait-wakeup}), \racepro accesses theses recorded values to
+identify all \code{wait()} calls and their returned PIDs.
 Second, when recording OS resource ordering information, \scribe only records
 the rendezvous point unique sequence number~(\S\ref{scribe:sec:rendezvous}).
-However, \racepro needs to identify each resource to be able to relate
-system calls accessing the same resource. For this, resource type and unique resource
-identifiers are recorded along side to the sequence number of each rendezvous
-points. A complication arise with pipes and sockets as the kernel considers each
-endpoint to be a separate resource for performance. Because \racepro needs to
+\racepro must identify each accessed resource to relate
+system calls accessing the same resource. For this, a resource type and a unique resource
+identifier are recorded along side to the sequence number of each rendezvous
+points. Complications arise with pipes and sockets as the kernel considers each
+endpoint to be a separate resource. Because \racepro needs to
 relate system calls accessing the same socket or pipe, extra metadata is recorded to
 uniquely identify the pipe or socket being accessed, regardless of the endpoint.
 Third, to handle signals, \scribe only records the value of signals to be delivered,
-to replay them verbatim while ignoring the original source of the signal (e.g.
-calls to \code{kill()})~(\S\ref{scribe:sec:signaldelivery}). However, \racepro needs to
-tie the signal delivery with its corresponding source. For this, a signal
-identifier is recorded in a signal emission event when a signal emitted by a source process,
-and recorded again in the signal delivery event by the target process.
-This allow \racepro to bind the two events, sending and
-receiving, of a signal delivery mechanism to perform signal race detection.
+to replay them verbatim while ignoring the originating cause of the
+signal~(\S\ref{scribe:sec:signaldelivery}).
+To detect signal races, \racepro must tie the signal delivery to its
+corresponding source. For this, a per-signal identifier is recorded during
+signal emission, and recorded again during signal delivery.
+By matching these identifiers, \racepro can tie signal deliveries to their sources.
 These three areas of additional deterministic recorded information do not impede
 performance per our findings. If performance was impacted, \racepro could
-record a minimal log file containing only non-deterministic data akin to \scribe,
-and replay it once to recover all the required deterministic information.
+record a minimal log file containing only nondeterministic data akin to \scribe,
+and replay it once to recover the required deterministic data.
 
 \racepro's explorer manipulates the recorded log file to finely control the
 ordering of system calls. To simplify the explorer implementation, we built a
 high level abstraction to parse and manipulate recorded log files. A log file
-can be seen as a large list of serialized events. When processing a log file,
+can be seen as a list of serialized events. When processing a log file,
 loading all events in memory can be prohibitive due to the large amount of
 events. For this reason, we followed a streaming architecture to do our
-processing. The stream starts with a source, emitting each event from a given
+processing. The stream begins with a source, emitting each event from a given
 recorded log file. The event stream then goes through a series of 
 functional blocks that may perform various actions. An event stream ends in a
-sink, which can write a new log to disk, or feed events directly to the
+sink, which may write a new log to disk, or feed events directly to the
 replayer. The explorer instantiates and connects functional blocks to generate
 execution branches. Some of these blocks can add, remove, or modify certain
 events. Other blocks may do more complex tasks, for example consolidating
-all sequence numbers of a given resource due to the reordering of system calls.
+all sequence numbers of resources due to the reordering of system calls.
 Another example is adding a barrier synchronization primitive at a consistent cut,
 to ensure that all processes reach a certain location in their event stream
 simultaneously.
 
 This barrier synchronization primitive must be supported by the replayer.
 During the replay, when a barrier is encountered by a process in its event
-stream, it waits for all other processes to also reach their barrier.
+stream, the process waits for all other processes to also reach their corresponding barrier.
 The last process to reach its barrier resumes the execution of the other
-processes. This feature is useful in certain edge cases with the wait-wakeup
-race, where multiple {\code exit()} calls sharing no common resource must be
+processes. This feature is useful in certain edge cases with wait-wakeup
+races, where multiple {\code exit()} calls sharing no common resource must be
 synchronized. Barrier can also be useful in detecting \toctou races as the
-replayer can invoke callbacks at a barrier right before resuming execution.
-Such callback could modify a file. Finally, barriers are used to ensure all
+replayer can invoke a custom callback modifying the file system at a barrier
+right before resuming execution. Finally, barriers are used to ensure that all
 processes go-live simultaneously at a specific consistent cut.
 Aside from this additional barrier feature, the replayer has not gone through
 extensive changes compared to \scribe.
 
 \racepro's record-replay engine differ from \scribe's mostly from its
 ability to record useful deterministic data, and modify recorded executions.
-The replayer remains mostly with the same feature set, and provides no tolerance
-to execution divergences, which is why \racepro must go-live as soon as the
-modified behavior has been executed. To improve the quality of race triage, it
-would be desirable to make the replayer tolerant to execution divergence.
-Allowing the replayed execution, even though modified, to continue replaying
-after the modifications introduced by \racepro may provide a quality automatic
-checker.
+\racepro and \scribe replayers mostly share the same feature set, and provide no
+tolerance to execution divergences, which is why \racepro must go-live as soon
+as the modified behavior has been executed.
+
+To improve the quality of race triage, using a replayer tolerant to execution
+divergence may be useful to implement a powerful automatic checker.
+Instead of going live, the replayer would continue replaying past the introduced
+modifications and monitor the application behavior.
 In cases where the exhibited race is benign, a minimal divergence is expected,
-but when the race is harmful, a substantial divergence would be expected.
+when the race is harmful, a substantial divergence is expected.
 Interestingly, \racepro could report the effect of a race by showing the
 difference from the original execution and the modified execution.
 We explore a record-replay engine tolerant to such divergences in the next
@@ -1955,7 +1955,7 @@ configurations or executions covered by software vendors or beta
 testing sites. \racepro builds on \scribe, our transparent, low overhead
 record-replay engine described in the previous chapter, and extends it
 to allow system call reordering modifications at the end of a recorded log file.
-This ability goes beyond deterministic record-replay and is instrumental to
+This ability goes beyond faithful replay and is instrumental to
 \racepro's race validation feature.
 The race detection accuracy depends on the quality of the checker which runs
 modified executions. The checker would thus benefit from a replay engine

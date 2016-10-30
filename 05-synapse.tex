@@ -13,17 +13,17 @@ record-replay mechanisms.
 Resilient distributed databases replicate data on
 different machines. Aside from fault-tolerance, running replicas provide other
 benefits such as horizontal scalability for load balancing. Databases (DBs) that
-implement data replication protocols often run an underlying record-replay
+implement data replication protocols often rely on an underlying record-replay
 mechanism.
-However, using deterministic record-replay is not desirable as these replicas
+However, using faithful record-replay is not desirable as these replicas
 would not be able to serve any traffic, as any new incoming queries would be a
 divergence from the primary execution.
-Data replication can be seen as recording execution of a primary DB and
-replaying execution on a replica DB.
-For example, many distributed databases such
-as MongoDB, RethinkDB or Elasticsearch provide a log based replication mechanism,
-which is a form of record-replay.  The target audience of these
-distributed databases are typically Web applications.
+Data replication can be seen as replaying a recorded execution from
+a primary DB on a replica DB.
+For example, many distributed DBs such
+as MongoDB, RethinkDB or Elasticsearch rely on log based replication mechanisms,
+which is a form of record-replay.
+These distributed DBs are mostly used to power Web applications.
 
 Web applications are increasingly built using a service-oriented
 architecture that integrates composable services using a variety of DBs.
@@ -327,6 +327,10 @@ publisher listing the various objects and fields being published and is made
 available to developers who want to create subscribers for the published data.
 A factory file is also made available for each publisher that provides sample
 data for writing integration tests (\S\ref{synapse:sec:testing}). 
+Developers who prefer not modifying their model source code can use a \synapse
+configuration file in which are specified which models and attributes should be
+published. The configuration file syntax is almost identical to the presented inline
+model syntax and is thus not shown.
 Other API calls that
 can be used by publishers are {\tt add\_read\_deps}, {\tt add\_write\_dep},
 and {\tt delivery\_mode}, discussed in
@@ -515,25 +519,23 @@ execution may continue uncontrolled at any point in time.
 From this perspective, \scribe (resp. \synapse) records and replays the state of
 the OS (resp. DB).
 Table~\ref{synapse:tab:similarities} summarizes the similarities between the
-two record-replay systems. The important takeaway is that both systems use a
+two record-replay systems. The takeaway is that both systems use a
 similar causal engine to record and replay state mutation operations interleavings.
 Due to different semantics needs, \synapse causal replay engine has the ability
 to replicate the recorded ordering with different levels of faithfulness
 as explained in \S\ref{synapse:sec:semantics}.
-Despite their similarities, the two systems are not compatible in the features
-they provide.
+Despite their similarities, the two systems do not share common features.
 
-Could \scribe, or even \dora which provides a superset of \scribe
-functionalities, be sufficient to implement a heterogeneous DB replication
+Could \dora, which provides a superset of \scribe features,
+be sufficient to implement a heterogeneous DB replication
 engine? The answer is no for two mains reasons. Replaying a recorded execution at
 the OS-level of a DB on a different DB would be impractical, even with advanced
 mutable replay techniques. Given enough differences between the two DBs,
 resolving replay divergences is impractical. Additionally, one of
-\synapse's key insight is the use of ORM as data translation layer. Mutable
+\synapse's key insight is the use of ORM as data translation layer. Generic mutable
 replay offers no solution to address this data translation problem.
 Further, our OS-level record-replay engine do not provide any
 support for distributed applications, a requirement for multi-node DB support.
-
 
 \subsection{\synapse Delivery Semantics}
 \label{synapse:sec:semantics}

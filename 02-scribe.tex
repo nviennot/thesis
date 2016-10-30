@@ -88,7 +88,7 @@ replayed; replaying just the outcome of system calls in user space is
 not sufficient.  \scribe{} does not aim to replay
 the exact scheduling order as in the original execution, but instead
 uses rendezvous points to make a partial ordering of execution
-based on system call dependencies sufficient for replay.  Since an
+based on system call dependencies sufficient for faithful replay.  Since an
 exact execution ordering is not needed, \scribe{} does not incur the
 associated recording overhead and does not need hardware counters used
 to maintain such an ordering.  \scribe{} also logs input data
@@ -1269,11 +1269,11 @@ count instructions deterministically~\cite{ispass2013-deterministic-counters},
 meaning that the counter values remain identical across replays.
 For example, on the Westmere, SandyBridge, and IvyBridge architectures, the
 retired conditional branch counter is not affected by hardware interrupts or
-non-deterministic page faults that could make an instruction be counted twice.
+nondeterministic page faults that could make an instruction be counted twice.
 By using similar techniques used in Mozilla~rr~\cite{mozilla-rr}, \scribe can
 accurately count the number of instructions executed after a sync point.
-This way, \scribe can precisely mark when an asynchronous event is delivered
-during the recording, and when to replay it.
+This way, \scribe can precisely record when an asynchronous event is delivered
+in userspace.
 
 \begin{table}[t]
 \centering
@@ -1749,12 +1749,17 @@ rendezvous points} to ensure correct partial ordering of execution based on
 system call dependencies, and {\em sync points} to convert asynchronous
 interactions that can occur at arbitrary times into synchronous events that are
 much easier to record and replay.
-Using these two mechanisms, we show that \scribe{} recording overhead is modest
-for various server and desktop applications.
+Using these two mechanisms, \scribe overcomes the need of enforcing the original
+application scheduling. While a replayed execution is different from the original
+one from a kernel perspective, they appear identical from an application
+perspective. By relaxing the amount of determinism
+replicated at the kernel level, \scribe{} recording overhead stays modest for
+various server and desktop applications without sacrificing faithfulness at the
+application level.
 \scribe can transition an application to running live at any time,
 an instrumental for certain record-replay applications such as fault-tolerance,
 or any form of debugging that requires the replayed instance to go live.
 We built \racepro, a process race detection system based on the \scribe engine,
 that leverage this go-live feature when performing race triage. We describe
-\racepro and its usage of record-replay techniques that goes beyond deterministic
-record-replay in the next chapter.
+\racepro in the next chapter and show how it generates new executions based on
+previously recorded executions.
