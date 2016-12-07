@@ -9,33 +9,35 @@ capabilities to applications by replaying application state on a replica.
 The desired semantics of record-replay systems varies depending on the use case.
 For example, when debugging a rarely occurring multi-threaded related bug,
 a record-replay system that guarantees an identical reenactment of the original
-execution is useful. By recording an application on production
+execution is useful. Such systems are called {\em deterministic record-replay}
+systems as all sources of nondeterminism must be captured during the recording
+phase.
+By recording an application on production
 systems, a developer can capture a rare occurrence of an elusive bug, replay it
 in his development environment, exactly as it happened, repeatedly, to
-determine its root cause. Here, a record-replay system that provides
-a replay that is as faithful as possible compared to the original execution is desirable.
-However, faithful replay can be insufficient with other use cases.
-A developer may want to inject faults
+determine its root cause.
+While deterministic replay mechanisms are certainly useful, such mechanisms
+can dramatically hinder application performance, rendering them
+unpractical in certain application domains. Furthermore, deterministic replay alone
+can be insufficient for some use cases. A developer may want to inject faults
 into a replayed execution to observe how the application behaves upon failures, or
 enable full logging capabilities of the application by changing a configuration
 file. Here, a record-replay system tolerant to application changes is useful.
 Other record-replay use cases include database replication. For example,
 recording a primary database execution and replaying it live on an other
 replica provides fault tolerance. Upon primary failure, the replica is
-promoted to primary, and traffic redirected. Faithful replay alone can
+promoted to primary, and traffic redirected. Deterministic replay alone can
 provide fault tolerance, but cannot provide any scaling capabilities.
 If the replica was able to serve read-only queries while being replayed,
-it could offload some traffic from the primary. Faithful replay does
+it could offload some traffic from the primary. Deterministic replay does
 not allow any new executions to occur, and is thus not suitable for such use case.
 This dissertation shows that controlling the emergence of new executions during
 replay enables powerful new use cases.
-We show four record-replay systems. We start by presenting a record-replay system
-that provides strong faithfulness guarantees, and gradually relax this guarantee
-throughout our other systems to open the range of use cases.
+We show four record-replay systems. We start by presenting a deterministic
+record-replay system that is fast and efficient, and gradually broaden
+replay semantics to open the range of use cases throughout our other systems.
 
 First, we present \scribe, a multiprocessor deterministic record-replay system.
-Systems offering faithful replay are typically referred to as deterministic
-since all forms of nondeterminism must be faithfully reproduced.
 To support a wide range of application, \scribe is
 implemented at the operating system (OS) level, and is transparent to applications.
 Implementing deterministic execution record-replay can be challenging for a
@@ -60,7 +62,7 @@ of recording the kernel scheduling decisions, \scribe piggy backs on existing
 kernel synchronization primitives such as inode mutexes or file descriptor
 locks, and records in which order these locks are taken by the kernel.  We call
 these rendezvous points, and they make a partial ordering of execution based on
-system call dependencies sufficient for faithful replay, avoiding the recording overhead
+system call dependencies sufficient for deterministic replay, avoiding the recording overhead
 of maintaining an exact execution ordering.
 During replay, application processes and threads are scheduled in a
 different order compared to the original ordering. This leads to executions that are
@@ -166,7 +168,7 @@ execution until the \emph{reordered} system calls then resumes live execution.
 It then runs a set of built-in or user-provided checkers on the live execution
 to detect failures, and emits a bug report only when a real failure is detected.
 
-This constitutes a departure from faithful replay. First, \racepro
+This constitutes a departure from deterministic replay. First, \racepro
 replays a modified version of the original execution that includes reordered system calls.
 Second, after the reordered system calls are replayed, \racepro switches from a
 controlled execution to a live execution. This can be challenging as the live
@@ -255,7 +257,7 @@ should not result in having half of the DBs missing some data.
 Using \dora to record the source DB transparently and replying its execution on
 the destination DB would not work due to large differences between the two DB systems
 as \dora would fail at matching a stream of system calls.
-Instead, \synapse operates at the application level.
+Instead of operating at the kernel level, \synapse operates at the application level.
 On a high level, \synapse records application state modifications at the source
 application, and replay these modifications at the destination application,
 making \synapse a mutable replay engine for Web applications.

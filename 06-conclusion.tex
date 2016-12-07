@@ -11,7 +11,7 @@ replay system to reproduce nondeterministic bugs with retroactive debugging;
 and \synapse, a replication system for distributed
 applications to facilitate the use of heterogeneous databases in
 service-oriented architectures.
-Throughout each system we presented, we gradually moved away from faithful
+Throughout each system we presented, we gradually moved away from deterministic
 replay, opening the range of use cases.
 
 First, we presented \scribe{}, the first operating system mechanism to provide
@@ -127,7 +127,7 @@ scalability, and deployed it in production for a company.
 
 We have shown four systems implementing transparent application execution
 record-replay to achieve various use cases. These four systems are presented
-in an order where replay faithfulness decreases.
+in an order where replay semantics are increasingly broaden to enable new use cases.
 With \scribe, we explored an implementation of deterministic record-replay where
 the replayed execution appears to be identical to the original one from an application
 perspective, but in reality, differs due to differences in scheduling to improve performance.
@@ -136,7 +136,7 @@ recorded execution and replay such changes before going live.
 With \dora, we introduced mutable replay which allow a modified version
 of the same application to be replayed.
 With \synapse, we achieved heterogeneous database replication with
-record-replay mechanisms implemented in web frameworks.
+distributed record-replay mechanisms implemented in web frameworks.
 Our findings showcase numerous
 use cases of record-replay, ranging from (1) transparent fault tolerance
 by recording a primary and replaying on replicas, (2) dynamic application
@@ -145,10 +145,12 @@ application behavior recorded on production systems, such as process-race
 detection, (3) debugging applications by capturing hard-to-find bugs and
 reproducing them with recompiled and reconfigured version of applications to
 greatly facilitate debugging, and (4) heterogeneous database replication.
-We gradually relaxed the faithfulness of the replay throughout our systems.
+We gradually broaden the replay semantics throughout our systems to show
 
-Controlling the emergence of new executions during replay enables powerful new
-use cases.
+This disseration has shown how to make deterministic record-replay fast and
+efficient, how broadening replay semantics can enable powerful new use cases,
+and how chosing the right level of abstraction can enable distributed
+record-replay with little effort.
 
 \section{Future Work}
 

@@ -88,7 +88,7 @@ replayed; replaying just the outcome of system calls in user space is
 not sufficient.  \scribe{} does not aim to replay
 the exact scheduling order as in the original execution, but instead
 uses rendezvous points to make a partial ordering of execution
-based on system call dependencies sufficient for faithful replay.  Since an
+based on system call dependencies sufficient for deterministic replay.  Since an
 exact execution ordering is not needed, \scribe{} does not incur the
 associated recording overhead and does not need hardware counters used
 to maintain such an ordering.  \scribe{} also logs input data

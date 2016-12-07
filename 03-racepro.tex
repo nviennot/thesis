@@ -131,7 +131,7 @@ By checking many execution branches,
 reduces false positives. 
 
 \racepro heavily relies on record-replay techniques to perform its tasks.
-However, faithful record-replay is not sufficient to perform validation of
+However, deterministic record-replay is not sufficient to perform validation of
 detected races. \racepro goes beyond replaying an execution verbatim,
 as it relies on the ability to modify the recorded execution and evaluate the
 effect of the modification. Even though reordering system calls can be seen as a
@@ -1101,7 +1101,7 @@ bug.
 instead replays an execution branch built from the original execution
 in a controlled way. The execution branch is a truncated and modified version of
 the original log file. Replaying such modified log file is a departure from
-faithful record-replay presented in the previous chapter with
+deterministic record-replay presented in the previous chapter with
 \scribe as we no longer aim to reproduce a past execution verbatim.
 Given a detected race which, based
 on its type, involves two or three anchor system calls, \racepro creates an
@@ -1755,7 +1755,7 @@ without human intervention, but efficiently.
 
 Our implementation of \racepro builds atop our deterministic \scribe
 record-replay engine introduced in the previous chapter.  However, because
-\scribe only supports faithful record-replay, enhancements had to be made to
+\scribe only supports deterministic record-replay, enhancements had to be made to
 fulfill \racepro's requirements. These enhancements take place at
 different steps in \racepro's workflow. First, the recording step had to be
 modified to include additional deterministic information to permit \racepro
@@ -1767,7 +1767,7 @@ synchronization primitive in the replayer to allow \racepro to synchronize
 a group of processes.
 
 \scribe makes significant efforts to record just enough information
-to perform faithful replay as to minimize the recording overhead.
+to perform deterministic replay as to minimize the recording overhead.
 \scribe focuses on capturing sources of nondeterminism and
 ignores deterministic data.
 Such recording is insufficient for \racepro.
@@ -1955,7 +1955,7 @@ configurations or executions covered by software vendors or beta
 testing sites. \racepro builds on \scribe, our transparent, low overhead
 record-replay engine described in the previous chapter, and extends it
 to allow system call reordering modifications at the end of a recorded log file.
-This ability goes beyond faithful replay and is instrumental to
+This ability goes beyond deterministic replay and is instrumental to
 \racepro's race validation feature.
 The race detection accuracy depends on the quality of the checker which runs
 modified executions. The checker would thus benefit from a replay engine

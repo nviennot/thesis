@@ -15,7 +15,7 @@ different machines. Aside from fault-tolerance, running replicas provide other
 benefits such as horizontal scalability for load balancing. Databases (DBs) that
 implement data replication protocols often rely on an underlying record-replay
 mechanism.
-However, using faithful record-replay is not desirable as these replicas
+However, using deterministic record-replay is not desirable as these replicas
 would not be able to serve any traffic, as any new incoming queries would be a
 divergence from the primary execution.
 Data replication can be seen as replaying a recorded execution from
@@ -327,10 +327,6 @@ publisher listing the various objects and fields being published and is made
 available to developers who want to create subscribers for the published data.
 A factory file is also made available for each publisher that provides sample
 data for writing integration tests (\S\ref{synapse:sec:testing}). 
-Developers who prefer not modifying their model source code can use a \synapse
-configuration file in which are specified which models and attributes should be
-published. The configuration file syntax is almost identical to the presented inline
-model syntax and is thus not shown.
 Other API calls that
 can be used by publishers are {\tt add\_read\_deps}, {\tt add\_write\_dep},
 and {\tt delivery\_mode}, discussed in
@@ -476,6 +472,74 @@ additionally lets programmers introduce getters and setters for attributes
 that are not in the DB schema.  We call these programmer-provided attributes
 {\em virtual attributes}. Virtual attributes are valuable for schema mappings,
 as shown in \S\ref{synapse:sec:examples}.
+
+To support different team workflows, publisher and subscriber declarations can
+be expressed with either the inline model syntax or the configuration file syntax.
+The inline model syntax allows developers to declare definitions in existing model class scopes.
+It provides a model centric view to developers.
+This syntax has been used in the previously shown API examples.
+The configuration file syntax allows developers to consolidate \synapse
+declarations in a single file. It provides a \synapse centric view to developers.
+Both syntaxes offer different benefits, especially when used in conjunction with a source
+control system.
+\F\ref{synapse:fig:conf} showcases the two syntaxes in declaring a User publisher and a
+Comment publisher.
+
+\begin{figure}
+\centering
+\begin{minipage}{1.0\textwidth}
+\begin{minipage}{.45\textwidth}
+\begin{rbox}
+\begin{lstlisting}
+# models/user.rb
+class User < ActiveRecord::Base
+ `\specialKeyword{publish}` do
+  field :name
+ end
+end
+
+# models/comment.rb
+class Comment < ActiveRecord::Base
+ `\specialKeyword{publish}` do
+  :belongs_to :user
+ end
+end
+
+# config/synapse.rb
+# EOF
+\end{lstlisting}
+\end{rbox}
+\end{minipage}
+\hspace{0.3in}
+\begin{minipage}{.45\textwidth}
+  \begin{rbox}
+\begin{lstlisting}
+# models/user.rb
+class User < ActiveRecord::Base
+end
+
+# models/comment.rb
+class Comment < ActiveRecord::Base
+end
+
+# config/synapse.rb
+`\specialKeyword{Synapse.define}` do
+ `\specialKeyword{publish}` :users do
+  field :name
+ end
+ `\specialKeyword{publish}` :comments do
+  belongs_to :user
+ end
+end
+\end{lstlisting}
+\end{rbox}
+\end{minipage}
+\end{minipage}
+  \caption{{\bf Writing Definitions.} \synapse offers an inline model syntax (left) and
+                             a configuration file syntax (right) to declare definitions.}
+\label{synapse:fig:conf}
+\end{figure}
+
 
 \subsection{Comparison with \scribe}
 \label{synapse:sec:record-replay}
