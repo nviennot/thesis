@@ -1161,6 +1161,29 @@ not picked in the original execution. It also adds a constraint
 to ensure that the parent will execute after that child's \code{exit}.
 The other child is not constrained.
 
+
+\begin{figure}[t]
+  \centering
+  \begin{minipage}{.55\linewidth}
+    \begin{rbox}
+      \centering
+      \begin{tabular}{lccc}
+               & {\bf P1}    & {\bf P2}    & {\bf P3}    \\ \hline
+               & $\cdots$    &             &             \\
+        $S_1$: & syscall(R); &             &             \\
+        $S_2$: & syscall(R); &             & $\cdots$    \\
+        $S_3$: & $\cdots$    & $\cdots$    & syscall(R); \\
+        $S_4$: &             & syscall(R); & $\cdots$    \\
+        $S_5$: &             & syscall(R); &             \\
+               &             & $\cdots$    &             \\
+      \end{tabular}
+    \end{rbox}
+  \end{minipage}
+  \caption{{\bf Replay Divergence Due to Reordering.}}
+  \label{racepro:fig:reorder}
+\end{figure}
+
+
 For wakeup-waits races, there are also three anchor system calls: one
 wakeup system call and two wait system calls. To generate the
 execution branch, \racepro simply flips the order of the two wait system
@@ -1223,27 +1246,6 @@ internally maintained by the operating system for the processes.  For
 example, actions such as creating a pipe and writing to it must be
 done as is so that the pipe exists and has suitable state should the
 process transition to live execution. 
-
-\begin{figure}[t]
-  \centering
-  \begin{minipage}{.55\linewidth}
-    \begin{rbox}
-      \centering
-      \begin{tabular}{lccc}
-               & {\bf P1}    & {\bf P2}    & {\bf P3}    \\ \hline
-               & $\cdots$    &             &             \\
-        $S_1$: & syscall(R); &             &             \\
-        $S_2$: & syscall(R); &             & $\cdots$    \\
-        $S_3$: & $\cdots$    & $\cdots$    & syscall(R); \\
-        $S_4$: &             & syscall(R); & $\cdots$    \\
-        $S_5$: &             & syscall(R); &             \\
-               &             & $\cdots$    &             \\
-      \end{tabular}
-    \end{rbox}
-  \end{minipage}
-  \caption{{\bf Replay Divergence Due to Reordering.}}
-  \label{racepro:fig:reorder}
-\end{figure}
 
 \racepro works best when a go-live execution requests no inputs from users or
 external processes; such executions include parallel make, parallel boot,
